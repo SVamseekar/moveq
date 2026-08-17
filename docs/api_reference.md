@@ -1,0 +1,108 @@
+# API Reference
+
+Complete Python API and class references for the `moveq` suite.
+
+---
+
+## 1. `moveq_core.equity`
+
+Core population-weighted inequality algorithms.
+
+### `compute_gini(values: np.ndarray, weights: np.ndarray) -> float`
+Computes the population-weighted Gini coefficient via numerical integration of the Lorenz curve.
+
+- **Parameters**:
+  - `values` (`np.ndarray`): Public transport service levels per areal unit (e.g. departures, seat-km).
+  - `weights` (`np.ndarray`): Population count or weight per areal unit.
+- **Returns**:
+  - `float`: Gini coefficient in \([0, 1]\). \(0\) represents perfect equality, and \(1\) represents maximum inequality.
+
+---
+
+### `compute_palma_ratio(values: np.ndarray, weights: np.ndarray) -> float`
+Computes the Palma ratio: the ratio of the mean service level in the top 10% highest-service population to the bottom 40% lowest-service population.
+
+- **Parameters**:
+  - `values` (`np.ndarray`): Public transport service levels per areal unit.
+  - `weights` (`np.ndarray`): Population weight per unit.
+- **Returns**:
+  - `float`: Palma ratio. Returns `float("inf")` if the bottom 40% has zero mean service.
+
+---
+
+### `compute_concentration_index(service: np.ndarray, rank: np.ndarray, population: np.ndarray) -> float`
+Computes the Wagstaff Concentration Index using the fractional rank covariance method.
+
+- **Parameters**:
+  - `service` (`np.ndarray`): Service level per areal unit.
+  - `rank` (`np.ndarray`): Socioeconomic or deprivation rank per unit (where \(1\) = most deprived, higher numbers = less deprived).
+  - `population` (`np.ndarray`): Population weight per unit.
+- **Returns**:
+  - `float`: Concentration Index in \([-1, 1]\). Positive values indicate pro-rich concentration; negative values indicate pro-poor concentration.
+
+---
+
+## 2. `moveq_core.score`
+
+Configurable weighted composite scoring with dynamic missing-term weight renormalization.
+
+### `compute_score(...) -> ScoreResult`
+```python
+def compute_score(
+    terms: dict[str, float | None],
+    weights: dict[str, float],
+    *,
+    labels: dict[str, str] | None = None,
+    n_areas: int | None = None,
+    context: dict[str, str] | None = None,
+    empty_note: str = "No score for this cut — required inputs are missing.",
+) -> ScoreResult
+```
+- **Parameters**:
+  - `terms` (`dict[str, float | None]`): Mapping of term IDs to normalized values in \([0, 1]\) (or `None` if missing).
+  - `weights` (`dict[str, float]`): Mapping of term IDs to initial design weights.
+  - `labels` (`dict[str, str] | None`): Optional human-readable labels for each term.
+  - `n_areas` (`int | None`): Optional count of areal units contributing to this score.
+  - `context` (`dict[str, str] | None`): Free-form metadata dict preserved in results.
+  - `empty_note` (`str`): Informational message returned when all terms are missing.
+- **Returns**:
+  - `ScoreResult`: Dataclass containing the computed score, component breakdown, list of dropped terms, and audit notes.
+
+### `ScoreResult`
+- `score: float | None`: Overall composite score \([0, 100]\), or `None` if all terms were missing.
+- `components: list[ScoreComponent]`: Breakdown of individual score components.
+- `dropped: list[str]`: Keys of terms that were omitted due to missing data.
+- `n_areas: int | None`: Number of units evaluated.
+- `note: str | None`: Explanatory notice (e.g. renormalizations).
+- `context: dict[str, str]`: Custom contextual metadata.
+- `to_dict() -> dict[str, Any]`: Serializes the score result into a JSON-compatible dictionary.
+
+---
+
+## 3. `moveq_core.frames`
+
+Convenience methods for pandas DataFrames (requires `moveq-core[frames]`).
+
+### `compute_vulnerability_index(df: pd.DataFrame, factors: list[str]) -> pd.Series`
+Combines multiple deprivation and vulnerability columns into a 0–100 index using min-max scaling followed by row-wise averaging.
+
+### `identify_multiply_deprived(df: pd.DataFrame, factors: list[str], min_factors: int = 3) -> pd.Series`
+Returns a boolean pandas Series flagging rows situated in the worst tertile (\(\ge 66.7\%\) quantile) across at least `min_factors` indicators.
+
+---
+
+## 4. `moveq_catalogue.catalogue`
+
+Cross-country methodology harmonization registry.
+
+### `SectionAction` (`Enum`)
+- `SectionAction.SAME = "same"`
+- `SectionAction.REPLACE = "replace"`
+- `SectionAction.OMIT = "omit"`
+
+### `Catalogue(base_sections: list[str], country: str)`
+- `register(section_id: str, action: SectionAction, *, note: str | None = None, replacement_title: str | None = None) -> Catalogue`
+- `unregistered() -> list[str]`: Lists any base sections that have not yet been assigned a decision.
+- `validate() -> list[str]`: Validates completeness. Returns a list of error strings; empty list indicates full specification.
+- `summary() -> dict[str, int]`: Returns counts of each action (`same`, `replace`, `omit`).
+- `to_dict() -> dict[str, Any]`: Serializes the catalogue into a dictionary.
