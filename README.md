@@ -41,7 +41,7 @@ Comprehensive documentation and guides are available in the [`docs/`](docs/) dir
 ## Installation (from source)
 
 ```bash
-git clone <this-repo>
+git clone https://github.com/SVamseekar/moveq.git
 cd moveq
 python -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate

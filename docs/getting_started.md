@@ -11,7 +11,7 @@ This guide covers installing `moveq`, running Python calculations, and using the
 Clone the repository and set up a virtual environment:
 
 ```bash
-git clone https://github.com/<org>/moveq.git
+git clone https://github.com/SVamseekar/moveq.git
 cd moveq
 python -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
