@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "moveq"
+version = "0.1.0"
+description = "Transport-equity analysis: Gini/Palma/Concentration Index scoring plus cross-country catalogue harmonization. Umbrella package over moveq-core and moveq-catalogue."
+readme = "README.md"
+license = { text = "BSD-3-Clause" }
+requires-python = ">=3.10"
+dependencies = [
+    "moveq-core>=0.1.0",
+    "moveq-catalogue>=0.1.0",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
