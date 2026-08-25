@@ -1,0 +1,28 @@
+name: Feature request
+description: Propose an API, CLI, or documentation change.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is hard or impossible with the current library?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: The API, CLI command, or behaviour you want.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+    validations:
+      required: false
+  - type: markdown
+    attributes:
+      value: |
+        Breaking API changes require a **major** version bump (or a **minor** bump while the stack is still `0.x`).

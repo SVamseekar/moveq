@@ -1,14 +1,37 @@
 # moveq-core
 
-Pure algorithms for measuring transport equity:
+Pure NumPy algorithms for measuring transport equity.
+
+[![PyPI](https://img.shields.io/pypi/v/moveq-core.svg)](https://pypi.org/project/moveq-core/)
+[![Python versions](https://img.shields.io/pypi/pyversions/moveq-core.svg)](https://pypi.org/project/moveq-core/)
+[![License](https://img.shields.io/pypi/l/moveq-core.svg)](https://github.com/SVamseekar/moveq/blob/main/LICENSE)
+
 - **Population-weighted Gini coefficient** via numerical Lorenz curve integration
 - **Palma ratio** (top 10% highest-service vs bottom 40% lowest-service population)
-- **Wagstaff Concentration Index** via fractional rank weighted covariance
-- **Configurable weighted composite scoring** with dynamic missing-term renormalization
+- **Wagstaff Concentration Index** via fractional-rank weighted covariance
+- **Weighted composite scoring** with dynamic missing-term renormalization
 
-No I/O, no database or framework dependencies — feed it NumPy arrays, get numbers back.
+No I/O, no database, no framework lock-in: pass NumPy arrays, get numbers back.
 
----
+Most applications should install the umbrella package instead:
+
+```bash
+pip install moveq
+```
+
+## Installation
+
+Requires Python 3.10+.
+
+```bash
+pip install moveq-core
+```
+
+Pandas DataFrame helpers:
+
+```bash
+pip install "moveq-core[frames]"
+```
 
 ## Quickstart
 
@@ -29,7 +52,6 @@ gini = compute_gini(service, population)
 palma = compute_palma_ratio(service, population)
 ci = compute_concentration_index(service, deprivation_rank, population)
 
-# Composite score with graceful missing data handling
 score_res = compute_score(
     terms={"coverage": 0.75, "evening": 0.50, "night": None},
     weights={"coverage": 0.50, "evening": 0.30, "night": 0.20},
@@ -37,15 +59,7 @@ score_res = compute_score(
 print(f"Score: {score_res.score:.1f} ({score_res.note})")
 ```
 
----
-
-## DataFrame Helpers (`moveq_core.frames`)
-
-DataFrame helpers for multidimensional vulnerability indices and multi-factor deprivation flagging live in `moveq_core.frames` and require the `frames` extra:
-
-```bash
-pip install "moveq-core[frames]"
-```
+### DataFrame helpers (`moveq_core.frames`)
 
 ```python
 import pandas as pd
@@ -57,14 +71,21 @@ df = pd.DataFrame({
     "elderly_pct": [15.0, 25.0, 35.0],
 })
 
-vulnerability = compute_vulnerability_index(df, ["unemployment_pct", "no_car_pct", "elderly_pct"])
-flagged = identify_multiply_deprived(df, ["unemployment_pct", "no_car_pct", "elderly_pct"], min_factors=2)
+vulnerability = compute_vulnerability_index(
+    df, ["unemployment_pct", "no_car_pct", "elderly_pct"]
+)
+flagged = identify_multiply_deprived(
+    df, ["unemployment_pct", "no_car_pct", "elderly_pct"], min_factors=2
+)
 ```
-
----
 
 ## Documentation
 
-See the root documentation for detailed explanations and formal mathematical proofs:
-- [Methodology & Mathematical Formulations](../../../docs/methodology.md)
-- [API Reference](../../../docs/api_reference.md)
+- [Methodology](https://github.com/SVamseekar/moveq/blob/main/docs/methodology.md)
+- [API reference](https://github.com/SVamseekar/moveq/blob/main/docs/api_reference.md)
+- [Source repository](https://github.com/SVamseekar/moveq)
+- [Changelog](https://github.com/SVamseekar/moveq/blob/main/CHANGELOG.md)
+
+## License
+
+[BSD 3-Clause](https://github.com/SVamseekar/moveq/blob/main/LICENSE).

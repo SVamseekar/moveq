@@ -1,21 +1,57 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "moveq"
 version = "0.1.0"
-description = "Transport-equity analysis: Gini/Palma/Concentration Index scoring plus cross-country catalogue harmonization. Umbrella package over moveq-core and moveq-catalogue."
+description = "Transport-equity analysis: Gini, Palma, and Concentration Index scoring plus cross-country catalogue harmonization."
 readme = "README.md"
-license = { text = "BSD-3-Clause" }
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
 requires-python = ">=3.10"
+authors = [
+    { name = "Soura", email = "martisoura@gmail.com" },
+]
+keywords = [
+    "transport",
+    "equity",
+    "accessibility",
+    "inequality",
+    "gini",
+    "palma",
+    "concentration-index",
+    "harmonization",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering",
+]
 dependencies = [
     "moveq-core>=0.1.0",
     "moveq-catalogue>=0.1.0",
 ]
 
 [project.optional-dependencies]
+frames = ["moveq-core[frames]"]
 test = ["pytest>=7"]
+
+[project.urls]
+Homepage = "https://github.com/SVamseekar/moveq"
+Documentation = "https://github.com/SVamseekar/moveq/blob/main/docs/index.md"
+Repository = "https://github.com/SVamseekar/moveq"
+Issues = "https://github.com/SVamseekar/moveq/issues"
+Changelog = "https://github.com/SVamseekar/moveq/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 where = ["src"]

@@ -36,9 +36,21 @@ moveq/
 
 ---
 
+## Install
+
+```bash
+pip install moveq        # Python API
+pip install moveq-cli    # also installs the `moveq` command
+```
+
+Source: <https://github.com/SVamseekar/moveq>.
+PyPI: <https://pypi.org/project/moveq/>.
+
 ## Documentation Navigation
 
 - [**Getting Started**](getting_started.md): Installation, quickstart recipes, and CLI guide.
 - [**Methodology Guide**](methodology.md): Mathematical formulations of Gini, Palma, Concentration Index, and scoring algorithms.
 - [**Catalogue Harmonization Guide**](catalogue_guide.md): The `SAME` / `REPLACE` / `OMIT` decision framework for international studies.
 - [**API Reference**](api_reference.md): Complete module, class, and function documentation.
+- [**Publishing to PyPI**](publishing.md): Maintainer runbook for versioning, Trusted Publishing, and GitHub Releases.
+- [**Changelog**](../CHANGELOG.md): User-facing history of each lockstep release.

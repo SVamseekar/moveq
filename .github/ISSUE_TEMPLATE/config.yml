@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Documentation
+    url: https://github.com/SVamseekar/moveq/blob/main/docs/index.md
+    about: Guides for installation, methodology, the CLI, and releasing.
+  - name: Security report
+    url: https://github.com/SVamseekar/moveq/security/advisories/new
+    about: Report a vulnerability privately. Do not file a public issue.

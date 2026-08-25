@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,12 +7,44 @@ name = "moveq-catalogue"
 version = "0.1.0"
 description = "Same/replace/omit harmonization registry for cross-country transport-equity section catalogues."
 readme = "README.md"
-license = { text = "BSD-3-Clause" }
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
 requires-python = ">=3.10"
+authors = [
+    { name = "Soura", email = "martisoura@gmail.com" },
+]
+keywords = [
+    "transport",
+    "equity",
+    "harmonization",
+    "catalogue",
+    "cross-country",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering",
+]
 dependencies = []
 
 [project.optional-dependencies]
 test = ["pytest>=7"]
+
+[project.urls]
+Homepage = "https://github.com/SVamseekar/moveq"
+Documentation = "https://github.com/SVamseekar/moveq/blob/main/docs/catalogue_guide.md"
+Repository = "https://github.com/SVamseekar/moveq"
+Issues = "https://github.com/SVamseekar/moveq/issues"
+Changelog = "https://github.com/SVamseekar/moveq/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 where = ["src"]

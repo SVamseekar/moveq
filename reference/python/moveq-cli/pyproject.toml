@@ -1,23 +1,58 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "moveq-cli"
 version = "0.1.0"
-description = "Command-line tool for moveq — compute equity metrics from a CSV without writing Python."
+description = "Command-line tool for moveq — compute equity metrics from CSV or JSON without writing Python."
 readme = "README.md"
-license = { text = "BSD-3-Clause" }
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
 requires-python = ">=3.10"
+authors = [
+    { name = "Soura", email = "martisoura@gmail.com" },
+]
+keywords = [
+    "transport",
+    "equity",
+    "accessibility",
+    "cli",
+    "gini",
+    "palma",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering",
+]
 dependencies = [
     "moveq>=0.1.0",
 ]
 
 [project.optional-dependencies]
+frames = ["moveq[frames]"]
 test = ["pytest>=7"]
 
 [project.scripts]
 moveq = "moveq_cli.main:main"
+
+[project.urls]
+Homepage = "https://github.com/SVamseekar/moveq"
+Documentation = "https://github.com/SVamseekar/moveq/blob/main/docs/getting_started.md"
+Repository = "https://github.com/SVamseekar/moveq"
+Issues = "https://github.com/SVamseekar/moveq/issues"
+Changelog = "https://github.com/SVamseekar/moveq/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 where = ["src"]

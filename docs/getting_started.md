@@ -2,13 +2,35 @@
 
 This guide covers installing `moveq`, running Python calculations, and using the `moveq` CLI.
 
+Requires **Python 3.10 or newer**.
+
 ---
 
 ## 1. Installation
 
-### From Source (Editable Mode)
+### From PyPI (recommended)
 
-Clone the repository and set up a virtual environment:
+```bash
+pip install moveq
+```
+
+That installs the Python API (`moveq-core` and `moveq-catalogue` come in as
+dependencies). For the command-line tool:
+
+```bash
+pip install moveq-cli
+```
+
+Pandas DataFrame helpers (`moveq_core.frames`):
+
+```bash
+pip install "moveq[frames]"
+```
+
+### From source (editable mode)
+
+Use this when you are developing the library itself. See also
+[CONTRIBUTING.md](../CONTRIBUTING.md).
 
 ```bash
 git clone https://github.com/SVamseekar/moveq.git
@@ -16,26 +38,24 @@ cd moveq
 python -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
-# Install all packages in editable mode
-pip install -e reference/python/moveq-core
-pip install -e reference/python/moveq-catalogue
-pip install -e reference/python/moveq
-pip install -e reference/python/moveq-cli
+pip install -e "reference/python/moveq-core[frames,test]"
+pip install -e "reference/python/moveq-catalogue[test]"
+pip install -e "reference/python/moveq[test]"
+pip install -e "reference/python/moveq-cli[test]"
 ```
 
-### Optional Dependencies
+### Which package should I install?
 
-For pandas DataFrame helpers ([`moveq_core.frames`](file:///Users/souravamseekarmarti/Projects/moveq/reference/python/moveq-core/src/moveq_core/frames.py)):
+| You want to… | Install |
+| --- | --- |
+| Call `from moveq import compute_gini, Catalogue` | `pip install moveq` |
+| Run `moveq gini data.csv …` | `pip install moveq-cli` |
+| Depend only on the NumPy algorithms | `pip install moveq-core` |
+| Depend only on the harmonization registry | `pip install moveq-catalogue` |
 
-```bash
-pip install -e "reference/python/moveq-core[frames]"
-```
-
-For running tests:
-
-```bash
-pip install -e "reference/python/moveq-core[test]"
-```
+The four packages are released together from
+<https://github.com/SVamseekar/moveq>. Maintainers: see
+[publishing.md](publishing.md).
 
 ---
 

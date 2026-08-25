@@ -2,7 +2,16 @@
 
 **Python libraries for transport-equity analysis.**
 
-`moveq` turns raw service and demographic data — trips per area, population counts, deprivation ranks — into standard inequality measures (Gini, Palma, Wagstaff Concentration Index), a configurable composite accessibility score, and a cross-country harmonization registry for extending methodologies without silent omissions.
+[![CI](https://github.com/SVamseekar/moveq/actions/workflows/ci.yml/badge.svg)](https://github.com/SVamseekar/moveq/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/moveq.svg)](https://pypi.org/project/moveq/)
+[![Python versions](https://img.shields.io/pypi/pyversions/moveq.svg)](https://pypi.org/project/moveq/)
+[![License](https://img.shields.io/pypi/l/moveq.svg)](LICENSE)
+
+`moveq` turns raw service and demographic data — trips per area, population
+counts, deprivation ranks — into standard inequality measures (Gini, Palma,
+Wagstaff Concentration Index), a configurable composite accessibility score,
+and a cross-country harmonization registry for extending methodologies without
+silent omissions.
 
 It is a library stack, not a hosted product:
 
@@ -11,19 +20,41 @@ It is a library stack, not a hosted product:
 - **Standardized CLI**: quick CSV-in, numbers-out command-line interface (`moveq-cli`).
 - **Harmonization registry**: programmatic `same`/`replace`/`omit` contracts for cross-country studies (`moveq-catalogue`).
 
-`moveq` computes what the data shows. It does not decide policy — you keep that judgment; `moveq` owns the math and the trail of what was computed.
+`moveq` computes what the data shows. It does not decide policy — you keep that
+judgment; `moveq` owns the math and the trail of what was computed.
 
 ---
 
-## Documentation
+## Installation
 
-Comprehensive documentation and guides are available in the [`docs/`](docs/) directory:
+Requires Python 3.10 or newer.
 
-- [**Overview & Architecture**](docs/index.md)
-- [**Methodology & Mathematical Formulations**](docs/methodology.md) (Gini, Palma, Concentration Index, Composite Scoring)
-- [**Getting Started & CLI Guide**](docs/getting_started.md)
-- [**Cross-Country Catalogue Harmonization Guide**](docs/catalogue_guide.md)
-- [**API Reference**](docs/api_reference.md)
+```bash
+pip install moveq          # Python API (core + catalogue)
+pip install moveq-cli      # also installs the `moveq` command
+pip install "moveq[frames]"  # optional pandas helpers
+```
+
+PyPI projects: [`moveq`](https://pypi.org/project/moveq/),
+[`moveq-core`](https://pypi.org/project/moveq-core/),
+[`moveq-catalogue`](https://pypi.org/project/moveq-catalogue/),
+[`moveq-cli`](https://pypi.org/project/moveq-cli/).
+
+### From source (editable)
+
+```bash
+git clone https://github.com/SVamseekar/moveq.git
+cd moveq
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+
+pip install -e "reference/python/moveq-core[frames,test]"
+pip install -e "reference/python/moveq-catalogue[test]"
+pip install -e "reference/python/moveq[test]"
+pip install -e "reference/python/moveq-cli[test]"
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full development setup.
 
 ---
 
@@ -36,25 +67,19 @@ Comprehensive documentation and guides are available in the [`docs/`](docs/) dir
 | [`moveq`](reference/python/moveq/) | Umbrella package re-exporting both |
 | [`moveq-cli`](reference/python/moveq-cli/) | `moveq` command-line tool |
 
+All four packages are versioned in lockstep and released from one Git tag.
+
 ---
 
-## Installation (from source)
+## Documentation
 
-```bash
-git clone https://github.com/SVamseekar/moveq.git
-cd moveq
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-
-# Install all packages in editable mode
-pip install -e reference/python/moveq-core
-pip install -e reference/python/moveq-catalogue
-pip install -e reference/python/moveq
-pip install -e reference/python/moveq-cli
-
-# Optional: install pandas support for DataFrame helpers
-pip install -e "reference/python/moveq-core[frames]"
-```
+- [**Overview & Architecture**](docs/index.md)
+- [**Methodology & Mathematical Formulations**](docs/methodology.md) (Gini, Palma, Concentration Index, Composite Scoring)
+- [**Getting Started & CLI Guide**](docs/getting_started.md)
+- [**Cross-Country Catalogue Harmonization Guide**](docs/catalogue_guide.md)
+- [**API Reference**](docs/api_reference.md)
+- [**Publishing to PyPI**](docs/publishing.md) (maintainers)
+- [**Changelog**](CHANGELOG.md)
 
 ---
 
@@ -93,18 +118,15 @@ result = compute_score(
 print(result.to_dict())
 ```
 
-### Command-Line Interface (CLI)
+### Command-line interface
 
 ```bash
-# Equity metrics from CSV
 moveq gini examples/basic_equity/data.csv --value trips --weight population
 moveq palma examples/basic_equity/data.csv --value trips --weight population
 moveq ci examples/basic_equity/data.csv --value trips --rank deprivation_rank --weight population
 
-# Composite scoring
 moveq score --terms '{"coverage": 0.8, "evening": 0.5}' --weights '{"coverage": 0.6, "evening": 0.4}'
 
-# Catalogue validation
 moveq catalogue validate country_catalogue.json
 ```
 
@@ -112,15 +134,15 @@ See [`examples/basic_equity/run.py`](examples/basic_equity/run.py) for a runnabl
 
 ---
 
-## Running Tests
-
-Run the test suite using `pytest`:
+## Running tests
 
 ```bash
 pytest -v
 ```
 
-CI/CD runs automatically across Python 3.10, 3.11, 3.12, and 3.13 via GitHub Actions ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
+CI runs on Python 3.10–3.13 ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
+Releases are published from [`.github/workflows/publish.yml`](.github/workflows/publish.yml)
+via PyPI Trusted Publishing. There is no production PyPI token in this repository.
 
 ---
 
@@ -135,6 +157,14 @@ CI/CD runs automatically across Python 3.10, 3.11, 3.12, and 3.13 via GitHub Act
 ## Relationship to Aequitas
 
 [Aequitas](https://github.com/) (the multi-country bus × deprivation briefing platform) is `moveq`'s flagship consumer and the origin of this methodology — `moveq` is the extraction of Aequitas's equity math and cross-country harmonization pattern into a standalone, reusable open-source library suite.
+
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). Please follow the
+[Code of Conduct](CODE_OF_CONDUCT.md). Security reports go through
+[SECURITY.md](SECURITY.md), not public issues.
 
 ---
 

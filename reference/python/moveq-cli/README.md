@@ -1,56 +1,56 @@
 # moveq-cli
 
-Command-line tool for `moveq` — compute equity metrics, composite accessibility scores, and validate country harmonization catalogues from CSV or JSON without writing Python.
+Command-line interface for [`moveq`](https://pypi.org/project/moveq/): compute
+equity metrics, composite accessibility scores, and validate country
+harmonization catalogues from CSV or JSON without writing Python.
 
----
+[![PyPI](https://img.shields.io/pypi/v/moveq-cli.svg)](https://pypi.org/project/moveq-cli/)
+[![Python versions](https://img.shields.io/pypi/pyversions/moveq-cli.svg)](https://pypi.org/project/moveq-cli/)
+[![License](https://img.shields.io/pypi/l/moveq-cli.svg)](https://github.com/SVamseekar/moveq/blob/main/LICENSE)
 
 ## Installation
 
+Requires Python 3.10+.
+
 ```bash
-pip install -e reference/python/moveq-cli
+pip install moveq-cli
 ```
 
----
+This installs the `moveq` console script and pulls in `moveq` (and therefore
+`moveq-core` and `moveq-catalogue`).
 
 ## Commands
 
-### 1. Inequality Metrics from CSV
+### Inequality metrics from CSV
 
 ```bash
-# Population-weighted Gini coefficient
 moveq gini data.csv --value trips --weight population
-
-# Palma ratio (top 10% / bottom 40%)
 moveq palma data.csv --value trips --weight population
-
-# Wagstaff Concentration Index
 moveq ci data.csv --value trips --rank deprivation_rank --weight population
 ```
 
-### 2. Composite Scoring
-
-Compute weighted composite scores with dynamic missing-term handling:
+### Composite scoring
 
 ```bash
-# Using inline terms and weights:
-moveq score --terms '{"coverage": 0.8, "evening": 0.5, "frequency": null}' --weights '{"coverage": 0.5, "evening": 0.3, "frequency": 0.2}'
+moveq score --terms '{"coverage": 0.8, "evening": 0.5, "frequency": null}' \
+            --weights '{"coverage": 0.5, "evening": 0.3, "frequency": 0.2}'
 
-# Using a JSON configuration file:
 moveq score score_config.json --json
 ```
 
-### 3. Catalogue Validation
-
-Validate a country's section mappings against a base questionnaire:
+### Catalogue validation
 
 ```bash
 moveq catalogue validate country_catalogue.json
 ```
 
----
-
 ## Documentation
 
-See the root documentation:
-- [Getting Started & CLI Guide](../../../docs/getting_started.md)
-- [API Reference](../../../docs/api_reference.md)
+- [Getting started & CLI guide](https://github.com/SVamseekar/moveq/blob/main/docs/getting_started.md)
+- [API reference](https://github.com/SVamseekar/moveq/blob/main/docs/api_reference.md)
+- [Source repository](https://github.com/SVamseekar/moveq)
+- [Changelog](https://github.com/SVamseekar/moveq/blob/main/CHANGELOG.md)
+
+## License
+
+[BSD 3-Clause](https://github.com/SVamseekar/moveq/blob/main/LICENSE).
