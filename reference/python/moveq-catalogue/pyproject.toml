@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "moveq-catalogue"
-version = "0.1.0"
-description = "Same/replace/omit harmonization registry for cross-country transport-equity section catalogues."
+version = "0.1.1"
+description = "Same/replace/omit registry so a transport-equity questionnaire cannot silently drop a section when it is reused in another country."
 readme = "README.md"
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]

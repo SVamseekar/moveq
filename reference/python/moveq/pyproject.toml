@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "moveq"
-version = "0.1.0"
-description = "Transport-equity analysis: Gini, Palma, and Concentration Index scoring plus cross-country catalogue harmonization."
+version = "0.1.1"
+description = "Transport-equity analysis: population-weighted Gini, Palma, and Wagstaff Concentration Index, composite scores that drop missing terms, and a same/replace/omit catalogue for cross-country studies."
 readme = "README.md"
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]

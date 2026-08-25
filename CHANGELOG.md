@@ -11,21 +11,16 @@ PyPI.
 
 ## [Unreleased]
 
-### Added
+## [0.1.1] — 2026-08-25
 
-- GitHub Actions publish workflow using PyPI Trusted Publishing (OIDC). Production
-  uploads are triggered by `v*` tags; TestPyPI uploads are triggered by
-  workflow dispatch. No production PyPI token is stored in the repository.
-  Each package uses its own GitHub environment (`pypi-moveq`,
-  `pypi-moveq-core`, …) because PyPI pending publishers are unique per
-  workflow + environment.
-- CI now also builds wheels/sdists and runs `twine check --strict`.
-- Package metadata for PyPI: authors, classifiers, keywords, and project URLs.
-- Maintainer and contributor docs: publishing runbook, contributing guide,
-  security policy, code of conduct, issue/PR templates, and Dependabot for
-  GitHub Actions.
+Documentation-only release. No algorithm changes.
 
-## [0.1.0] — 2026-08-17
+### Changed
+
+- Rewrote all four package READMEs so PyPI project pages explain *what*
+  each metric and catalogue action means, not only how to call the API.
+
+## [0.1.0] — 2026-08-25
 
 Initial library stack (source on GitHub; first PyPI upload follows the `v0.1.0`
 tag).

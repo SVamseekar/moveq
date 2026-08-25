@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "moveq-cli"
-version = "0.1.0"
-description = "Command-line tool for moveq — compute equity metrics from CSV or JSON without writing Python."
+version = "0.1.1"
+description = "Command-line tool for moveq: Gini, Palma, Concentration Index, composite scores, and catalogue validation from CSV or JSON."
 readme = "README.md"
 license = "BSD-3-Clause"
 license-files = ["LICENSE"]
