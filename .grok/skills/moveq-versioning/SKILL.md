@@ -17,7 +17,8 @@ of truth. This skill stops the wrong bump *and* a bump that nobody asked for.
 
 Do not edit `version` / `__version__` or create a git tag unless the user
 asked to publish. Commits are not releases. One Git tag publishes all four
-packages.
+packages. CI (`python scripts/check_release_version.py --git-rules`) rejects
+a bump that is not a changelog release heading. Do not `--no-verify`.
 
 ## Rule
 

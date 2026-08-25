@@ -13,6 +13,8 @@ PyPI.
 
 ### Added
 
+- CI job **Git release rules** fails if package version drifts from the
+  latest `v*` tag unless `CHANGELOG.md` has a `## [X.Y.Z]` release heading.
 - Independent second-implementation tests for Gini, Palma, the Concentration
   Index, and composite scores, plus scale/permutation invariance, documented
   bounds, and empty / single-observation cases.

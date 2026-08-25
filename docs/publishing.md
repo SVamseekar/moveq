@@ -286,7 +286,7 @@ File: [`.github/workflows/publish.yml`](../.github/workflows/publish.yml)
 | --- | --- | --- | --- | --- | --- |
 | Push tag `v*` | yes | yes | yes | no | yes |
 | `workflow_dispatch` | yes | yes | no | yes | no |
-| Push / PR to `main` | [ci.yml](../.github/workflows/ci.yml) only | check only | no | no | no |
+| Push / PR to `main` | [ci.yml](../.github/workflows/ci.yml) only (includes **Git release rules**: version must equal the latest `v*` tag unless CHANGELOG has `## [X.Y.Z]`) | check only | no | no | no |
 
 The publish job uses `permissions: id-token: write` so GitHub can mint a
 short-lived OIDC token. PyPI exchanges that token for a one-time upload

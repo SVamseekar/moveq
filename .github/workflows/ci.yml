@@ -56,6 +56,24 @@ jobs:
       - name: Run example integration test
         run: python examples/basic_equity/run.py
 
+  git-rules:
+    name: Git release rules
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Version must match latest tag unless this is a release
+        run: python scripts/check_release_version.py --git-rules
+
   build:
     name: Build distributions
     runs-on: ubuntu-latest

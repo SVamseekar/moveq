@@ -11,6 +11,12 @@ A slice that only adds tests or docs is a **patch** when it is eventually
 released, not a minor — even if you think of it as "the trust release" or
 "moveq 0.2".
 
+CI job **Git release rules** (`python scripts/check_release_version.py
+--git-rules`) fails the build if package version ≠ latest `v*` tag, unless
+`CHANGELOG.md` has a `## [X.Y.Z]` heading for that version (a real release
+commit). Do not `--no-verify` to skip the pre-push hook. Do not tag a
+feature commit; the publish workflow treats every `v*` tag as a PyPI upload.
+
 ## Versioning
 
 Before proposing or applying a version bump, read
