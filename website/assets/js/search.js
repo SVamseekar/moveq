@@ -10,7 +10,12 @@ const DOCS_INDEX = [
   { title: "moveq palma CLI", path: "/docs/cli#palma", cat: "CLI Reference", desc: "Compute Palma ratio from CSV" },
   { title: "moveq ci CLI", path: "/docs/cli#ci", cat: "CLI Reference", desc: "Compute Wagstaff Concentration Index from CSV" },
   { title: "GTFS & r5py Guide", path: "/guides#gtfs", cat: "Guides", desc: "Compute transit equity from raw GTFS feeds using r5py and moveq" },
-  { title: "Title VI Environmental Justice", path: "/guides#title-vi", cat: "Guides", desc: "Audit transit equity and generate Federal Title VI reports" }
+  { title: "Title VI Environmental Justice", path: "/guides#title-vi", cat: "Guides", desc: "Audit transit equity and generate Federal Title VI reports" },
+  { title: "v0.1.2 correctness patch", path: "/blog#v0-1-2", cat: "Blog", desc: "Palma boundary splits, tied-rank CI, zero-service conventions, score validation" },
+  { title: "Why discrete Palma binning fails", path: "/blog#palma-boundaries", cat: "Blog", desc: "MAUP at 40/90 population cuts and continuous proportional boundary splitting" },
+  { title: "v0.1.1 PyPI documentation", path: "/blog#v0-1-1", cat: "Blog", desc: "Package READMEs explain metrics, not only API call signatures" },
+  { title: "Announcing moveq v0.1.0", path: "/blog#v0-1-0", cat: "Blog", desc: "First lockstep release of core, catalogue, umbrella, and CLI" },
+  { title: "Static site CI and Vercel deploys", path: "/blog#site", cat: "Blog", desc: "Clean-URL checks and pytest for website/ with no Node build" }
 ];
 
 window.openSearch = function() {

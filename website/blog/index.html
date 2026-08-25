@@ -87,7 +87,7 @@
           <svg class="icon" width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></svg>
         </button>
         <a href="/docs" class="cut-btn">
-          <span>Install v0.1.0</span>
+          <span>Install v0.1.2</span>
         </a>
       </div>
     </div>
@@ -96,23 +96,82 @@
   <div class="container" style="padding: 48px 24px;">
     <span class="section-tag">Briefings & Changelog</span>
     <h1 style="font-size: 2.75rem; font-weight: 800; color: var(--text-fg); margin-top: 8px;">Methodology & Releases</h1>
+    <p style="color: var(--text-muted); max-width: 720px; margin-top: 12px; line-height: 1.6;">
+      Lockstep releases of <code>moveq</code>, <code>moveq-core</code>, <code>moveq-catalogue</code>, and <code>moveq-cli</code>.
+      Versioning follows scientific Python: a patch may change numeric outputs so they match the documented formula.
+    </p>
 
     <div style="display: flex; flex-direction: column; gap: 32px; margin-top: 36px; max-width: 820px;">
-      <div style="padding: 24px; background-color: var(--bg-surface); border: 1px solid var(--border-rule); border-radius: 12px;">
-        <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-metro); text-transform: uppercase;">Release Notes · v0.1.0</div>
-        <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--text-fg); margin: 8px 0;">Announcing moveq: Pure-NumPy Transport Equity Suite</h2>
-        <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">
-          Today we're releasing <code>moveq</code>, extracting the mathematical core and cross-country harmonization engine from Aequitas into an open-source, framework-agnostic Python stack. Includes Gini, continuous Palma, Wagstaff CI, composite scoring, and CLI tooling.
-        </p>
-      </div>
 
-      <div style="padding: 24px; background-color: var(--bg-surface); border: 1px solid var(--border-rule); border-radius: 12px;">
-        <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-emerald); text-transform: uppercase;">Methodology Deep Dive</div>
-        <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--text-fg); margin: 8px 0;">Why Discrete Palma Binning Fails at Spatial Zone Boundaries</h2>
+      <article id="v0-1-2" style="padding: 24px; background-color: var(--bg-surface); border: 1px solid var(--border-rule); border-radius: 12px;">
+        <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-metro); text-transform: uppercase;">Release Notes · v0.1.2 · 2026-08-25</div>
+        <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--text-fg); margin: 8px 0;">Correctness patch: Palma, CI, Gini, and score match the docs</h2>
         <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">
-          An exploration of the Modifiable Areal Unit Problem (MAUP) in transit equity, showing how discrete quantile slicing distorts Palma ratios, and how proportional boundary interpolation solves the issue.
+          Public signatures are unchanged. Some figures computed with <code>0.1.1</code> will change — coarse geographies, tied ranks, all-zero service, invalid input — because the implementations now follow the documented definitions. That is a patch, not a minor: <code>pip install "moveq~=0.1.1"</code> is meant to receive it.
         </p>
-      </div>
+        <ul style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.65; margin: 12px 0 0 1.2em;">
+          <li>Palma splits areal units that straddle the 40% and 90% population cuts instead of assigning whole polygons to one bin.</li>
+          <li>The Concentration Index gives tied ranks a shared group-midpoint fractional rank, so input order among ties no longer changes the result.</li>
+          <li>All-zero service: Palma is <code>1.0</code> (equality), Gini is <code>0.0</code>. CI is defined when mean service is negative, and ignores unpopulated units.</li>
+          <li><code>compute_score</code> keeps <code>n_areas=None</code> when every term is missing. Non-finite term values are rejected. Design weights must be finite and strictly positive.</li>
+          <li>Gini, Palma, and CI reject 2-D input with a clear error instead of a NumPy broadcast failure.</li>
+        </ul>
+        <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin-top: 12px;">
+          Install: <code>pip install -U moveq</code>. Details:
+          <a href="/docs/core#palma">Palma</a>,
+          <a href="/docs/core#ci">Concentration Index</a>,
+          <a href="/docs/core#gini">Gini</a>,
+          <a href="/docs/scoring">composite score</a>.
+        </p>
+      </article>
+
+      <article id="palma-boundaries" style="padding: 24px; background-color: var(--bg-surface); border: 1px solid var(--border-rule); border-radius: 12px;">
+        <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-emerald); text-transform: uppercase;">Methodology Deep Dive</div>
+        <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--text-fg); margin: 8px 0;">Why discrete Palma binning fails at spatial zone boundaries</h2>
+        <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">
+          Palma is the ratio of service held by the top 10% of population to that held by the bottom 40%. Census tracts, LSOAs, and IRIS units almost never land exactly on those cumulative-population cuts. Discrete quantile tools (including a naive <code>pd.qcut</code>) dump the whole straddling polygon into one bucket. Sort the same table differently and the Palma ratio jumps — a MAUP artefact, not a change in the network.
+        </p>
+        <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin-top: 12px;">
+          From <a href="/blog#v0-1-2">v0.1.2</a>, <code>compute_palma_ratio</code> splits those boundary units: population and service are partitioned in proportion to how much of the unit sits below versus above the 40% and 90% cuts. That is the documented continuous-boundary Palma, and it is permutation-stable. Read the
+          <a href="/docs/core#palma">core inequality notes</a>.
+        </p>
+      </article>
+
+      <article id="v0-1-1" style="padding: 24px; background-color: var(--bg-surface); border: 1px solid var(--border-rule); border-radius: 12px;">
+        <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-metro); text-transform: uppercase;">Release Notes · v0.1.1 · 2026-08-25</div>
+        <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--text-fg); margin: 8px 0;">PyPI pages now explain the metrics, not only the call signatures</h2>
+        <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">
+          Documentation-only. No algorithm changes. The four package READMEs on PyPI describe what Gini, Palma, the Concentration Index, composite scores, and catalogue <code>same</code> / <code>replace</code> / <code>omit</code> mean, not only how to invoke them.
+        </p>
+        <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6; margin-top: 12px;">
+          <a href="https://pypi.org/project/moveq/" target="_blank" rel="noopener noreferrer">moveq</a>,
+          <a href="https://pypi.org/project/moveq-core/" target="_blank" rel="noopener noreferrer">moveq-core</a>,
+          <a href="https://pypi.org/project/moveq-catalogue/" target="_blank" rel="noopener noreferrer">moveq-catalogue</a>,
+          <a href="https://pypi.org/project/moveq-cli/" target="_blank" rel="noopener noreferrer">moveq-cli</a>.
+        </p>
+      </article>
+
+      <article id="v0-1-0" style="padding: 24px; background-color: var(--bg-surface); border: 1px solid var(--border-rule); border-radius: 12px;">
+        <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-metro); text-transform: uppercase;">Release Notes · v0.1.0 · 2026-08-25</div>
+        <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--text-fg); margin: 8px 0;">Announcing moveq: a pure-NumPy transport-equity suite</h2>
+        <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">
+          First lockstep release of the four packages. Population-weighted Gini, continuous Palma, Wagstaff Concentration Index, weighted composite scoring with missing-term renormalization, optional pandas vulnerability helpers, a <code>same</code> / <code>replace</code> / <code>omit</code> catalogue registry, and a CSV/JSON CLI.
+        </p>
+      </article>
+
+      <article id="site" style="padding: 24px; background-color: var(--bg-surface); border: 1px solid var(--border-rule); border-radius: 12px;">
+        <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--accent-emerald); text-transform: uppercase;">Engineering · site</div>
+        <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--text-fg); margin: 8px 0;">This site is static HTML, gated in CI, deployed from main</h2>
+        <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">
+          Files live in <code>website/</code>. Vercel deploys <code>main</code> to
+          <a href="https://moveq.souravamseekar.com">moveq.souravamseekar.com</a>
+          (pull requests get previews). Commits that do not touch <code>website/</code> skip the site build.
+          GitHub Actions runs <code>python scripts/check_website.py</code> and <code>pytest tests/test_website*.py</code>
+          — clean URLs, HTML structure, in-page and cross-page anchors, JS–DOM id bindings, MIME types —
+          with no Node or npm install. That is website integrity, not a PyPI version bump.
+        </p>
+      </article>
+
     </div>
   </div>
 
