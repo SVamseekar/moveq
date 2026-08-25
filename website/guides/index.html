@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Guides & Recipes | moveq</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+  <link rel="stylesheet" href="/assets/css/theme.css">
+  <script src="/assets/js/theme.js" defer></script>
+  <script src="/assets/js/version.js" defer></script>
+  <script src="/assets/js/search.js" defer></script>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/" class="logo-group">
+        <svg class="logo-img" viewBox="0 0 100 100" width="30" height="30" aria-label="moveq logo">
+          <rect x="6" y="6" width="88" height="88" rx="22" fill="#0f172a" stroke="#38bdf8" stroke-width="4"/>
+          <path d="M22,78 L22,38 C22,26 34,26 42,38 L50,52 C58,64 70,64 78,52 L78,22" fill="none" stroke="#38bdf8" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="50" cy="50" r="18" fill="none" stroke="#34d399" stroke-width="5" stroke-dasharray="2 6"/>
+          <path d="M56,56 L82,82" fill="none" stroke="#fb7185" stroke-width="7" stroke-linecap="round"/>
+          <circle cx="22" cy="78" r="5.5" fill="#ffffff" stroke="#38bdf8" stroke-width="3"/>
+          <circle cx="50" cy="50" r="6" fill="#34d399" stroke="#ffffff" stroke-width="2.5"/>
+          <circle cx="78" cy="22" r="5.5" fill="#ffffff" stroke="#38bdf8" stroke-width="3"/>
+          <circle cx="82" cy="82" r="5" fill="#fb7185" stroke="#ffffff" stroke-width="2.5"/>
+        </svg>
+        <span>MovEq</span>
+      </a>
+      <nav class="nav-links">
+        <a href="/docs" class="nav-item">
+          <svg class="icon" width="16" height="16" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+          <span>Docs</span>
+        </a>
+        <a href="/guides" class="nav-item active">
+          <svg class="icon" width="16" height="16" viewBox="0 0 24 24"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon><line x1="9" y1="3" x2="9" y2="18"></line><line x1="15" y1="6" x2="15" y2="21"></line></svg>
+          <span>Guides</span>
+        </a>
+        <a href="/reference" class="nav-item">
+          <svg class="icon" width="16" height="16" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+          <span>Reference</span>
+        </a>
+        <a href="/playground" class="nav-item">
+          <svg class="icon" width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M8 12a4 4 0 0 1 8 0"></path><line x1="12" y1="2" x2="12" y2="4"></line></svg>
+          <span>Playground</span>
+        </a>
+        <a href="/blog" class="nav-item">
+          <svg class="icon" width="16" height="16" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          <span>Blog</span>
+        </a>
+      </nav>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <button class="search-btn" onclick="openSearch()" aria-label="Search docs">
+          <svg class="icon" width="15" height="15" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <span>Search guides…</span>
+          <kbd class="kbd-shortcut">/</kbd>
+        </button>
+        <button id="themeToggleBtn" onclick="toggleTheme()" class="theme-toggle-btn" aria-label="Toggle Theme" style="padding: 8px;">
+          <svg class="icon" width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container" style="padding: 48px 24px;">
+    <div style="margin-bottom: 40px;">
+      <span class="section-tag">Cookbook & Tutorials</span>
+      <h1 style="font-size: 2.75rem; font-weight: 800; color: var(--text-fg); margin-top: 8px;">Practical Guides & Ecosystem Workflows</h1>
+      <p style="color: var(--text-muted); font-size: 1.1rem; max-width: 720px; margin-top: 8px;">
+        End-to-end recipes for evaluating transit networks from raw GTFS schedules, spatial aggregation to Uber H3 hex grids, Federal Title VI compliance reporting, and GPU choropleth rendering in Kepler.gl.
+      </p>
+    </div>
+
+    <!-- Guide 1: GTFS Routing -->
+    <div style="margin-bottom: 48px; padding: 32px; background-color: var(--bg-surface); border: 1px solid var(--border-rule); border-radius: 12px;" id="gtfs">
+      <span class="tool-stamp stamp-blue">Transit Routing Pipeline</span>
+      <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-fg); margin-top: 8px;">1. Compute Transit Access Equity from GTFS via r5py</h2>
+      <p style="color: var(--text-muted); margin: 12px 0 16px;">
+        This recipe demonstrates how to calculate origin-destination transit travel time matrices using <code>r5py</code> (the Python wrapper for Conway's R5 routing engine) and evaluate spatial inequality across neighborhood origins.
+      </p>
+
+      <div class="code-wrapper">
+        <div class="code-header">
+          <span>gtfs_r5py_equity.py</span>
+          <span>Python 3.10+</span>
+        </div>
+        <pre><code>import datetime
+import geopandas as gpd
+import r5py
+from moveq import compute_gini, compute_palma_ratio, compute_concentration_index
+
+# 1. Initialize R5 Transport Network (OSM road network + GTFS zip)
+transport_network = r5py.TransportNetwork("osm_city.pbf", ["transit_feed.gtfs.zip"])
+
+# 2. Load origin census centroids and destination employment opportunities
+origins = gpd.read_file("census_tract_centroids.geojson")
+destinations = gpd.read_file("job_centers.geojson")
+
+# 3. Compute Travel Time Matrix for Tuesday morning peak (08:00 - 09:00)
+travel_time_matrix = r5py.TravelTimeMatrixComputer(
+    transport_network,
+    origins=origins,
+    destinations=destinations,
+    departure=datetime.datetime(2026, 9, 15, 8, 0),
+    transport_modes=[r5py.TransportMode.WALK, r5py.TransportMode.TRANSIT],
+).compute_travel_times()
+
+# 4. Calculate cumulative jobs accessible within 45 minutes per origin zone
+access_45 = travel_time_matrix[travel_time_matrix["travel_time"] <= 45]
+jobs_per_origin = access_45.groupby("from_id")["jobs_count"].sum().values
+population = origins["population"].values
+deprivation_rank = origins["deprivation_decile"].values
+
+# 5. Evaluate Equity Metrics
+gini = compute_gini(jobs_per_origin, population)
+palma = compute_palma_ratio(jobs_per_origin, population)
+ci = compute_concentration_index(jobs_per_origin, deprivation_rank, population)
+
+print(f"45-Min Job Access Gini: {gini:.4f}")
+print(f"Palma Ratio (Top 10% / Bottom 40%): {palma:.2f}")
+print(f"Concentration Index: {ci:.4f} ({'Pro-Poor' if ci < 0 else 'Pro-Rich'})")</code></pre>
+      </div>
+    </div>
+
+    <!-- Guide 2: H3 Hexagonal Aggregation -->
+    <div style="margin-bottom: 48px; padding: 32px; background-color: var(--bg-surface); border: 1px solid var(--border-rule); border-radius: 12px;" id="h3">
+      <span class="tool-stamp stamp-emerald">Spatial Hexagonal Indexing</span>
+      <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-fg); margin-top: 8px;">2. Mitigate MAUP via Uber H3 Hexagonal Resampling</h2>
+      <p style="color: var(--text-muted); margin: 12px 0 16px;">
+        The <strong>Modifiable Areal Unit Problem (MAUP)</strong> distorts equity metrics when census boundaries have arbitrary irregular shapes. Resampling stop frequencies and population density to Uber H3 hexagons (Resolution 8 / ~460m edge) yields uniform spatial cells.
+      </p>
+
+      <div class="code-wrapper">
+        <div class="code-header">
+          <span>h3_equity_resampling.py</span>
+          <span>h3 + moveq</span>
+        </div>
+        <pre><code>import h3
+import pandas as pd
+from moveq import compute_gini
+
+# 1. Map transit stops and population points to H3 Resolution 8 index
+df["h3_res8"] = df.apply(lambda r: h3.latlng_to_cell(r["lat"], r["lng"], res=8), axis=1)
+
+# 2. Group by hexagonal cell to obtain uniform spatial bins
+hex_df = df.groupby("h3_res8").agg({
+    "hourly_departures": "sum",
+    "estimated_population": "sum"
+}).reset_index()
+
+# 3. Compute H3-standardized Gini coefficient
+h3_gini = compute_gini(hex_df["hourly_departures"].values, hex_df["estimated_population"].values)
+print(f"H3 Standardized Gini: {h3_gini:.4f}")</code></pre>
+      </div>
+    </div>
+
+    <!-- Guide 3: Title VI Compliance -->
+    <div style="margin-bottom: 48px; padding: 32px; background-color: var(--bg-surface); border: 1px solid var(--border-rule); border-radius: 12px;" id="title-vi">
+      <span class="tool-stamp stamp-crimson">Federal Compliance Auditing</span>
+      <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-fg); margin-top: 8px;">3. Audit Title VI Disparate Impact & Environmental Justice</h2>
+      <p style="color: var(--text-muted); margin: 12px 0 16px;">
+        Federal Title VI audits require transit agencies to demonstrate that major service reductions or fare changes do not create statistically significant disparate impacts on protected minority or low-income populations.
+      </p>
+
+      <div class="code-wrapper">
+        <div class="code-header">
+          <span>title_vi_audit.py</span>
+          <span>Federal Reporting</span>
+        </div>
+        <pre><code>from moveq import compute_concentration_index
+
+# Rank 1 = Highest minority concentration / Highest poverty tracts
+minority_rank = tract_df["minority_percentage_rank"].values
+baseline_service = tract_df["trips_2025"].values
+proposed_service = tract_df["trips_2026_proposed"].values
+population = tract_df["population"].values
+
+ci_baseline = compute_concentration_index(baseline_service, minority_rank, population)
+ci_proposed = compute_concentration_index(proposed_service, minority_rank, population)
+
+delta_ci = ci_proposed - ci_baseline
+print(f"Baseline CI: {ci_baseline:+.4f}")
+print(f"Proposed CI: {ci_proposed:+.4f}")
+print(f"Disparity Delta: {delta_ci:+.4f}")
+
+if delta_ci > 0.05:
+    print("⚠ WARNING: Proposed service changes increase pro-rich disparity by > 5%. Title VI review required.")</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div id="searchModal" class="search-modal">
+    <div class="search-card">
+      <input type="text" id="searchInput" class="search-input" placeholder="Search guides…" autocomplete="off">
+      <div id="searchResults" class="search-results"></div>
+    </div>
+  </div>
+
+</body>
+</html>

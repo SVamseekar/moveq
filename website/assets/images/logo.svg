@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <!-- Background Shape: Hexagonal Transit Hub -->
+  <rect x="6" y="6" width="88" height="88" rx="22" fill="#0f172a" stroke="#38bdf8" stroke-width="4"/>
+  
+  <!-- Intersecting Metro Rail Lines (Wayfinding Map) -->
+  <!-- Line 1: Blue Express Line -->
+  <path d="M22,78 L22,38 C22,26 34,26 42,38 L50,52 C58,64 70,64 78,52 L78,22" 
+        fill="none" stroke="#38bdf8" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Line 2: Emerald Equity Loop -->
+  <circle cx="50" cy="50" r="18" fill="none" stroke="#34d399" stroke-width="5" stroke-dasharray="2 6"/>
+  
+  <!-- Line 3: Coral Priority Spur forming Q -->
+  <path d="M56,56 L82,82" fill="none" stroke="#fb7185" stroke-width="7" stroke-linecap="round"/>
+
+  <!-- Station Interchange Nodes -->
+  <circle cx="22" cy="78" r="5.5" fill="#ffffff" stroke="#38bdf8" stroke-width="3"/>
+  <circle cx="50" cy="50" r="6" fill="#34d399" stroke="#ffffff" stroke-width="2.5"/>
+  <circle cx="78" cy="22" r="5.5" fill="#ffffff" stroke="#38bdf8" stroke-width="3"/>
+  <circle cx="82" cy="82" r="5" fill="#fb7185" stroke="#ffffff" stroke-width="2.5"/>
+</svg>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Harmonization Registry | moveq Docs</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+  <link rel="stylesheet" href="/assets/css/theme.css">
+  <script src="/assets/js/theme.js" defer></script>
+  <script src="/assets/js/version.js" defer></script>
+  <script src="/assets/js/search.js" defer></script>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/" class="logo-group">
+        <svg class="logo-img" viewBox="0 0 100 100" width="30" height="30" aria-label="moveq logo">
+          <rect x="6" y="6" width="88" height="88" rx="22" fill="#0f172a" stroke="#38bdf8" stroke-width="4"/>
+          <path d="M22,78 L22,38 C22,26 34,26 42,38 L50,52 C58,64 70,64 78,52 L78,22" fill="none" stroke="#38bdf8" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="50" cy="50" r="18" fill="none" stroke="#34d399" stroke-width="5" stroke-dasharray="2 6"/>
+          <path d="M56,56 L82,82" fill="none" stroke="#fb7185" stroke-width="7" stroke-linecap="round"/>
+          <circle cx="22" cy="78" r="5.5" fill="#ffffff" stroke="#38bdf8" stroke-width="3"/>
+          <circle cx="50" cy="50" r="6" fill="#34d399" stroke="#ffffff" stroke-width="2.5"/>
+          <circle cx="78" cy="22" r="5.5" fill="#ffffff" stroke="#38bdf8" stroke-width="3"/>
+          <circle cx="82" cy="82" r="5" fill="#fb7185" stroke="#ffffff" stroke-width="2.5"/>
+        </svg>
+        <span>MovEq</span>
+      </a>
+
+      <nav class="nav-links">
+        <a href="/docs" class="nav-item active">
+          <svg class="icon" width="16" height="16" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+          <span>Docs</span>
+        </a>
+        <a href="/guides" class="nav-item">
+          <svg class="icon" width="16" height="16" viewBox="0 0 24 24"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon><line x1="9" y1="3" x2="9" y2="18"></line><line x1="15" y1="6" x2="15" y2="21"></line></svg>
+          <span>Guides</span>
+        </a>
+        <a href="/reference" class="nav-item">
+          <svg class="icon" width="16" height="16" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+          <span>Reference</span>
+        </a>
+        <a href="/playground" class="nav-item">
+          <svg class="icon" width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M8 12a4 4 0 0 1 8 0"></path><line x1="12" y1="2" x2="12" y2="4"></line></svg>
+          <span>Playground</span>
+        </a>
+        <a href="/blog" class="nav-item">
+          <svg class="icon" width="16" height="16" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          <span>Blog</span>
+        </a>
+      </nav>
+
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <button class="search-btn" onclick="openSearch()" aria-label="Search docs">
+          <svg class="icon" width="15" height="15" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <span>Search docs…</span>
+          <kbd class="kbd-shortcut">/</kbd>
+        </button>
+        <button id="themeToggleBtn" onclick="toggleTheme()" class="theme-toggle-btn" aria-label="Toggle Theme" style="padding: 8px;">
+          <svg class="icon" width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="docs-subnav" style="margin-top: 24px;">
+      <a href="/docs" class="docs-subnav-link">
+        <svg class="icon" width="14" height="14" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        <span>Overview</span>
+      </a>
+      <a href="/docs/core" class="docs-subnav-link">
+        <span class="bullet-shield shield-gini" style="width:16px; height:16px; font-size: 0.65rem;">G</span>
+        <span>Core Inequality</span>
+      </a>
+      <a href="/docs/scoring" class="docs-subnav-link">
+        <span class="bullet-shield shield-score" style="width:16px; height:16px; font-size: 0.65rem;">S</span>
+        <span>Composite Scoring</span>
+      </a>
+      <a href="/docs/catalogue" class="docs-subnav-link active">
+        <span class="bullet-shield shield-cat" style="width:16px; height:16px; font-size: 0.65rem;">H</span>
+        <span>Harmonization</span>
+      </a>
+      <a href="/docs/frames" class="docs-subnav-link">
+        <svg class="icon" width="14" height="14" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+        <span>DataFrames</span>
+      </a>
+      <a href="/docs/cli" class="docs-subnav-link">
+        <svg class="icon" width="14" height="14" viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+        <span>CLI Reference</span>
+      </a>
+    </div>
+
+    <div class="docs-layout">
+      <aside class="docs-sidebar">
+        <div class="sidebar-category">
+          <div class="sidebar-cat-title">Harmonization Registry</div>
+          <ul class="sidebar-list">
+            <li><a href="#overview" class="sidebar-link active">Overview</a></li>
+            <li><a href="#problem" class="sidebar-link">Comparative Transit Problem</a></li>
+            <li><a href="#actions" class="sidebar-link">Tri-State Section Actions</a></li>
+            <li><a href="#catalogue-class" class="sidebar-link">Catalogue API</a></li>
+            <li><a href="#validation" class="sidebar-link">Validation Rules</a></li>
+          </ul>
+        </div>
+      </aside>
+
+      <article class="prose">
+        <div class="docs-breadcrumbs">
+          <a href="/docs">Docs</a> / <a href="/docs/catalogue">Core Engines</a> / <span>Harmonization</span>
+        </div>
+
+        <h1 id="overview">Cross-Country Harmonization Registry</h1>
+        <p>
+          The <code>moveq_catalogue</code> module provides a formal questionnaire contract registry for cross-country and cross-jurisdictional transport equity comparisons.
+        </p>
+
+        <h2 id="problem">The Comparative Transit Problem</h2>
+        <p>
+          When an equity methodology designed for the United Kingdom (based on UK Index of Multiple Deprivation deciles and LSOA polygons) is applied to France (INSEE IRIS units) or the United States (Census Tracts), research teams often silently skip unavailable variables or quietly substitute metrics without documentation.
+        </p>
+
+        <div class="callout callout-important">
+          <div class="callout-title">Zero Silent Methodology Drift</div>
+          <div>
+            <code>moveq-catalogue</code> prevents silent omission. A base study defines a questionnaire of metric section IDs. Any adapted study must explicitly register one of three actions for every base section: <code>SAME</code>, <code>REPLACE</code>, or <code>OMIT</code>.
+          </div>
+        </div>
+
+        <h2 id="actions">Tri-State Section Actions (<code>SectionAction</code>)</h2>
+        <table class="param-table">
+          <thead>
+            <tr>
+              <th>Action</th>
+              <th>Requirements</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="param-name">SectionAction.SAME</span></td>
+              <td>None</td>
+              <td>The metric definition is preserved verbatim and calculated against local demographic data.</td>
+            </tr>
+            <tr>
+              <td><span class="param-name">SectionAction.REPLACE</span></td>
+              <td><code>replacement_title</code> (str)</td>
+              <td>The metric is substituted with a locally meaningful equivalent (e.g. replacing UK IMD with French INSEE IRIS deprivation index).</td>
+            </tr>
+            <tr>
+              <td><span class="param-name">SectionAction.OMIT</span></td>
+              <td><code>note</code> (str)</td>
+              <td>The section is dropped because no local data exists. Requires an explicit justification note explaining why.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2 id="catalogue-class">Python Usage</h2>
+        <div class="code-wrapper">
+          <div class="code-header">
+            <span>harmonize_country.py</span>
+            <span>Python 3.10+</span>
+          </div>
+          <pre><code>from moveq_catalogue import Catalogue, SectionAction
+
+# 1. Define base questionnaire established by lead study
+base_sections = [
+    "bus_stop_coverage_400m",
+    "peak_hour_frequency",
+    "evening_night_service",
+    "socioeconomic_deprivation_rank"
+]
+
+# 2. Initialize catalogue for adapted study (e.g. France)
+cat = Catalogue(base_sections, country="France")
+
+# 3. Register explicit decisions for each section
+cat.register("bus_stop_coverage_400m", SectionAction.SAME)
+cat.register("peak_hour_frequency", SectionAction.SAME)
+cat.register("evening_night_service", SectionAction.SAME)
+cat.register(
+    "socioeconomic_deprivation_rank",
+    SectionAction.REPLACE,
+    replacement_title="French INSEE IRIS Deprivation Decile"
+)
+
+# 4. Validate completeness (fails if any base section was forgotten)
+issues = cat.validate()
+if issues:
+    print("Incomplete catalogue! Missing mappings:", issues)
+else:
+    print("✓ Catalogue valid and fully harmonized.")
+    print("Summary:", cat.summary())
+    # Output: Summary: {'same': 3, 'replace': 1, 'omit': 0}</code></pre>
+        </div>
+
+        <h2 id="validation">Validation Rules</h2>
+        <ul>
+          <li><strong>Duplicate Base Sections</strong>: Initializing <code>Catalogue</code> with duplicate base section IDs raises <code>ValueError</code>.</li>
+          <li><strong>Unknown Section ID</strong>: Registering an action for an ID not present in <code>base_sections</code> raises <code>ValueError</code>.</li>
+          <li><strong>Replace Without Title</strong>: Calling <code>register(id, SectionAction.REPLACE)</code> without <code>replacement_title</code> raises <code>ValueError</code>.</li>
+          <li><strong>Omit Without Note</strong>: Calling <code>register(id, SectionAction.OMIT)</code> without <code>note</code> raises <code>ValueError</code>.</li>
+          <li><strong>Incomplete Catalogue</strong>: <code>validate()</code> returns a list of error strings for any section IDs that remain unmapped.</li>
+        </ul>
+
+        <div class="docs-pager">
+          <a href="/docs/scoring" class="pager-card prev">
+            <span class="pager-label">← Previous</span>
+            <span class="pager-title">Composite Scoring Engine</span>
+          </a>
+          <a href="/docs/frames" class="pager-card next">
+            <span class="pager-label">Next Step →</span>
+            <span class="pager-title">DataFrame Helpers</span>
+          </a>
+        </div>
+      </article>
+
+      <nav class="docs-toc" style="font-size: 0.84rem;">
+        <div style="font-weight: 700; text-transform: uppercase; color: var(--text-faint); margin-bottom: 10px;">On this page</div>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 8px;">
+          <li><a href="#problem" style="color: var(--text-muted);">Comparative Transit Problem</a></li>
+          <li><a href="#actions" style="color: var(--text-muted);">Section Actions</a></li>
+          <li><a href="#catalogue-class" style="color: var(--text-muted);">Catalogue API</a></li>
+          <li><a href="#validation" style="color: var(--text-muted);">Validation Rules</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+  <div id="searchModal" class="search-modal">
+    <div class="search-card">
+      <input type="text" id="searchInput" class="search-input" placeholder="Search docs…" autocomplete="off">
+      <div id="searchResults" class="search-results"></div>
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documentation Overview | moveq</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+  <link rel="stylesheet" href="/assets/css/theme.css">
+  <script src="/assets/js/theme.js" defer></script>
+  <script src="/assets/js/version.js" defer></script>
+  <script src="/assets/js/search.js" defer></script>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/" class="logo-group">
+        <svg class="logo-img" viewBox="0 0 100 100" width="30" height="30" aria-label="moveq logo">
+          <rect x="6" y="6" width="88" height="88" rx="22" fill="#0f172a" stroke="#38bdf8" stroke-width="4"/>
+          <path d="M22,78 L22,38 C22,26 34,26 42,38 L50,52 C58,64 70,64 78,52 L78,22" fill="none" stroke="#38bdf8" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="50" cy="50" r="18" fill="none" stroke="#34d399" stroke-width="5" stroke-dasharray="2 6"/>
+          <path d="M56,56 L82,82" fill="none" stroke="#fb7185" stroke-width="7" stroke-linecap="round"/>
+          <circle cx="22" cy="78" r="5.5" fill="#ffffff" stroke="#38bdf8" stroke-width="3"/>
+          <circle cx="50" cy="50" r="6" fill="#34d399" stroke="#ffffff" stroke-width="2.5"/>
+          <circle cx="78" cy="22" r="5.5" fill="#ffffff" stroke="#38bdf8" stroke-width="3"/>
+          <circle cx="82" cy="82" r="5" fill="#fb7185" stroke="#ffffff" stroke-width="2.5"/>
+        </svg>
+        <span>MovEq</span>
+      </a>
+
+      <nav class="nav-links">
+        <a href="/docs" class="nav-item active">
+          <svg class="icon" width="16" height="16" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+          <span>Docs</span>
+        </a>
+        <a href="/guides" class="nav-item">
+          <svg class="icon" width="16" height="16" viewBox="0 0 24 24"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon><line x1="9" y1="3" x2="9" y2="18"></line><line x1="15" y1="6" x2="15" y2="21"></line></svg>
+          <span>Guides</span>
+        </a>
+        <a href="/reference" class="nav-item">
+          <svg class="icon" width="16" height="16" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+          <span>Reference</span>
+        </a>
+        <a href="/playground" class="nav-item">
+          <svg class="icon" width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M8 12a4 4 0 0 1 8 0"></path><line x1="12" y1="2" x2="12" y2="4"></line></svg>
+          <span>Playground</span>
+        </a>
+        <a href="/blog" class="nav-item">
+          <svg class="icon" width="16" height="16" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          <span>Blog</span>
+        </a>
+      </nav>
+
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <button class="search-btn" onclick="openSearch()" aria-label="Search docs">
+          <svg class="icon" width="15" height="15" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <span>Search docs…</span>
+          <kbd class="kbd-shortcut">/</kbd>
+        </button>
+
+        <button id="themeToggleBtn" onclick="toggleTheme()" class="theme-toggle-btn" aria-label="Toggle Theme" style="padding: 8px;">
+          <svg class="icon" width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="docs-subnav" style="margin-top: 24px;">
+      <a href="/docs" class="docs-subnav-link active">
+        <svg class="icon" width="14" height="14" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        <span>Overview</span>
+      </a>
+      <a href="/docs/core" class="docs-subnav-link">
+        <span class="bullet-shield shield-gini" style="width:16px; height:16px; font-size: 0.65rem;">G</span>
+        <span>Core Inequality</span>
+      </a>
+      <a href="/docs/scoring" class="docs-subnav-link">
+        <span class="bullet-shield shield-score" style="width:16px; height:16px; font-size: 0.65rem;">S</span>
+        <span>Composite Scoring</span>
+      </a>
+      <a href="/docs/catalogue" class="docs-subnav-link">
+        <span class="bullet-shield shield-cat" style="width:16px; height:16px; font-size: 0.65rem;">H</span>
+        <span>Harmonization</span>
+      </a>
+      <a href="/docs/frames" class="docs-subnav-link">
+        <svg class="icon" width="14" height="14" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+        <span>DataFrames</span>
+      </a>
+      <a href="/docs/cli" class="docs-subnav-link">
+        <svg class="icon" width="14" height="14" viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+        <span>CLI Reference</span>
+      </a>
+    </div>
+
+    <div class="docs-layout">
+      <aside class="docs-sidebar">
+        <div class="sidebar-category">
+          <div class="sidebar-cat-title">Getting Started</div>
+          <ul class="sidebar-list">
+            <li><a href="/docs" class="sidebar-link active">Introduction</a></li>
+            <li><a href="#philosophy" class="sidebar-link">Design Philosophy</a></li>
+            <li><a href="#installation" class="sidebar-link">Installation Options</a></li>
+            <li><a href="#quickstart" class="sidebar-link">Quickstart Tutorial</a></li>
+            <li><a href="#architecture" class="sidebar-link">Architecture & Modules</a></li>
+          </ul>
+        </div>
+
+        <div class="sidebar-category">
+          <div class="sidebar-cat-title">Core Engines</div>
+          <ul class="sidebar-list">
+            <li><a href="/docs/core" class="sidebar-link">Core Inequality Metrics</a></li>
+            <li><a href="/docs/scoring" class="sidebar-link">Composite Scoring Engine</a></li>
+            <li><a href="/docs/catalogue" class="sidebar-link">Harmonization Registry</a></li>
+            <li><a href="/docs/frames" class="sidebar-link">DataFrame & Vulnerability</a></li>
+            <li><a href="/docs/cli" class="sidebar-link">Command-Line Tools</a></li>
+          </ul>
+        </div>
+
+        <div class="sidebar-category">
+          <div class="sidebar-cat-title">Guides & Ecosystem</div>
+          <ul class="sidebar-list">
+            <li><a href="/guides#gtfs" class="sidebar-link">GTFS Transit Routing</a></li>
+            <li><a href="/guides#h3" class="sidebar-link">Uber H3 Spatial Hexagons</a></li>
+            <li><a href="/guides#title-vi" class="sidebar-link">Title VI Compliance Audits</a></li>
+            <li><a href="/reference" class="sidebar-link">API Signature Index</a></li>
+          </ul>
+        </div>
+      </aside>
+
+      <article class="prose">
+        <div class="docs-breadcrumbs">
+          <a href="/docs">Docs</a> / <span>Getting Started</span> / <span>Introduction</span>
+        </div>
+
+        <h1>Introduction to moveq</h1>
+        <p>
+          <strong><code>moveq</code></strong> is a fast, modular, and mathematically auditable Python toolkit for <strong>transport equity analysis, spatial justice auditing, and cross-country policy benchmarking</strong>.
+        </p>
+        <p>
+          It transforms raw municipal transit metrics (e.g. trips per neighborhood, morning peak frequency, evening coverage buffers) paired with spatial population arrays into population-weighted inequality coefficients, resilient composite scores, and validated cross-country questionnaire catalogues.
+        </p>
+
+        <div class="callout callout-note">
+          <div class="callout-title">
+            <svg class="icon" width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            <span>Core Mathematical Principle</span>
+          </div>
+          <div>
+            In spatial justice and transport equity, transit service is a <strong>resource</strong>, population is the <strong>distribution weight</strong>, and socioeconomic indicators define <strong>priority ranks</strong>. <code>moveq</code> guarantees deterministic invariance against spatial zone reordering and tied rank deciles.
+          </div>
+        </div>
+
+        <h2 id="philosophy">Design Philosophy</h2>
+        <p>
+          Unlike monolithic GIS toolboxes that require heavy C libraries (GDAL, GEOS, PROJ) or opaque spreadsheet formulas that fail silently when demographic columns are missing, <code>moveq</code> was built from first principles with four non-negotiable architectural invariants:
+        </p>
+
+        <ul>
+          <li>
+            <strong>1. Pure NumPy Zero-Bloat Core</strong>: The primary mathematical engine (<code>moveq-core</code>) depends strictly on NumPy. It imports in under 5 milliseconds and runs identically on laptops, embedded IoT routers, microservices, AWS Lambda, and browser WebAssembly.
+          </li>
+          <li>
+            <strong>2. Continuous Boundary Slicing</strong>: Standard quantile binning produces erratic jumps when demographic zones cross the 40% or 90% population thresholds. <code>moveq</code> calculates exact continuous proportional splitting across boundary units.
+          </li>
+          <li>
+            <strong>3. Graceful Renormalization Over Silent Padding</strong>: If an indicator (e.g., weekend night frequency) is missing from a dataset cut, <code>moveq</code> does NOT pad with zeros (which falsely penalizes scores). Instead, it drops the missing term and dynamically renormalizes the remaining design weights, generating an explicit note in the audit trail.
+          </li>
+          <li>
+            <strong>4. Strict Harmonization Contracts</strong>: When comparing transit equity across borders (e.g., UK LSOAs vs. French IRIS zones vs. US Census Tracts), <code>moveq-catalogue</code> strictly validates whether each section is <code>same</code>, <code>replace</code> (with new title), or <code>omit</code> (with justification note).
+          </li>
+        </ul>
+
+        <h2 id="installation">Installation Options</h2>
+        <p><code>moveq</code> is packaged into modular distributions so you only install what you need:</p>
+
+        <div class="code-wrapper">
+          <div class="code-header">
+            <span>Terminal</span>
+            <span>pip / uv / conda</span>
+          </div>
+          <pre><code># 1. Full Stack: Core math + Composite Scoring + Catalogue + CLI + Pandas DataFrame helpers
+pip install "moveq[cli,frames]"
+
+# 2. Lightning-fast UV package manager
+uv add "moveq[cli,frames]"
+
+# 3. Pure NumPy Core Only (zero GIS/Pandas dependencies, < 50KB package size)
+pip install moveq-core
+
+# 4. Conda Forge Distribution
+conda install -c conda-forge moveq</code></pre>
+        </div>
+
+        <h2 id="quickstart">Quickstart Tutorial</h2>
+        <p>
+          Here is a complete, runnable example computing the Gini coefficient, Palma ratio, Wagstaff Concentration Index, and composite accessibility score:
+        </p>
+
+        <div class="code-wrapper">
+          <div class="code-header">
+            <span>quickstart.py</span>
+            <span>Python 3.10+</span>
+          </div>
+          <pre><code>import numpy as np
+from moveq import (
+    compute_gini,
+    compute_palma_ratio,
+    compute_concentration_index,
+    compute_score,
+)
+
+# 1. Define municipal data for 5 spatial zones (e.g. Census Tracts or LSOAs)
+trips_per_capita = np.array([10.0, 20.0, 5.0, 50.0, 8.0])
+population = np.array([1000, 800, 1200, 300, 900])
+deprivation_rank = np.array([1, 3, 2, 5, 4])  # 1 = most deprived neighborhood
+
+# 2. Population-Weighted Gini Coefficient (Overall Inequality)
+gini = compute_gini(trips_per_capita, population)
+print(f"Gini Coefficient: {gini:.4f}")
+# Output: Gini Coefficient: 0.3902
+
+# 3. Continuous Boundary Palma Ratio (Top 10% vs Bottom 40%)
+palma = compute_palma_ratio(trips_per_capita, population)
+print(f"Palma Ratio: {palma:.4f}")
+# Output: Palma Ratio: 7.0732
+
+# 4. Wagstaff Concentration Index (Pro-Poor vs Pro-Rich Disparity)
+ci = compute_concentration_index(trips_per_capita, deprivation_rank, population)
+print(f"Concentration Index: {ci:.4f}")
+# Output: Concentration Index: 0.2457 (> 0 indicates service favors less deprived areas)
+
+# 5. Composite Accessibility Score (with missing term dropped)
+score_result = compute_score(
+    terms={
+        "buffer_400m": 0.85,    # 85% coverage
+        "evening_freq": 0.60,   # 60% standard
+        "night_service": None,  # Data not collected in this city
+    },
+    weights={
+        "buffer_400m": 0.50,
+        "evening_freq": 0.30,
+        "night_service": 0.20,
+    },
+    labels={
+        "buffer_400m": "400m Transit Stop Access",
+        "evening_freq": "Evening Service Frequency",
+        "night_service": "24-Hour Night Transit",
+    }
+)
+
+print(f"Composite Score: {score_result.score:.1f} / 100")
+print(f"Audit Trail Note: {score_result.note}")
+# Output:
+# Composite Score: 75.6 / 100
+# Audit Trail Note: 24-hour night transit not in this cut — weights renormalised.</code></pre>
+        </div>
+
+        <h2 id="architecture">Architecture & Module Matrix</h2>
+        <p>The library is split into 4 decoupled subpackages under the <code>moveq</code> umbrella:</p>
+
+        <table class="param-table">
+          <thead>
+            <tr>
+              <th>Package</th>
+              <th>Primary Imports</th>
+              <th>Purpose & Core Invariants</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="param-name">moveq-core</span></td>
+              <td><code>moveq_core.equity</code><br><code>moveq_core.score</code></td>
+              <td>Pure NumPy engine for Gini, continuous Palma, Concentration Index, and composite scoring with dynamic weight renormalization.</td>
+            </tr>
+            <tr>
+              <td><span class="param-name">moveq-catalogue</span></td>
+              <td><code>moveq_catalogue.catalogue</code></td>
+              <td>Harmonization registry enforcing explicit <code>same</code> / <code>replace</code> / <code>omit</code> questionnaire mapping for cross-country studies.</td>
+            </tr>
+            <tr>
+              <td><span class="param-name">moveq</span></td>
+              <td><code>import moveq</code></td>
+              <td>Convenience top-level re-export package providing clean imports across all modules.</td>
+            </tr>
+            <tr>
+              <td><span class="param-name">moveq-cli</span></td>
+              <td><code>moveq</code> command</td>
+              <td>Standalone command-line interface for running equity audits on CSV files and JSON payloads in headless CI/CD pipelines.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="docs-pager">
+          <div></div>
+          <a href="/docs/core" class="pager-card next">
+            <span class="pager-label">Next Step →</span>
+            <span class="pager-title">Core Inequality Metrics</span>
+          </a>
+        </div>
+      </article>
+
+      <nav class="docs-toc" style="font-size: 0.84rem;">
+        <div style="font-weight: 700; text-transform: uppercase; color: var(--text-faint); margin-bottom: 10px;">On this page</div>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 8px;">
+          <li><a href="#philosophy" style="color: var(--text-muted);">Design Philosophy</a></li>
+          <li><a href="#installation" style="color: var(--text-muted);">Installation Options</a></li>
+          <li><a href="#quickstart" style="color: var(--text-muted);">Quickstart Tutorial</a></li>
+          <li><a href="#architecture" style="color: var(--text-muted);">Architecture & Modules</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+  <div id="searchModal" class="search-modal">
+    <div class="search-card">
+      <input type="text" id="searchInput" class="search-input" placeholder="Search docs…" autocomplete="off">
+      <div id="searchResults" class="search-results"></div>
+    </div>
+  </div>
+
+</body>
+</html>

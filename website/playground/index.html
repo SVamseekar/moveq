@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Equity Playground | moveq</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
+  <link rel="stylesheet" href="/assets/css/theme.css">
+  <script src="/assets/js/theme.js" defer></script>
+  <script src="/assets/js/version.js" defer></script>
+  <script src="/assets/js/playground.js" defer></script>
+  <script src="/assets/js/search.js" defer></script>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/" class="logo-group">
+        <svg class="logo-img" viewBox="0 0 100 100" width="30" height="30" aria-label="moveq logo">
+          <rect x="6" y="6" width="88" height="88" rx="22" fill="#0f172a" stroke="#38bdf8" stroke-width="4"/>
+          <path d="M22,78 L22,38 C22,26 34,26 42,38 L50,52 C58,64 70,64 78,52 L78,22" fill="none" stroke="#38bdf8" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="50" cy="50" r="18" fill="none" stroke="#34d399" stroke-width="5" stroke-dasharray="2 6"/>
+          <path d="M56,56 L82,82" fill="none" stroke="#fb7185" stroke-width="7" stroke-linecap="round"/>
+          <circle cx="22" cy="78" r="5.5" fill="#ffffff" stroke="#38bdf8" stroke-width="3"/>
+          <circle cx="50" cy="50" r="6" fill="#34d399" stroke="#ffffff" stroke-width="2.5"/>
+          <circle cx="78" cy="22" r="5.5" fill="#ffffff" stroke="#38bdf8" stroke-width="3"/>
+          <circle cx="82" cy="82" r="5" fill="#fb7185" stroke="#ffffff" stroke-width="2.5"/>
+        </svg>
+        <span>MovEq</span>
+      </a>
+      <nav class="nav-links">
+        <a href="/docs" class="nav-item">
+          <svg class="icon" width="16" height="16" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+          <span>Docs</span>
+        </a>
+        <a href="/guides" class="nav-item">
+          <svg class="icon" width="16" height="16" viewBox="0 0 24 24"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon><line x1="9" y1="3" x2="9" y2="18"></line><line x1="15" y1="6" x2="15" y2="21"></line></svg>
+          <span>Guides</span>
+        </a>
+        <a href="/reference" class="nav-item">
+          <svg class="icon" width="16" height="16" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+          <span>Reference</span>
+        </a>
+        <a href="/playground" class="nav-item active">
+          <svg class="icon" width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M8 12a4 4 0 0 1 8 0"></path><line x1="12" y1="2" x2="12" y2="4"></line></svg>
+          <span>Playground</span>
+        </a>
+        <a href="/blog" class="nav-item">
+          <svg class="icon" width="16" height="16" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          <span>Blog</span>
+        </a>
+      </nav>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <button class="search-btn" onclick="openSearch()" aria-label="Search docs">
+          <svg class="icon" width="15" height="15" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <span>Search playground…</span>
+          <kbd class="kbd-shortcut">/</kbd>
+        </button>
+        <button id="themeToggleBtn" onclick="toggleTheme()" class="theme-toggle-btn" aria-label="Toggle Theme" style="padding: 8px;">
+          <svg class="icon" width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></svg>
+        </button>
+        <a href="/docs" class="cut-btn">
+          <span>Install v0.1.0</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="container" style="padding: 48px 24px;">
+    <span class="section-tag">In-Browser Simulation</span>
+    <h1 style="font-size: 2.75rem; font-weight: 800; color: var(--text-fg); margin-top: 8px;">Lorenz Curve & Inequality Playground</h1>
+    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 8px; max-width: 680px;">
+      Simulate demographic deciles, adjust transit access parameters, and see exact real-time mathematical evaluations.
+    </p>
+
+    <div class="playground-card" style="margin-top: 32px;">
+      <div class="canvas-container">
+        <canvas id="lorenzCanvas" width="360" height="360"></canvas>
+      </div>
+
+      <div style="display: flex; flex-direction: column; justify-content: center;">
+        <div class="slider-group">
+          <div class="slider-item">
+            <label>
+              <span>Deprived / Low-Income Decile Service (trips/cap):</span>
+              <span id="lowIncomeVal" style="font-family: var(--font-mono); font-weight: 700; color: var(--accent-metro);">10.0</span>
+            </label>
+            <input type="range" id="sliderLowIncome" min="1" max="50" value="10" 
+                   oninput="document.getElementById('lowIncomeVal').innerText = parseFloat(this.value).toFixed(1)">
+          </div>
+
+          <div class="slider-item">
+            <label>
+              <span>Affluent / High-Income Decile Service (trips/cap):</span>
+              <span id="highIncomeVal" style="font-family: var(--font-mono); font-weight: 700; color: var(--accent-metro);">50.0</span>
+            </label>
+            <input type="range" id="sliderHighIncome" min="10" max="100" value="50" 
+                   oninput="document.getElementById('highIncomeVal').innerText = parseFloat(this.value).toFixed(1)">
+          </div>
+        </div>
+
+        <div class="metric-readouts" style="margin-top: 24px;">
+          <div class="metric-badge">
+            <div class="metric-title">Gini Coeff</div>
+            <div class="metric-num" id="calcGini">0.3902</div>
+          </div>
+          <div class="metric-badge">
+            <div class="metric-title">Palma Ratio</div>
+            <div class="metric-num" id="calcPalma">7.07</div>
+          </div>
+          <div class="metric-badge">
+            <div class="metric-title">Wagstaff CI</div>
+            <div class="metric-num" id="calcCI">+0.2457</div>
+          </div>
+        </div>
+
+        <div style="margin-top: 24px; padding: 14px; background-color: var(--bg-subtle); border-radius: 8px; font-size: 0.84rem; color: var(--text-muted);">
+          <strong>Observation</strong>: When low-income decile service rises from 10 to 45 trips/cap, Gini drops below 0.10, Palma approaches 1.0, and the Wagstaff index flips negative (pro-poor service investment).
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="searchModal" class="search-modal">
+    <div class="search-card">
+      <input type="text" id="searchInput" class="search-input" placeholder="Search playground…" autocomplete="off">
+      <div id="searchResults" class="search-results"></div>
+    </div>
+  </div>
+
+</body>
+</html>
