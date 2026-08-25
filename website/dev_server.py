@@ -7,7 +7,7 @@ import sys
 import mimetypes
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 
-PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8080
+PORT = 8080
 DOC_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 class CleanURLHandler(SimpleHTTPRequestHandler):
@@ -65,6 +65,7 @@ class CleanURLHandler(SimpleHTTPRequestHandler):
         return super().do_GET()
 
 if __name__ == "__main__":
+    PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8080
     server = HTTPServer(("0.0.0.0", PORT), CleanURLHandler)
-    print(f"🚀 Serving clean URLs on http://localhost:{PORT}")
+    print(f"Serving clean URLs on http://localhost:{PORT}")
     server.serve_forever()

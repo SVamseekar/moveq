@@ -56,6 +56,29 @@ jobs:
       - name: Run example integration test
         run: python examples/basic_equity/run.py
 
+  website:
+    name: Website
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Check static site
+        run: python scripts/check_website.py
+
+      - name: Install pytest
+        run: python -m pip install --upgrade pip pytest
+
+      - name: Run website tests
+        run: pytest -v tests/test_website.py
+
   git-rules:
     name: Git release rules
     runs-on: ubuntu-latest

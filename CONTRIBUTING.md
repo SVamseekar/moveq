@@ -37,7 +37,8 @@ pytest -v
 python examples/basic_equity/run.py
 ```
 
-CI runs the same tests on Python 3.10, 3.11, 3.12, and 3.13.
+CI runs the same tests on Python 3.10, 3.11, 3.12, and 3.13. The
+**Website** job checks the static site (`python scripts/check_website.py`).
 
 ## Project layout
 
@@ -69,8 +70,9 @@ Do not commit virtual environments, `dist/`, caches, or secrets. See `.gitignore
    [`docs/api_reference.md`](docs/api_reference.md) and any affected guide.
 
 CI must pass before merge. Packaging is also checked on every PR (`python -m build`
-plus `twine check --strict`). Changes under `website/` also get a Vercel
-preview URL on the pull request; production is https://moveq.souravamseekar.com.
+plus `twine check --strict`). The **Website** job must pass for the static
+site. Changes under `website/` also get a Vercel preview URL on the pull
+request; production is https://moveq.souravamseekar.com.
 
 ## Versioning
 
