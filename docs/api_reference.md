@@ -15,7 +15,9 @@ Computes the population-weighted Gini coefficient via numerical integration of t
   - `values` (`np.ndarray`): Public transport service levels per areal unit (e.g. departures, seat-km).
   - `weights` (`np.ndarray`): Population count or weight per areal unit.
 - **Returns**:
-  - `float`: Gini coefficient in \([0, 1]\). \(0\) represents perfect equality, and \(1\) represents maximum inequality.
+  - `float`: Gini coefficient in \([0, 1]\). \(0\) represents perfect equality, and \(1\) represents maximum inequality. Zero total service returns `0.0`.
+- **Raises**:
+  - `ValueError`: if inputs are not 1-dimensional, differ in length, are empty, contain non-finite or negative values, or have non-positive total weight.
 
 ---
 
@@ -26,7 +28,9 @@ Computes the Palma ratio: the ratio of the mean service level in the top 10% hig
   - `values` (`np.ndarray`): Public transport service levels per areal unit.
   - `weights` (`np.ndarray`): Population weight per unit.
 - **Returns**:
-  - `float`: Palma ratio. Returns `float("inf")` if the bottom 40% has zero mean service.
+  - `float`: Palma ratio. Areas that straddle the 40% / 90% population cuts are split proportionally. Equal service, including all-zero service, returns `1.0`. Returns `float("inf")` if the bottom 40% has zero mean service while the top 10% does not.
+- **Raises**:
+  - `ValueError`: same input constraints as `compute_gini`.
 
 ---
 
@@ -38,7 +42,9 @@ Computes the Wagstaff Concentration Index using the fractional rank covariance m
   - `rank` (`np.ndarray`): Socioeconomic or deprivation rank per unit (where \(1\) = most deprived, higher numbers = less deprived).
   - `population` (`np.ndarray`): Population weight per unit.
 - **Returns**:
-  - `float`: Concentration Index in \([-1, 1]\). Positive values indicate pro-rich concentration; negative values indicate pro-poor concentration.
+  - `float`: Concentration Index. For non-negative service this lies in \([-1, 1]\). Positive values indicate pro-rich concentration; negative values indicate pro-poor concentration. Tied ranks share a group-midpoint fractional rank. Unpopulated units are ignored. Zero mean service returns `0.0`.
+- **Raises**:
+  - `ValueError`: if any array is not 1-dimensional, lengths differ, inputs are empty or non-finite, or total population is not positive. Negative service is allowed.
 
 ---
 
@@ -60,7 +66,7 @@ def compute_score(
 ```
 - **Parameters**:
   - `terms` (`dict[str, float | None]`): Mapping of term IDs to normalized values in \([0, 1]\) (or `None` if missing).
-  - `weights` (`dict[str, float]`): Mapping of term IDs to initial design weights.
+  - `weights` (`dict[str, float]`): Mapping of term IDs to initial design weights (finite and strictly positive).
   - `labels` (`dict[str, str] | None`): Optional human-readable labels for each term.
   - `n_areas` (`int | None`): Optional count of areal units contributing to this score.
   - `context` (`dict[str, str] | None`): Free-form metadata dict preserved in results.

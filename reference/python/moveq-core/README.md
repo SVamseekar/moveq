@@ -30,7 +30,8 @@ Areas are sorted from lowest to highest service. Cumulative population share
 is plotted against cumulative service share (a Lorenz curve). Gini is `1`
 minus twice the area under that curve, using trapezoidal integration.
 
-- `0` — every person faces the same service level
+- `0` — every person faces the same service level (including the all-zero
+  convention: nothing to distribute)
 - toward `1` — almost all service sits with a small share of the population
 
 Gini does **not** know whether the poorly served people are deprived. It is
@@ -43,8 +44,9 @@ two-fifths?*
 
 It is the population-weighted mean service of the top 10% divided by that of
 the bottom 40% (areas on the boundary of those shares are split
-proportionally). Equal service gives `1`. If the bottom 40% have zero
-service, the function returns `inf` rather than dividing by zero.
+proportionally). Equal service, including all-zero service, gives `1`. If
+the bottom 40% have zero service while the top 10% do not, the function
+returns `inf` rather than dividing by zero.
 
 Palma is more sensitive to the tails than Gini, which is why the two are
 reported together.
@@ -55,9 +57,11 @@ The concentration index answers: *does service rise or fall as deprivation
 falls?*
 
 Areas are ordered by rank (`1` = most deprived by convention in this
-library). A population-weighted covariance between service and each area’s
-midpoint fractional rank is scaled by the mean service. The result is in
-`[-1, 1]`:
+library). Units that tie on rank share the group's midpoint fractional
+rank, so the answer does not depend on input order. Unpopulated units are
+ignored. A population-weighted covariance between service and fractional
+rank is scaled by the mean service. For non-negative service the result is
+in `[-1, 1]`:
 
 | Sign | Meaning |
 | --- | --- |
@@ -78,8 +82,10 @@ The important behaviour is what happens when a term is `None`:
 3. the result records `weight_used` vs `design_weight`, the dropped ids,
    and a `note`
 
-If every term is missing, `score` is `None`. Callers keep control of which
-indicators exist; the library refuses to invent a zero.
+If every term is missing, `score` is `None`. Design weights must be finite
+and strictly positive; non-finite term values are rejected rather than
+clipped. Callers keep control of which indicators exist; the library
+refuses to invent a zero.
 
 ### Optional DataFrame helpers (`moveq_core.frames`)
 

@@ -43,17 +43,20 @@ so they render on both GitHub and PyPI.
 
 ## Versioning
 
-Semantic Versioning: `MAJOR.MINOR.PATCH`.
+Canonical policy: [CONTRIBUTING.md](../CONTRIBUTING.md) (scientific Python, not
+Cargo `0.x`). Decision at bump time:
 
 | Kind of change | Version bump | Example |
 | --- | --- | --- |
-| Breaking public API | major | `1.4.2` → `2.0.0` |
-| Compatible new API | minor | `1.4.2` → `1.5.0` |
-| Bug fix | patch | `1.4.2` → `1.4.3` |
+| Breaking public API | major after `1.0`; **minor** while `0.x` | `0.1.2` → `0.2.0` |
+| Compatible new API | minor | `0.1.2` → `0.2.0` |
+| Bug fix, including metric-output corrections | **patch** | `0.1.1` → `0.1.2` |
+| Docs, packaging | patch | `0.1.1` → `0.1.2` |
 
-While the stack is `0.x`, a **minor** bump may include breaking changes
-(`0.1.0` → `0.2.0`). Patch stays bug-fix only. Stay on `0.x` until you are
-ready to freeze the public API as `1.0.0`.
+Do **not** bump minor because Palma / CI / Gini / score numbers change after a
+correctness fix. `~=0.1.1` only receives `0.1.*`; shipping the fix as `0.2.0`
+hides it from pinned users. Stay on `0.x` until you freeze the public API as
+`1.0.0`.
 
 Set `version = "X.Y.Z"` in **all four** `pyproject.toml` files in the same
 commit. The publish workflow runs `scripts/check_release_version.py` and

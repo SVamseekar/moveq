@@ -23,7 +23,9 @@ population weight. They print a single number:
 
 - Gini — overall inequality of that service across people (`0` = equal)
 - Palma — mean service of the best-served 10% of population over the
-  worst-served 40% (`1` = equal; `inf` if the bottom 40% have no service)
+  worst-served 40%, with boundary areas split proportionally (`1` =
+  equal, including all-zero service; `inf` if the bottom 40% have no
+  service and the top 10% do not)
 
 **`moveq ci`** is the Wagstaff Concentration Index. It needs a third
 column: socioeconomic rank (`1` = most deprived in this library).

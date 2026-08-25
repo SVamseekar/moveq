@@ -50,3 +50,49 @@ def test_to_dict_rounds_score():
     d = result.to_dict()
     assert isinstance(d["score"], float)
     assert d["score"] == round(d["score"], 1)
+
+
+def test_rejects_zero_weight():
+    terms = {"coverage": 1.0, "evening": 1.0, "frequency": 1.0, "gap": 1.0}
+    bad_weights = {**WEIGHTS, "coverage": 0.0}
+    with pytest.raises(ValueError):
+        compute_score(terms, bad_weights, labels=LABELS)
+
+
+def test_rejects_negative_weight():
+    terms = {"coverage": 1.0, "evening": 1.0, "frequency": 1.0, "gap": 1.0}
+    bad_weights = {**WEIGHTS, "coverage": -0.1}
+    with pytest.raises(ValueError):
+        compute_score(terms, bad_weights, labels=LABELS)
+
+
+def test_rejects_non_finite_weight():
+    terms = {"coverage": 1.0, "evening": 1.0, "frequency": 1.0, "gap": 1.0}
+    bad_weights = {**WEIGHTS, "coverage": float("nan")}
+    with pytest.raises(ValueError):
+        compute_score(terms, bad_weights, labels=LABELS)
+
+
+def test_rejects_non_finite_term():
+    terms = {"coverage": float("nan"), "evening": 1.0, "frequency": 1.0, "gap": 1.0}
+    with pytest.raises(ValueError, match="finite"):
+        compute_score(terms, WEIGHTS, labels=LABELS)
+
+
+def test_rejects_infinite_term():
+    terms = {"coverage": float("inf"), "evening": 1.0, "frequency": 1.0, "gap": 1.0}
+    with pytest.raises(ValueError, match="finite"):
+        compute_score(terms, WEIGHTS, labels=LABELS)
+
+
+def test_all_missing_preserves_n_areas():
+    terms = {"coverage": None, "evening": None, "frequency": None, "gap": None}
+    result = compute_score(terms, WEIGHTS, labels=LABELS, n_areas=12)
+    assert result.score is None
+    assert result.n_areas == 12
+
+
+def test_all_missing_leaves_n_areas_none_when_omitted():
+    terms = {"coverage": None, "evening": None, "frequency": None, "gap": None}
+    result = compute_score(terms, WEIGHTS, labels=LABELS)
+    assert result.n_areas is None

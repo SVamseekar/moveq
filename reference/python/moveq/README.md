@@ -28,13 +28,15 @@ public API of [`moveq-core`](https://pypi.org/project/moveq-core/) and
 area (weekly trips, departures, coverage) and a population weight:
 
 - **Gini** — overall inequality of that service across people. `0` is
-  equal service for everyone; values toward `1` mean service is
-  concentrated on a small share of the population. Internally this is a
-  population-weighted Lorenz curve, integrated with the trapezoid rule.
+  equal service for everyone (including the all-zero convention); values
+  toward `1` mean service is concentrated on a small share of the
+  population. Internally this is a population-weighted Lorenz curve,
+  integrated with the trapezoid rule.
 - **Palma ratio** — the *extremes*: mean service of the best-served 10%
   of the population divided by mean service of the worst-served 40%.
-  Equal service yields `1`. If the bottom 40% have no service at all, the
-  result is infinity.
+  Areas that straddle those cuts are split proportionally. Equal service,
+  including all-zero service, yields `1`. If the bottom 40% have no
+  service while the top 10% do not, the result is infinity.
 
 Neither Gini nor Palma knows anything about income or deprivation. They
 only describe the distribution of the service variable.
@@ -42,8 +44,9 @@ only describe the distribution of the service variable.
 **Inequality *along* deprivation (who is favoured).** The **Wagstaff
 Concentration Index** ranks areas by a socioeconomic variable (for
 example Index of Multiple Deprivation, where `1` is most deprived) and
-asks whether service rises or falls along that ranking. The index lies
-in `[-1, 1]`:
+asks whether service rises or falls along that ranking. Tied ranks share
+a group-midpoint fractional rank so input order does not change the
+answer. For non-negative service the index lies in `[-1, 1]`:
 
 - **positive** — service is concentrated among *less* deprived areas
   (pro-rich)

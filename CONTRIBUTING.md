@@ -72,21 +72,41 @@ plus `twine check --strict`).
 
 ## Versioning
 
-This project uses [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PATCH`.
+This project uses [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PATCH`,
+interpreted the way **scientific Python** libraries do (NumPy, SciPy,
+scikit-learn, statsmodels) — not Cargo’s pre-1.0 shift, where the middle number
+is the breaking channel.
 
-| Change | Bump |
-| --- | --- |
-| Breaking public API | **major** (`1.2.3` → `2.0.0`) |
-| New backwards-compatible API | **minor** (`1.2.3` → `1.3.0`) |
-| Bug fix, docs, packaging | **patch** (`1.2.3` → `1.2.4`) |
+| Change | Bump | Example |
+| --- | --- | --- |
+| Breaking public API (rename, remove, or change signatures) | **major** after `1.0`; **minor** while `0.x` | `0.1.2` → `0.2.0` |
+| New backwards-compatible public API | **minor** | `0.1.2` → `0.2.0` |
+| Bug fix, including numerical / correctness fixes that change outputs | **patch** | `0.1.1` → `0.1.2` |
+| Docs, packaging | **patch** | `0.1.1` → `0.1.2` |
 
-While the stack is still `0.x`, a **minor** bump may also include breaking API
-changes (`0.1.0` → `0.2.0`). Patch remains bug-fix only. Do not declare `1.0.0`
-until the public API is intentionally stable.
+### Patch vs minor for metrics
 
-All four packages share the same version string in their `pyproject.toml` files.
-Bump every file in the same commit. A Git tag `v0.1.0` must match that version
-exactly or the publish workflow will fail.
+Fixing Gini, Palma, the Concentration Index, or `compute_score` so they match
+the **already documented** definition is a **patch**, even if numbers published
+under the previous version change. scikit-learn `0.24.1` shipped a numerical
+stability fix in `mutual_info_score` as a patch, not `0.25.0`. NumPy bugfix
+releases contain no new features or deprecations.
+
+Bump **minor** only when you add a public function, change arguments, or
+*intentionally redefine* a metric (a new Palma, not the documented one).
+
+`pip install "moveq~=0.1.1"` means `>=0.1.1, ==0.1.*`. A correctness fix
+shipped as `0.2.0` is never installed for those users.
+
+If a patch changes numeric results, say so in `CHANGELOG.md` under that patch
+so a study re-run knows to expect different figures.
+
+Do not declare `1.0.0` until the public API is intentionally stable.
+
+All four packages share the same version string in their `pyproject.toml` files
+(and matching `__version__` in each `__init__.py`). Bump every file in the same
+commit. A Git tag `v0.1.0` must match that version exactly or the publish
+workflow will fail.
 
 ## Releasing
 

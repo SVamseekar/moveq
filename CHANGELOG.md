@@ -11,6 +11,35 @@ PyPI.
 
 ## [Unreleased]
 
+## [0.1.2] — 2026-08-25
+
+Correctness patch. Signatures are unchanged. Palma, the Concentration Index,
+Gini, and `compute_score` now match the documented definitions, so some
+figures computed with `0.1.1` will change (coarse geographies, tied ranks,
+all-zero service, invalid input).
+
+### Changed
+
+- Palma ratio splits areal units that straddle the 40% and 90% population
+  cuts, instead of including or dropping whole units.
+- Concentration Index assigns tied ranks a shared group-midpoint fractional
+  rank, so input order among ties no longer changes the result.
+- Palma of an all-zero service distribution is `1.0` (equality), not `inf`.
+- `compute_score` keeps `n_areas=None` when every term is missing (it
+  previously coerced that to `0`).
+
+### Fixed
+
+- Gini with zero total service returns `0.0` instead of dividing by zero.
+- Concentration Index is defined when mean service is negative (it previously
+  returned `0`).
+- Concentration Index ignores unpopulated units instead of producing `NaN`.
+- Gini, Palma, and the Concentration Index reject 2-D input with a clear
+  error instead of a NumPy broadcast failure or a silent 2-D result.
+- Composite scores reject non-finite term values rather than clipping `inf`
+  to `1` or propagating `NaN`.
+- Design weights must be finite and strictly positive.
+
 ## [0.1.1] — 2026-08-25
 
 Documentation-only release. No algorithm changes.

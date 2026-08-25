@@ -12,7 +12,11 @@ The Gini coefficient measures overall inequality in the distribution of a resour
 
 Let areal units be indexed by \(i = 1, \dots, N\).
 - Let \(y_i \ge 0\) be the service level (e.g. weekly trips, departures) in areal unit \(i\).
-- Let \(w_i > 0\) be the population in areal unit \(i\).
+- Let \(w_i \ge 0\) be the population in areal unit \(i\), with \(\sum_i w_i > 0\). Individual unpopulated units (\(w_i = 0\)) are allowed; they contribute nothing.
+
+Inputs are 1-dimensional. Non-finite values are rejected.
+
+If total service \(\sum_i y_i w_i = 0\) (nothing to distribute), \(G = 0\) by convention.
 
 1. **Ordering**: Sort all units by non-decreasing service level:
    \[
@@ -48,21 +52,25 @@ The Palma ratio focuses specifically on the distributional extremes: the top 10%
 
 ### Mathematical Formulation
 
-Given sorted service levels \(y_{(i)}\) and cumulative population fractions \(p_k\):
-1. **Bottom 40% Mean Service**:
+Sort units by non-decreasing service. Let \(W = \sum_i w_i\), and write \(W_{(k)}^{\text{before}}\) for the population strictly below unit \(k\) in that order.
+
+An areal unit that straddles a cut is **split**: only the share of its population that falls inside the bottom 40% or top 10% is counted. Whole-unit inclusion/exclusion would make the ratio depend on how the map is partitioned.
+
+1. **Overlap weights**:
    \[
-   \bar{y}_{B40} = \frac{\sum_{i: p_i \le 0.40} y_{(i)} w_{(i)}}{\sum_{i: p_i \le 0.40} w_{(i)}}
+   \omega_k^{B40} = \max\bigl(0,\; \min(W_{(k)}^{\text{before}} + w_{(k)},\; 0.40 W) - W_{(k)}^{\text{before}}\bigr)
    \]
-2. **Top 10% Mean Service**:
    \[
-   \bar{y}_{T10} = \frac{\sum_{i: p_i > 0.90} y_{(i)} w_{(i)}}{\sum_{i: p_i > 0.90} w_{(i)}}
+   \omega_k^{T10} = \max\bigl(0,\; (W_{(k)}^{\text{before}} + w_{(k)}) - \max(W_{(k)}^{\text{before}},\; 0.90 W)\bigr)
    \]
-3. **Palma Ratio**:
+2. **Means and ratio**:
    \[
+   \bar{y}_{B40} = \frac{\sum_k y_{(k)}\,\omega_k^{B40}}{\sum_k \omega_k^{B40}}, \qquad
+   \bar{y}_{T10} = \frac{\sum_k y_{(k)}\,\omega_k^{T10}}{\sum_k \omega_k^{T10}}, \qquad
    \text{Palma} = \frac{\bar{y}_{T10}}{\bar{y}_{B40}}
    \]
 
-If \(\bar{y}_{B40} = 0\), the ratio returns \(\infty\) (`float("inf")`).
+If both means are zero (all-zero service), Palma is \(1\) by the same equality convention as Gini. If only \(\bar{y}_{B40} = 0\), the ratio returns \(\infty\) (`float("inf")`). Because units are sorted ascending and values are non-negative, Palma is otherwise at least \(1\).
 
 ---
 
@@ -77,12 +85,14 @@ Let:
 - \(r_i\) = socioeconomic rank in area \(i\) (where \(r=1\) represents the most deprived/lowest socioeconomic rank, and higher values represent less deprived/wealthier areas)
 - \(w_i\) = population of area \(i\)
 
-1. **Ordering**: Sort all units in ascending order of their rank \(r_i\).
-2. **Fractional Rank Calculation**:
-   Compute the midpoint fractional rank \(R_i\) for each sorted unit:
+Unpopulated units (\(w_i = 0\)) are dropped before ranking. Service may be negative (e.g. a residual); Gini and Palma reject negatives.
+
+1. **Ordering**: Sort remaining units in ascending order of rank \(r_i\).
+2. **Tied ranks**: Consecutive units with the same \(r\) form a group \(g\) with mass \(W_g\). Every unit in the group shares the group's midpoint fractional rank, so the result does not depend on input order among ties:
    \[
-   R_i = \frac{\sum_{j=1}^{i-1} w_j + \frac{1}{2} w_i}{\sum_{j=1}^N w_j}
+   R_g = \frac{W_{<g} + \tfrac{1}{2} W_g}{W}
    \]
+   where \(W_{<g}\) is the population strictly poorer (lower rank) than group \(g\).
 3. **Weighted Covariance & Mean**:
    \[
    \mu = \frac{\sum_{i=1}^N w_i y_i}{\sum_{i=1}^N w_i}
@@ -94,12 +104,13 @@ Let:
    \[
    CI = \frac{2 \cdot \text{Cov}_w(y, R)}{\mu}
    \]
+   If \(\mu = 0\), \(CI = 0\) by convention.
 
 ### Interpretation
-- \(CI \in [-1, 1]\).
+- For non-negative service, \(CI \in [-1, 1]\).
 - \(CI > 0\) (**Pro-Rich / Less Deprived**): Public transport service is disproportionately concentrated in less deprived areas.
 - \(CI < 0\) (**Pro-Poor / More Deprived**): Public transport service is disproportionately concentrated in more deprived areas.
-- \(CI = 0\): Service is uniformly distributed across socioeconomic tiers.
+- \(CI = 0\): Service is uniformly distributed across socioeconomic tiers (or mean service is zero).
 
 ---
 
@@ -108,6 +119,8 @@ Let:
 Composite indicators aggregate multiple accessibility and service dimensions \(k \in K\) (each normalized to \([0, 1]\)) into a single \(0\)–\(100\) score using design weights \(w_k\).
 
 ### Graceful Handling of Missing Terms
+
+Design weights \(w_k\) must be finite and strictly positive. Term values must be finite (`NaN` / `inf` are rejected, not clipped). Values outside \([0, 1]\) are clipped after that check.
 
 When a subset of indicators \(M \subset K\) is unavailable (i.e. \(y_k = \text{None}\)), `moveq` drops \(M\) and renormalizes the weights of the available indicators \(P = K \setminus M\):
 

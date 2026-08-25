@@ -12,6 +12,7 @@ walkability score, a service-quality score, ...).
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -85,6 +86,10 @@ def compute_score(
     labels = labels or {k: k for k in weights}
     context = context or {}
 
+    for key, design_w in weights.items():
+        if not math.isfinite(design_w) or design_w <= 0:
+            raise ValueError(f"weight for {key!r} must be finite and strictly positive, got {design_w}")
+
     present: list[tuple[str, float, float]] = []
     dropped: list[str] = []
     for key, design_w in weights.items():
@@ -92,7 +97,10 @@ def compute_score(
         if raw is None:
             dropped.append(key)
             continue
-        present.append((key, design_w, clip01(raw)))
+        value = float(raw)
+        if not math.isfinite(value):
+            raise ValueError(f"term {key!r} must be finite, got {raw}")
+        present.append((key, design_w, clip01(value)))
 
     if not present:
         components = [
@@ -105,17 +113,17 @@ def compute_score(
             score=None,
             components=components,
             dropped=list(weights),
-            n_areas=n_areas or 0,
+            n_areas=n_areas,
             note=empty_note,
             context=context,
         )
 
     weight_sum = sum(w for _, w, _ in present)
+    present_values = {k: v for k, _, v in present}
     components = []
     weighted = 0.0
-    present_ids = {k for k, _, _ in present}
     for key, design_w in weights.items():
-        if key not in present_ids:
+        if key not in present_values:
             components.append(
                 ScoreComponent(
                     id=key, label=labels.get(key, key), design_weight=design_w,
@@ -123,7 +131,7 @@ def compute_score(
                 )
             )
             continue
-        value = next(v for k, _, v in present if k == key)
+        value = present_values[key]
         used = design_w / weight_sum
         weighted += used * value
         components.append(
