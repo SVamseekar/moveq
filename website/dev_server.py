@@ -11,15 +11,17 @@ PORT = 8080
 DOC_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 class CleanURLHandler(SimpleHTTPRequestHandler):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, directory=DOC_ROOT, **kwargs)
+    def __init__(self, *args, directory=None, **kwargs):
+        doc_dir = directory if directory is not None else DOC_ROOT
+        super().__init__(*args, directory=doc_dir, **kwargs)
 
     def do_GET(self):
         url_path = self.path.split('?')[0].split('#')[0]
+        doc_root = self.directory if getattr(self, "directory", None) else DOC_ROOT
         
         # Remove leading slash
         rel_path = url_path.lstrip('/')
-        local_path = os.path.join(DOC_ROOT, rel_path)
+        local_path = os.path.join(doc_root, rel_path)
 
         # 1. Exact file match (e.g. /assets/css/theme.css)
         if os.path.isfile(local_path):
@@ -51,7 +53,7 @@ class CleanURLHandler(SimpleHTTPRequestHandler):
 
         # 4. Root / -> website/index.html
         if url_path == "" or url_path == "/":
-            root_index = os.path.join(DOC_ROOT, "index.html")
+            root_index = os.path.join(doc_root, "index.html")
             if os.path.isfile(root_index):
                 self.send_response(200)
                 self.send_header("Content-Type", "text/html; charset=utf-8")

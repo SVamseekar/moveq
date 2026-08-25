@@ -291,6 +291,7 @@ kbd {
   letter-spacing: -0.03em;
   color: var(--text-fg);
   margin-bottom: 20px;
+  overflow-wrap: break-word;
 }
 
 .hero-subtitle {
@@ -588,10 +589,14 @@ kbd {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 24px;
+  padding-top: 16px;
+  overflow: visible;
 }
 
 .tool-card {
   position: relative;
+  isolation: isolate;
+  overflow: visible;
   background-color: var(--bg-surface);
   border: 1px solid var(--border-rule);
   border-radius: 12px;
@@ -609,21 +614,101 @@ kbd {
 /* Vector Starburst Sticker Stamp */
 .stamp-wrapper {
   position: absolute;
-  top: -12px;
-  right: -8px;
-  width: 76px;
-  height: 76px;
+  top: 10px;
+  right: 10px;
+  left: auto;
+  z-index: 2;
+  width: 84px;
+  height: 84px;
   pointer-events: none;
-  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
   transform: rotate(10deg);
   transition: transform 0.3s ease;
-  transform: none;
-  transition: transform 0.2s ease;
+}
+
+.stamp-seal {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 10px 8px;
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 1.08;
+  text-transform: uppercase;
+  color: #030712;
+  clip-path: polygon(
+    50.00% 5.00%,
+    58.41% 18.61%,
+    72.50% 11.03%,
+    72.98% 27.02%,
+    88.97% 27.50%,
+    81.39% 41.59%,
+    95.00% 50.00%,
+    81.39% 58.41%,
+    88.97% 72.50%,
+    72.98% 72.98%,
+    72.50% 88.97%,
+    58.41% 81.39%,
+    50.00% 95.00%,
+    41.59% 81.39%,
+    27.50% 88.97%,
+    27.02% 72.98%,
+    11.03% 72.50%,
+    18.61% 58.41%,
+    5.00% 50.00%,
+    18.61% 41.59%,
+    11.03% 27.50%,
+    27.02% 27.02%,
+    27.50% 11.03%,
+    41.59% 18.61%
+  );
+}
+
+.stamp-seal.stamp-tight {
+  font-size: 0.5rem;
+  letter-spacing: -0.04em;
+}
+
+.stamp-metro {
+  background-color: #38bdf8;
+}
+
+.stamp-amber {
+  background-color: #fbbf24;
+}
+
+.stamp-purple {
+  background-color: #a78bfa;
+}
+
+.stamp-emerald {
+  background-color: #34d399;
 }
 
 .tool-card:hover .stamp-wrapper {
-  transform: rotate(18deg) scale(1.08);
-  transform: scale(1.06);
+  transform: rotate(16deg) scale(1.06);
+}
+
+@media (max-width: 720px) {
+  .stamp-wrapper {
+    top: 16px;
+    left: 72px;
+    right: auto;
+    width: 68px;
+    height: 68px;
+    transform: rotate(8deg);
+  }
+
+  .tool-card:hover .stamp-wrapper {
+    transform: rotate(12deg) scale(1.05);
+  }
+
+  .nav-item span {
+    display: none;
+  }
 }
 
 .tool-badge {
