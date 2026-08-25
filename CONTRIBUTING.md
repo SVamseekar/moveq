@@ -44,10 +44,11 @@ CI runs the same tests on Python 3.10, 3.11, 3.12, and 3.13.
 ```text
 moveq/
 ├── reference/python/     # installable packages (src layout)
+├── website/              # static site (Vercel → moveq.souravamseekar.com)
 ├── docs/                 # user and maintainer documentation
 ├── examples/             # runnable demos
 ├── scripts/              # release helpers used by CI
-└── .github/workflows/    # CI and Trusted Publishing
+└── .github/workflows/    # Python CI and Trusted Publishing
 ```
 
 Do not commit virtual environments, `dist/`, caches, or secrets. See `.gitignore`.
@@ -68,7 +69,8 @@ Do not commit virtual environments, `dist/`, caches, or secrets. See `.gitignore
    [`docs/api_reference.md`](docs/api_reference.md) and any affected guide.
 
 CI must pass before merge. Packaging is also checked on every PR (`python -m build`
-plus `twine check --strict`).
+plus `twine check --strict`). Changes under `website/` also get a Vercel
+preview URL on the pull request; production is https://moveq.souravamseekar.com.
 
 ## Versioning
 

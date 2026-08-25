@@ -78,7 +78,7 @@ All four packages are versioned in lockstep and released from one Git tag.
 - [**Getting Started & CLI Guide**](docs/getting_started.md)
 - [**Cross-Country Catalogue Harmonization Guide**](docs/catalogue_guide.md)
 - [**API Reference**](docs/api_reference.md)
-- [**Website**](https://moveq.souravamseekar.com)
+- [**Website**](https://moveq.souravamseekar.com) — static files in [`website/`](website/); Vercel deploys `main` to production and pull requests to preview URLs
 - [**Publishing to PyPI**](docs/publishing.md) (maintainers)
 - [**Changelog**](CHANGELOG.md)
 
