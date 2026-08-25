@@ -3,6 +3,8 @@ import io
 import json
 from contextlib import redirect_stdout
 
+import pytest
+
 from moveq_cli.main import main
 
 
@@ -24,7 +26,25 @@ def test_gini_command(tmp_path):
     with redirect_stdout(buf):
         code = main(["gini", str(csv_path), "--value", "trips", "--weight", "population"])
     assert code == 0
-    assert "gini: 0.0000" in buf.getvalue()
+    assert buf.getvalue() == "gini: 0.0000\n"
+
+
+def test_gini_json_contains_metric_and_value(tmp_path):
+    csv_path = tmp_path / "data.csv"
+    _write_csv(
+        csv_path,
+        [{"trips": "10", "population": "100"}, {"trips": "10", "population": "100"}],
+        ["trips", "population"],
+    )
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        code = main(
+            ["gini", str(csv_path), "--value", "trips", "--weight", "population", "--json"]
+        )
+    assert code == 0
+    data = json.loads(buf.getvalue())
+    assert data["metric"] == "gini"
+    assert data["value"] == pytest.approx(0.0)
 
 
 def test_palma_command(tmp_path):
@@ -55,7 +75,58 @@ def test_ci_command(tmp_path):
     with redirect_stdout(buf):
         code = main(["ci", str(csv_path), "--value", "trips", "--rank", "dep_rank", "--weight", "population"])
     assert code == 0
-    assert "concentration_index:" in buf.getvalue()
+    out = buf.getvalue()
+    assert "concentration_index:" in out
+    assert "{" not in out
+
+
+def test_palma_json_contains_metric_and_value(tmp_path):
+    csv_path = tmp_path / "data.csv"
+    _write_csv(
+        csv_path,
+        [{"trips": str(i * 10), "population": "100"} for i in range(1, 11)],
+        ["trips", "population"],
+    )
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        code = main(
+            ["palma", str(csv_path), "--value", "trips", "--weight", "population", "--json"]
+        )
+    assert code == 0
+    data = json.loads(buf.getvalue())
+    assert data["metric"] == "palma"
+    assert isinstance(data["value"], float)
+
+
+def test_ci_json_contains_metric_and_value(tmp_path):
+    csv_path = tmp_path / "data.csv"
+    _write_csv(
+        csv_path,
+        [
+            {"trips": "10", "dep_rank": "1", "population": "100"},
+            {"trips": "20", "dep_rank": "2", "population": "100"},
+        ],
+        ["trips", "dep_rank", "population"],
+    )
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        code = main(
+            [
+                "ci",
+                str(csv_path),
+                "--value",
+                "trips",
+                "--rank",
+                "dep_rank",
+                "--weight",
+                "population",
+                "--json",
+            ]
+        )
+    assert code == 0
+    data = json.loads(buf.getvalue())
+    assert data["metric"] == "ci"
+    assert isinstance(data["value"], float)
 
 
 def test_missing_column_returns_error(tmp_path):

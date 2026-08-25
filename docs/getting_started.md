@@ -137,6 +137,9 @@ moveq palma data.csv --value trips --weight population
 
 # Wagstaff Concentration Index
 moveq ci data.csv --value trips --rank deprivation_rank --weight population
+
+# Same metrics as JSON (EquityResult.to_dict)
+moveq gini data.csv --value trips --weight population --json
 ```
 
 ### Composite Scoring via CLI

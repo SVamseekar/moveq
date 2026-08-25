@@ -21,10 +21,11 @@ import numpy as np
 
 from moveq_catalogue import Catalogue, SectionAction
 from moveq_core import (
-    compute_concentration_index,
-    compute_gini,
-    compute_palma_ratio,
+    EquityResult,
     compute_score,
+    concentration_index_result,
+    gini_result,
+    palma_result,
 )
 
 
@@ -40,25 +41,31 @@ def _read_columns(path: str, columns: list[str]) -> dict[str, np.ndarray]:
     return {c: np.array([float(r[c]) for r in rows]) for c in columns}
 
 
+def _print_equity(result: EquityResult, label: str, as_json: bool) -> int:
+    if as_json:
+        print(json.dumps(result.to_dict(), indent=2))
+        return 0
+    print(f"{label}: {result.value:.4f}")
+    return 0
+
+
 def _cmd_gini(args: argparse.Namespace) -> int:
     cols = _read_columns(args.csv, [args.value, args.weight])
-    result = compute_gini(cols[args.value], cols[args.weight])
-    print(f"gini: {result:.4f}")
-    return 0
+    return _print_equity(gini_result(cols[args.value], cols[args.weight]), "gini", args.json)
 
 
 def _cmd_palma(args: argparse.Namespace) -> int:
     cols = _read_columns(args.csv, [args.value, args.weight])
-    result = compute_palma_ratio(cols[args.value], cols[args.weight])
-    print(f"palma: {result:.4f}")
-    return 0
+    return _print_equity(palma_result(cols[args.value], cols[args.weight]), "palma", args.json)
 
 
 def _cmd_ci(args: argparse.Namespace) -> int:
     cols = _read_columns(args.csv, [args.value, args.rank, args.weight])
-    result = compute_concentration_index(cols[args.value], cols[args.rank], cols[args.weight])
-    print(f"concentration_index: {result:.4f}")
-    return 0
+    return _print_equity(
+        concentration_index_result(cols[args.value], cols[args.rank], cols[args.weight]),
+        "concentration_index",
+        args.json,
+    )
 
 
 def _cmd_score(args: argparse.Namespace) -> int:
@@ -178,6 +185,7 @@ def build_parser() -> argparse.ArgumentParser:
     gini.add_argument("csv", help="Path to input CSV file")
     gini.add_argument("--value", required=True, help="Service-level column")
     gini.add_argument("--weight", required=True, help="Population-weight column")
+    gini.add_argument("--json", action="store_true", help="Output machine-readable JSON")
     gini.set_defaults(func=_cmd_gini)
 
     # Palma
@@ -185,6 +193,7 @@ def build_parser() -> argparse.ArgumentParser:
     palma.add_argument("csv", help="Path to input CSV file")
     palma.add_argument("--value", required=True, help="Service-level column")
     palma.add_argument("--weight", required=True, help="Population-weight column")
+    palma.add_argument("--json", action="store_true", help="Output machine-readable JSON")
     palma.set_defaults(func=_cmd_palma)
 
     # Concentration Index
@@ -193,6 +202,7 @@ def build_parser() -> argparse.ArgumentParser:
     ci.add_argument("--value", required=True, help="Service-level column")
     ci.add_argument("--rank", required=True, help="Ranking column (e.g. deprivation rank)")
     ci.add_argument("--weight", required=True, help="Population-weight column")
+    ci.add_argument("--json", action="store_true", help="Output machine-readable JSON")
     ci.set_defaults(func=_cmd_ci)
 
     # Score

@@ -11,6 +11,16 @@ PyPI.
 
 ## [Unreleased]
 
+### Added
+
+- Independent second-implementation tests for Gini, Palma, the Concentration
+  Index, and composite scores, plus scale/permutation invariance, documented
+  bounds, and empty / single-observation cases.
+- `EquityResult` and `gini_result` / `palma_result` /
+  `concentration_index_result` for auditable Gini, Palma, and Concentration
+  Index outputs. The existing `compute_*` functions still return `float`.
+  `moveq gini|palma|ci --json` emits `EquityResult.to_dict()`.
+
 ## [0.1.2] — 2026-08-25
 
 Correctness patch. Signatures are unchanged. Palma, the Concentration Index,

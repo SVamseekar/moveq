@@ -13,11 +13,19 @@ NumPy 2.x guard: uses ``trapezoid`` with a fallback to the removed ``trapz``.
 
 from __future__ import annotations
 
+from dataclasses import dataclass, field
+from typing import Any, Literal
+
 import numpy as np
 
 _trapezoid = getattr(np, "trapezoid", getattr(np, "trapz", None))
 if _trapezoid is None:
     raise ImportError("NumPy has neither 'trapezoid' nor 'trapz' — unsupported version")
+
+MetricId = Literal["gini", "palma", "ci"]
+
+_PALMA_BOTTOM_CUT = 0.40
+_PALMA_TOP_CUT = 0.90
 
 
 def _as_1d(name: str, x: object) -> np.ndarray:
@@ -71,6 +79,223 @@ def _prepare_weighted(
     return values_arr, weights_arr
 
 
+def _drop_unpopulated(
+    *arrays: np.ndarray, population: np.ndarray
+) -> tuple[tuple[np.ndarray, ...], int, int, float]:
+    live = population > 0
+    n_dropped = int(np.count_nonzero(~live))
+    if n_dropped:
+        arrays = tuple(a[live] for a in arrays)
+        population = population[live]
+    return arrays, int(population.size), n_dropped, float(population.sum())
+
+
+@dataclass(frozen=True)
+class EquityResult:
+    """Auditable result of a population-weighted equity metric.
+
+    ``value`` is the same number returned by the corresponding ``compute_*``
+    function. ``method`` identifies the documented algorithm; parameters
+    such as Palma's 40%/90% cuts live in ``parameters``, not a parallel
+    versioning scheme.
+    """
+
+    metric: MetricId
+    value: float
+    method: str
+    n_areas: int
+    n_dropped: int
+    total_population: float
+    parameters: dict[str, Any]
+    warnings: list[str]
+    note: str | None
+    context: dict[str, str] = field(default_factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "metric": self.metric,
+            "value": self.value,
+            "method": self.method,
+            "n_areas": self.n_areas,
+            "n_dropped": self.n_dropped,
+            "total_population": self.total_population,
+            "parameters": dict(self.parameters),
+            "warnings": list(self.warnings),
+            "note": self.note,
+            "context": dict(self.context),
+        }
+
+
+def gini_result(
+    values: np.ndarray, weights: np.ndarray, *, context: dict[str, str] | None = None
+) -> EquityResult:
+    """Population-weighted Gini coefficient with audit fields.
+
+    See :func:`compute_gini` for the numeric definition.
+    """
+    values, weights = _prepare_weighted(values, weights)
+    (values, weights), n_areas, n_dropped, total_population = _drop_unpopulated(
+        values, weights, population=weights
+    )
+
+    warnings: list[str] = []
+    note = None
+    total_service = float((values * weights).sum())
+    if total_service == 0:
+        value = 0.0
+        warnings.append("zero total service treated as Gini = 0")
+        note = "Zero total service (nothing to distribute) is treated as perfect equality."
+    else:
+        order = np.argsort(values, kind="stable")
+        values = values[order]
+        weights = weights[order]
+        cum_pop = np.cumsum(weights) / weights.sum()
+        cum_service = np.cumsum(values * weights) / total_service
+        cum_pop = np.concatenate([[0], cum_pop])
+        cum_service = np.concatenate([[0], cum_service])
+        lorenz_area = _trapezoid(cum_service, cum_pop)
+        value = float(1 - 2 * lorenz_area)
+
+    return EquityResult(
+        metric="gini",
+        value=value,
+        method="lorenz-trapezoid",
+        n_areas=n_areas,
+        n_dropped=n_dropped,
+        total_population=total_population,
+        parameters={},
+        warnings=warnings,
+        note=note,
+        context=dict(context or {}),
+    )
+
+
+def palma_result(
+    values: np.ndarray, weights: np.ndarray, *, context: dict[str, str] | None = None
+) -> EquityResult:
+    """Palma ratio with audit fields.
+
+    See :func:`compute_palma_ratio` for the numeric definition.
+    """
+    values, weights = _prepare_weighted(values, weights)
+    (values, weights), n_areas, n_dropped, total_population = _drop_unpopulated(
+        values, weights, population=weights
+    )
+
+    order = np.argsort(values, kind="stable")
+    values = values[order]
+    weights = weights[order]
+
+    total = weights.sum()
+    cum_weight = np.cumsum(weights)
+    cum_before = cum_weight - weights
+
+    bottom_cut = _PALMA_BOTTOM_CUT * total
+    top_cut = _PALMA_TOP_CUT * total
+
+    bottom_overlap = np.clip(np.minimum(cum_weight, bottom_cut) - cum_before, 0, None)
+    top_overlap = np.clip(cum_weight - np.maximum(cum_before, top_cut), 0, None)
+
+    bottom_weight = bottom_overlap.sum()
+    top_weight = top_overlap.sum()
+
+    bottom_mean = float(np.sum(values * bottom_overlap) / bottom_weight) if bottom_weight > 0 else 0.0
+    top_mean = float(np.sum(values * top_overlap) / top_weight) if top_weight > 0 else 0.0
+
+    warnings: list[str] = []
+    note = None
+    if bottom_mean == 0.0 and top_mean == 0.0:
+        value = 1.0
+        warnings.append("zero total service treated as Palma = 1")
+        note = "All-zero service is treated as equality (Palma = 1)."
+    elif bottom_mean > 0:
+        value = float(top_mean / bottom_mean)
+    else:
+        value = float("inf")
+        warnings.append("bottom 40% mean service is zero; Palma is infinite")
+        note = "The bottom 40% has zero mean service while the top 10% does not."
+
+    return EquityResult(
+        metric="palma",
+        value=value,
+        method="palma-split-40-90",
+        n_areas=n_areas,
+        n_dropped=n_dropped,
+        total_population=total_population,
+        parameters={"bottom_cut": _PALMA_BOTTOM_CUT, "top_cut": _PALMA_TOP_CUT},
+        warnings=warnings,
+        note=note,
+        context=dict(context or {}),
+    )
+
+
+def concentration_index_result(
+    service: np.ndarray,
+    rank: np.ndarray,
+    population: np.ndarray,
+    *,
+    context: dict[str, str] | None = None,
+) -> EquityResult:
+    """Wagstaff Concentration Index with audit fields.
+
+    See :func:`compute_concentration_index` for the numeric definition.
+    """
+    service, population = _prepare_weighted(
+        service, population, values_name="service", weights_name="population", allow_negative_values=True
+    )
+    rank = _as_1d("rank", rank)
+    if rank.shape != service.shape:
+        raise ValueError("rank must have the same length as service")
+    if not np.all(np.isfinite(rank)):
+        raise ValueError("rank must be finite")
+
+    (service, rank, population), n_areas, n_dropped, total_population = _drop_unpopulated(
+        service, rank, population, population=population
+    )
+
+    order = np.argsort(rank, kind="stable")
+    rank_sorted = rank[order]
+    pop_sorted = population[order]
+    service_sorted = service[order]
+
+    # Tied ranks share the group's population-weighted midpoint fractional rank,
+    # i.e. (mass before the group + half the group's mass) / total population.
+    starts = np.empty(rank_sorted.size, dtype=bool)
+    starts[0] = True
+    starts[1:] = rank_sorted[1:] != rank_sorted[:-1]
+    group_id = np.cumsum(starts) - 1
+    n_groups = int(group_id[-1]) + 1
+    group_pop = np.bincount(group_id, weights=pop_sorted, minlength=n_groups)
+    group_before = np.cumsum(group_pop) - group_pop
+    frac_rank = (group_before + 0.5 * group_pop)[group_id] / total_population
+
+    mean_service = float(np.average(service_sorted, weights=pop_sorted))
+    warnings: list[str] = []
+    note = None
+    if mean_service == 0.0:
+        value = 0.0
+        warnings.append("zero mean service treated as Concentration Index = 0")
+        note = "Zero mean service is treated as CI = 0."
+    else:
+        cov = float(
+            np.average((service_sorted - mean_service) * (frac_rank - 0.5), weights=pop_sorted)
+        )
+        value = float(2 * cov / mean_service)
+
+    return EquityResult(
+        metric="ci",
+        value=value,
+        method="wagstaff-covariance",
+        n_areas=n_areas,
+        n_dropped=n_dropped,
+        total_population=total_population,
+        parameters={},
+        warnings=warnings,
+        note=note,
+        context=dict(context or {}),
+    )
+
+
 def compute_gini(values: np.ndarray, weights: np.ndarray) -> float:
     """Population-weighted Gini coefficient via Lorenz curve area.
 
@@ -83,24 +308,7 @@ def compute_gini(values: np.ndarray, weights: np.ndarray) -> float:
         inequality. By convention, zero total service (nothing to
         distribute) is treated as perfect equality and returns 0.0.
     """
-    values, weights = _prepare_weighted(values, weights)
-
-    total_service = (values * weights).sum()
-    if total_service == 0:
-        return 0.0
-
-    order = np.argsort(values, kind="stable")
-    values = values[order]
-    weights = weights[order]
-
-    cum_pop = np.cumsum(weights) / weights.sum()
-    cum_service = np.cumsum(values * weights) / total_service
-
-    cum_pop = np.concatenate([[0], cum_pop])
-    cum_service = np.concatenate([[0], cum_service])
-
-    lorenz_area = _trapezoid(cum_service, cum_pop)
-    return float(1 - 2 * lorenz_area)
+    return gini_result(values, weights).value
 
 
 def compute_palma_ratio(values: np.ndarray, weights: np.ndarray) -> float:
@@ -119,31 +327,7 @@ def compute_palma_ratio(values: np.ndarray, weights: np.ndarray) -> float:
         all-zero convention) returns ``1.0``. ``inf`` if the bottom 40% has
         zero mean service while the top 10% does not.
     """
-    values, weights = _prepare_weighted(values, weights)
-
-    order = np.argsort(values, kind="stable")
-    values = values[order]
-    weights = weights[order]
-
-    total = weights.sum()
-    cum_weight = np.cumsum(weights)
-    cum_before = cum_weight - weights
-
-    bottom_cut = 0.40 * total
-    top_cut = 0.90 * total
-
-    bottom_overlap = np.clip(np.minimum(cum_weight, bottom_cut) - cum_before, 0, None)
-    top_overlap = np.clip(cum_weight - np.maximum(cum_before, top_cut), 0, None)
-
-    bottom_weight = bottom_overlap.sum()
-    top_weight = top_overlap.sum()
-
-    bottom_mean = float(np.sum(values * bottom_overlap) / bottom_weight) if bottom_weight > 0 else 0.0
-    top_mean = float(np.sum(values * top_overlap) / top_weight) if top_weight > 0 else 0.0
-
-    if bottom_mean == 0.0 and top_mean == 0.0:
-        return 1.0
-    return float(top_mean / bottom_mean) if bottom_mean > 0 else float("inf")
+    return palma_result(values, weights).value
 
 
 def compute_concentration_index(
@@ -169,42 +353,4 @@ def compute_concentration_index(
         Concentration Index. For non-negative service this lies in [-1, 1].
         Zero mean service returns ``0.0``.
     """
-    service, population = _prepare_weighted(
-        service, population, values_name="service", weights_name="population", allow_negative_values=True
-    )
-    rank = _as_1d("rank", rank)
-    if rank.shape != service.shape:
-        raise ValueError("rank must have the same length as service")
-    if not np.all(np.isfinite(rank)):
-        raise ValueError("rank must be finite")
-
-    live = population > 0
-    if not np.all(live):
-        service = service[live]
-        rank = rank[live]
-        population = population[live]
-
-    total_pop = population.sum()
-    order = np.argsort(rank, kind="stable")
-    rank_sorted = rank[order]
-    pop_sorted = population[order]
-    service_sorted = service[order]
-
-    # Tied ranks share the group's population-weighted midpoint fractional rank,
-    # i.e. (mass before the group + half the group's mass) / total population.
-    starts = np.empty(rank_sorted.size, dtype=bool)
-    starts[0] = True
-    starts[1:] = rank_sorted[1:] != rank_sorted[:-1]
-    group_id = np.cumsum(starts) - 1
-    n_groups = int(group_id[-1]) + 1
-    group_pop = np.bincount(group_id, weights=pop_sorted, minlength=n_groups)
-    group_before = np.cumsum(group_pop) - group_pop
-    frac_rank = (group_before + 0.5 * group_pop)[group_id] / total_pop
-
-    mean_service = float(np.average(service_sorted, weights=pop_sorted))
-    if mean_service == 0.0:
-        return 0.0
-    cov = float(
-        np.average((service_sorted - mean_service) * (frac_rank - 0.5), weights=pop_sorted)
-    )
-    return float(2 * cov / mean_service)
+    return concentration_index_result(service, rank, population).value

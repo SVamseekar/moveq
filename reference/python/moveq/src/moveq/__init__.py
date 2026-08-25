@@ -2,6 +2,7 @@
 
 from moveq_catalogue import Catalogue, SectionAction, SectionMapping
 from moveq_core import (
+    EquityResult,
     ScoreComponent,
     ScoreResult,
     clip01,
@@ -9,12 +10,19 @@ from moveq_core import (
     compute_gini,
     compute_palma_ratio,
     compute_score,
+    concentration_index_result,
+    gini_result,
+    palma_result,
 )
 
 __all__ = [
     "compute_gini",
     "compute_palma_ratio",
     "compute_concentration_index",
+    "gini_result",
+    "palma_result",
+    "concentration_index_result",
+    "EquityResult",
     "compute_score",
     "clip01",
     "ScoreComponent",

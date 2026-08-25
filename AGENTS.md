@@ -1,5 +1,16 @@
 # Agent instructions for moveq
 
+## Commits are not releases
+
+Do not bump `version` in any `pyproject.toml` or `__init__.py`, and do not
+create a git tag, unless the user explicitly asks to publish. A finished
+work slice is ordinary commits. The version stays at the last released
+number until a release is requested.
+
+A slice that only adds tests or docs is a **patch** when it is eventually
+released, not a minor — even if you think of it as "the trust release" or
+"moveq 0.2".
+
 ## Versioning
 
 Before proposing or applying a version bump, read
@@ -27,6 +38,26 @@ Follow [docs/publishing.md](docs/publishing.md). One Git tag publishes all four
 packages. The tag (without `v`) must match lockstep `version` in every
 `pyproject.toml`. Never put a production PyPI token on the laptop or in
 secrets.
+
+## Scientific-credibility order
+
+Do not skip ahead unless the user asks. Current order:
+
+1. Independent verification of Gini, Palma, CI, and score (second
+   implementation in tests, invariance properties, documented edge cases).
+2. Auditable result objects for the equity metrics (new public API → minor
+   when released).
+3. Research reproductions of published statistics.
+4. Interop after GTFS/accessibility tools, not a GTFS parser.
+
+## Metric tests
+
+When adding or changing Gini, Palma, CI, or `compute_score` tests, expected
+values must come from an independent second implementation of the documented
+formula or a closed-form case, not from calling the production function.
+Property tests (permutation, scale invariance, documented bounds) are
+required for metric changes. Do not add an external statistics library as
+an oracle; their conventions differ.
 
 ## Leave alone unless asked
 

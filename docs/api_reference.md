@@ -48,6 +48,34 @@ Computes the Wagstaff Concentration Index using the fractional rank covariance m
 
 ---
 
+### `gini_result(values, weights, *, context=None) -> EquityResult`
+Same Gini calculation as `compute_gini`, returned as an `EquityResult` (`method="lorenz-trapezoid"`). Zero-weight units are counted in `n_dropped` and excluded from `n_areas` and `total_population`. Zero total service records a warning and sets `value` to `0.0`.
+
+### `palma_result(values, weights, *, context=None) -> EquityResult`
+Same Palma calculation as `compute_palma_ratio`, returned as an `EquityResult` (`method="palma-split-40-90"`). `parameters` records the population cuts `bottom_cut=0.40` and `top_cut=0.90`. All-zero service and infinite Palma each record a warning.
+
+### `concentration_index_result(service, rank, population, *, context=None) -> EquityResult`
+Same Concentration Index calculation as `compute_concentration_index`, returned as an `EquityResult` (`method="wagstaff-covariance"`). Unpopulated units are dropped (`n_dropped` / `n_areas`). Zero mean service records a warning and sets `value` to `0.0`.
+
+### `EquityResult`
+Frozen dataclass analogous to `ScoreResult`. `value` is the same number the corresponding `compute_*` function returns (`inf` is allowed for Palma).
+
+- `metric: "gini" | "palma" | "ci"`
+- `value: float`
+- `method: str` — documented method id (`lorenz-trapezoid`, `palma-split-40-90`, `wagstaff-covariance`)
+- `n_areas: int` — live areal units used
+- `n_dropped: int` — units dropped (for example zero-population units)
+- `total_population: float` — sum of weights actually used
+- `parameters: dict` — method parameters (Palma cuts, and so on)
+- `warnings: list[str]` — empty if none
+- `note: str | None` — optional explanation of conventions
+- `context: dict[str, str]` — free-form metadata, default `{}`
+- `to_dict() -> dict` — JSON-serializable copy of the fields
+
+The existing `compute_gini`, `compute_palma_ratio`, and `compute_concentration_index` functions still return `float` (they return `.value` from the corresponding `*_result` function).
+
+---
+
 ## 2. `moveq_core.score`
 
 Configurable weighted composite scoring with dynamic missing-term weight renormalization.

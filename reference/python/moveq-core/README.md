@@ -117,6 +117,7 @@ from moveq_core import (
     compute_gini,
     compute_palma_ratio,
     compute_concentration_index,
+    gini_result,
     compute_score,
 )
 
@@ -127,6 +128,7 @@ deprivation_rank = np.array([1, 3, 2, 5, 4])  # 1 = most deprived
 gini = compute_gini(service, population)
 palma = compute_palma_ratio(service, population)
 ci = compute_concentration_index(service, deprivation_rank, population)
+gini_audit = gini_result(service, population)  # EquityResult: value, method, n_areas, …
 
 score_res = compute_score(
     terms={"coverage": 0.75, "evening": 0.50, "night": None},

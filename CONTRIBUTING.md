@@ -103,6 +103,10 @@ so a study re-run knows to expect different figures.
 
 Do not declare `1.0.0` until the public API is intentionally stable.
 
+Do not bump versions on ordinary PRs. Leave `version` at the last released
+number until you are cutting a release; then bump, changelog, and tag in
+the same release sequence described below.
+
 All four packages share the same version string in their `pyproject.toml` files
 (and matching `__version__` in each `__init__.py`). Bump every file in the same
 commit. A Git tag `v0.1.0` must match that version exactly or the publish

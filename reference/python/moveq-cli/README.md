@@ -19,7 +19,7 @@ only the argparse front-end.
 
 **`moveq gini`** and **`moveq palma`** read a CSV and treat one column as
 the service value (trips, departures, coverage) and another as the
-population weight. They print a single number:
+population weight. By default they print a single number:
 
 - Gini — overall inequality of that service across people (`0` = equal)
 - Palma — mean service of the best-served 10% of population over the
@@ -41,6 +41,10 @@ in a JSON file (`--json`).
 **`moveq catalogue validate`** checks a country catalogue JSON against
 the same / replace / omit rules: every base section must have an
 explicit decision, replacements need a title, omissions need a note.
+
+`moveq gini`, `moveq palma`, and `moveq ci` accept `--json` to print the
+full `EquityResult` (`metric`, `value`, `method`, `n_areas`, warnings).
+The default line is unchanged.
 
 Column names are whatever your CSV actually uses; you point at them with
 `--value`, `--weight`, and `--rank`.
