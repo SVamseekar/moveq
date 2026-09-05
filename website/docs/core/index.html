@@ -247,9 +247,9 @@
         </p>
 
         <ul>
-          <li><strong>\(CI < 0\) (Negative)</strong>: Pro-Poor distribution. Service is concentrated in more deprived areas (desirable for equity interventions).</li>
-          <li><strong>\(CI = 0\) (Zero)</strong>: Neutral distribution. Transit service has zero correlation with neighborhood deprivation.</li>
-          <li><strong>\(CI > 0\) (Positive)</strong>: Pro-Rich distribution. Higher transit service is concentrated in less deprived, affluent areas.</li>
+          <li><strong>\(CI &lt; 0\)</strong>: disadvantage-concentrated — the outcome sits among less-advantaged observations.</li>
+          <li><strong>\(CI = 0\)</strong>: no socioeconomic gradient in the outcome.</li>
+          <li><strong>\(CI &gt; 0\)</strong>: advantage-concentrated — the outcome sits among more-advantaged observations.</li>
         </ul>
 
         <div class="callout callout-tip">
@@ -263,7 +263,10 @@
         <pre><code>def compute_concentration_index(
     service: np.ndarray | Sequence[float],
     rank: np.ndarray | Sequence[float],
-    population: np.ndarray | Sequence[float]
+    population: np.ndarray | Sequence[float],
+    *,
+    rank_direction: Literal["higher_is_advantaged", "higher_is_disadvantaged"],
+    zero_mean: Literal["raise", "legacy_zero"] = "raise",
 ) -> float</code></pre>
 
         <!-- Invariants & Test Proofs -->

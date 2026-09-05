@@ -27,10 +27,10 @@ const TOUR_STATIONS = [
     num: "03",
     title: "Evaluate Concentration Index",
     desc: "Audit whether transit access favors deprived or affluent demographic tracts.",
-    cmd: "moveq ci data.csv --value trips --rank deprivation_rank --weight population",
+    cmd: "moveq ci data.csv --value trips --rank deprivation_rank --weight population --rank-direction higher-is-advantaged",
     output: [
       "[INFO] Group-averaged fractional rank calculation for tied deciles",
-      "[STATUS] Positive = Pro-Rich disparity (+2.019 cov)",
+      "[STATUS] Positive = advantage-concentrated",
       "",
       "concentration_index: +0.2457  (favors less deprived areas)"
     ]

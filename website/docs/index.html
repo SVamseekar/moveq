@@ -148,9 +148,8 @@
         <div class="sidebar-category">
           <div class="sidebar-cat-title">Guides & Ecosystem</div>
           <ul class="sidebar-list">
-            <li><a href="/guides#gtfs" class="sidebar-link">GTFS Transit Routing</a></li>
-            <li><a href="/guides#h3" class="sidebar-link">Uber H3 Spatial Hexagons</a></li>
-            <li><a href="/guides#title-vi" class="sidebar-link">Title VI Compliance Audits</a></li>
+            <li><a href="/guides#arrays" class="sidebar-link">Service-array metrics</a></li>
+            <li><a href="/guides#baseline-proposal" class="sidebar-link">Baseline versus proposal</a></li>
             <li><a href="/reference" class="sidebar-link">API Signature Index</a></li>
           </ul>
         </div>
@@ -253,10 +252,13 @@ palma = compute_palma_ratio(trips_per_capita, population)
 print(f"Palma Ratio: {palma:.4f}")
 # Output: Palma Ratio: 7.0732
 
-# 4. Wagstaff Concentration Index (Pro-Poor vs Pro-Rich Disparity)
-ci = compute_concentration_index(trips_per_capita, deprivation_rank, population)
+# 4. Wagstaff Concentration Index (rank_direction is required)
+ci = compute_concentration_index(
+    trips_per_capita, deprivation_rank, population,
+    rank_direction="higher_is_advantaged",
+)
 print(f"Concentration Index: {ci:.4f}")
-# Output: Concentration Index: 0.2457 (> 0 indicates service favors less deprived areas)
+# Positive = advantage-concentrated; negative = disadvantage-concentrated
 
 # 5. Composite Accessibility Score (with missing term dropped)
 score_result = compute_score(
