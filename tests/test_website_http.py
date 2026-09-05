@@ -48,7 +48,7 @@ INDEPENDENT_PAGE_SNIPPETS: dict[str, dict[str, str]] = {
     },
     "/guides": {
         "title": "Guides & Recipes | moveq",
-        "h1": "Practical Guides & Ecosystem Workflows",
+        "h1": "Practical Guides",
     },
     "/playground": {
         "title": "Interactive Equity Playground | moveq",
