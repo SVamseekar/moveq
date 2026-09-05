@@ -1,299 +1,508 @@
 # moveq Example Gallery — Design
 
 **Date:** 2026-09-05
-**Status:** Design approved, pending implementation plan
+**Status:** Design, pending implementation plan
+**Supersedes:** the 52-entry draft committed in ae0afe7
 
 ---
 
-## 1. Purpose
+## 1. Thesis
 
-moveq has a user guide (`docs/`) and an API reference (`website/reference/`). It has
-no middle layer: no place that shows the library applied to a real problem. That gap
-is the main obstacle to adoption. Readers who do not already know what a Wagstaff
-Concentration Index is have no route into the library.
+People routinely report distributions as scalars — averages, counts, thresholds and
+ratios — and those scalars can hide who is actually affected. moveq makes the
+distributional dimension measurable and auditable.
 
-The gallery fills that layer. It is modelled on the PyMC-Marketing example gallery:
-a visual index of worked examples, grouped under headings, each card a thumbnail and
-a title linking to a runnable example.
+The gallery exists to make that case. It is not a demonstration that Python can
+calculate inequality statistics; it is an argument that a particular class of
+decisions is being made on evidence that has thrown away the relevant information.
 
-## 2. Organising principle
+Each example must be a different real-world manifestation of that problem. Eight
+genuinely different analytical jobs are worth more than eighteen variations on four.
 
-Entries are organised by **the decision being made**, not by domain and not by which
-moveq function they exercise.
+## 2. Inclusion test
 
-An earlier draft of this design organised 40 entries as "consumer 20 / academic 20".
-That was wrong, for a reason worth recording: generating entries by asking "where
-else can Gini apply?" produces many skins around one calculation. Six of that
-draft's consumer entries were `compute_gini` over a small array with the noun
-changed.
+Every candidate must answer all seven questions convincingly. Any that cannot is
+rejected, and the reason is recorded in the appendix.
 
-The correct generating question is:
+1. **Who actually has this problem?** A named actor: a planner, ministry, researcher,
+   regulator. Not "people" or "a group of friends".
+2. **What do they currently measure to make the decision?** A specific scalar in
+   current practice.
+3. **What does that measurement throw away?** Specifically. "It doesn't show
+   inequality" is not an answer.
+4. **What decision changes when the distribution is revealed?** If no real decision
+   or interpretation changes, reject.
+5. **What is the primary analytical job**, with the domain nouns stripped out?
+6. **Is that job different from every other example's job?** If two entries reduce to
+   the same job, merge them and pick the strongest domain.
+7. **Can the current moveq API express it?** If not, it is a future capability, not a
+   gallery entry.
 
-> What do people, organisations and governments actually have to decide, where are
-> they currently using an average, count, threshold or ratio, and what does the
-> distribution underneath it show?
+Two rules govern the set as a whole:
 
-Every entry must name a decision that changes depending on how it is measured.
+- **Coverage is not a reason.** No example exists because a function needs exercise.
+  Functions appear where the problem calls for them; if `moveq-cli` or
+  `moveq-catalogue` ends up in one example each, that is the correct number.
+- **The API is fixed.** No new library function is added to make an example possible.
 
-## 3. The argument
+## 3. The eight examples
 
-The research behind this design surfaced one consistent pattern across every domain
-examined: **these are distributions being reported as scalars.**
+Ranked by how strongly each makes the case for the library.
 
-- "9.2% of the EU cannot heat their home" — a mean across wildly unequal regions
-- "Half of Wallonia's communes have a doctor shortage" — a threshold count that
-  discards how far below the line each commune sits
-- "Valletta 0.7 m² vs Vilnius 66.3 m² of green space per person" — a min/max ratio
-  that says nothing about the other 24 capitals
-- "97% of children are within acceptable distance of a school" — a count that hides
-  who the 3% are
-- "Average response time is 4 hours" — compatible with 80% of users waiting 30
-  minutes and 20% waiting 18 hours
+---
 
-Each headline discards the shape of the thing being complained about. That is the
-gallery's thesis and the library's value proposition, and it is evidenced rather
-than asserted.
+### 1. The average improved. Did inequality?
 
-A secondary theme, recurring often enough to deserve its own section: **equal policy,
-unequal consequence.** The same £200 allowance, the same two work-from-home days,
-the same reimbursement rate — equal inputs producing unequal burdens.
+**Analytical job:** Isolating the divergence between a mean and a distribution across
+two periods — the phenomenon itself, taught directly.
 
-## 4. Card schema
+**Actor:** A policy evaluator signing off an intervention, or an analyst writing the
+post-implementation review.
 
-Every card carries the same four fields. No card ships without all four.
+**Problem:** An intervention has completed. The evaluation must state whether it
+worked.
+
+**Current practice:** Compare the mean before and after. If it improved, the
+intervention succeeded.
+
+**Information lost:** A rise in the mean is fully compatible with the worst-served
+falling further behind. Aggregate improvement and distributional deterioration are
+indistinguishable in a scalar.
+
+**moveq contributes:** `gini_result` and `concentration_index_result` computed on both
+periods, showing the mean rising while concentration worsens.
+
+**Decision affected:** Whether the programme is judged successful and extended.
+
+**Data:** Constructed. This is the one example where synthetic data is the right
+choice: the purpose is to isolate a mathematical phenomenon, and real data would
+introduce confounds that obscure it.
+
+**Buildability:** Synthetic — by design, clearly labelled.
+
+**Why different:** Every other two-period example is empirical and asks what happened
+in a specific case. This one is constructed to make the phenomenon unmistakable, and
+is the conceptual flagship the others depend on.
+
+---
+
+### 2. Did the new capacity reach the people who needed it?
+
+**Analytical job:** Two-period empirical evaluation — did a change in provision track
+need, or run against it?
+
+**Actor:** A transport authority or utility regulator evaluating an infrastructure
+programme, deciding where the next tranche goes.
+
+**Problem:** A city installed 1,000 EV charging points. The programme reports
+completion. The question for the next budget is whether it reached the people it was
+meant to reach.
+
+**Current practice:** Count of units installed, or percentage increase in provision.
+
+**Information lost:** Whether new capacity landed where provision was already good.
+An installation count is silent on the population underneath each unit and on the
+socioeconomic position of the areas that gained.
+
+**moveq contributes:** Population-weighted `gini_result` before and after, plus
+`concentration_index_result` against a deprivation rank, showing whether the gain
+accrued to already-advantaged areas.
+
+**Decision affected:** Whether the next investment is redirected.
+
+**Data:** National EV charging point registries with small-area geography; deprivation
+rank from IMD or an equivalent national index.
+
+**Buildability:** Buildable.
+
+**Why different:** Example 1 is constructed to teach; this is an empirical evaluation
+of a real programme with a real next decision attached.
+
+**Absorbs:** "Five pharmacies closed — whose access disappeared?" and "Who gained from
+the new rail station?" Both reduce to the same job — capacity changed, did the change
+track need — differing only in sign and noun. Pharmacy closure data by area could not
+be sourced (see appendix); the rail case is the same analysis on a different asset.
+One example, done well, is worth more than three.
+
+---
+
+### 3. Where should the one remaining unit go?
+
+**Analytical job:** Allocation under a hard constraint — ranking candidate areas by
+current burden when there is exactly one resource to place.
+
+**Actor:** A health authority with one additional weekend clinic session to allocate;
+equivalently a transport planner with one route to add.
+
+**Problem:** Several candidate areas want the resource. Population and headline demand
+look similar.
+
+**Current practice:** Total ridership, appointment volume, or projected utilisation —
+a cost-benefit case that favours areas already generating demand.
+
+**Information lost:** Utilisation measures revealed demand, which is suppressed
+precisely where provision is worst. Two areas of 20,000 people with 100 and 60
+service units look comparable on population and may look comparable on utilisation,
+while carrying entirely different access burdens.
+
+**moveq contributes:** Population-weighted service levels across candidates, plus
+`concentration_index_result` against deprivation to establish whether existing
+capacity already favours better-off populations.
+
+**Decision affected:** Which area receives the resource.
+
+**Data:** Service provision by small area (GP appointment sessions, bus service
+kilometres), population, national deprivation rank.
+
+**Buildability:** Buildable.
+
+**Why different:** Examples 1 and 2 evaluate what happened. This one is prospective
+and comparative: no intervention has occurred, and the output is a ranking that
+selects among candidates.
+
+**Absorbs:** "Where should the next bus go?" — identical mechanics, different asset.
+
+---
+
+### 4. Who are the ones outside the threshold?
+
+**Analytical job:** Turning a pass/fail threshold back into a distribution — locating
+and characterising the excluded minority.
+
+**Actor:** A local authority education planner deciding where school access investment
+is needed.
+
+**Problem:** The authority reports that 97% of children are within acceptable distance
+of a school place. The 3% are a rounding error in the headline and a live problem in
+the casework.
+
+**Current practice:** Percentage meeting a threshold.
+
+**Information lost:** Three things at once — who the excluded are, how far beyond the
+threshold they sit, and whether exclusion is socioeconomically concentrated. A
+threshold discards magnitude entirely: an area 200 metres beyond the line and one
+5 kilometres beyond are both simply "outside".
+
+**moveq contributes:** `concentration_index_result` on access against deprivation
+rank, and `gini_result` on the underlying distances rather than the binary outcome.
+
+**Decision affected:** Where access investment is targeted.
+
+**Data:** School place allocation and home-to-school distance statistics; IMD rank.
+
+**Buildability:** Buildable.
+
+**Why different from example 5:** A threshold discards *magnitude below a line*; a
+mean discards *the shape of a tail*. Different information lost, different reconstruction.
+
+**Absorbs:** "GP deserts in Wallonia" — "half of communes are shortage areas" is the
+same threshold-count job on a different service.
+
+---
+
+### 5. Does the average describe everyone?
+
+**Analytical job:** Single-period reconstruction of a distribution from a reported mean.
+
+**Actor:** A hospital trust or ambulance service reporting performance to a regulator.
+
+**Problem:** Waiting time performance must be reported, and the reported figure is
+treated as descriptive of the service patients receive.
+
+**Current practice:** The arithmetic mean — "average waiting time is 24 minutes" —
+sometimes accompanied by a median or a 95th percentile, but reported and read as a
+single headline figure.
+
+**Information lost:** The tail and its composition. A 24-minute mean is compatible with
+near-uniform waits and with most patients waiting 15 minutes while a minority wait
+two hours — and with those minorities being systematically the same people.
+
+**moveq contributes:** `gini_result` on waiting times weighted by population served,
+plus `concentration_index_result` against deprivation to test whether long waits fall
+disproportionately on particular communities.
+
+**Decision affected:** Whether reported performance improvement is accepted as
+equitable, or triggers targeted investigation.
+
+**Data:** NHS publishes waiting list breakdowns by deprivation, so the data already
+exists in the required shape.
+
+**Buildability:** Buildable.
+
+**Why different from example 4:** See above — mean versus threshold discard different
+things.
+
+---
+
+### 6. Does provision match vulnerability when the data is patchy?
+
+**Analytical job:** Composite scoring across heterogeneous inputs with missing terms
+handled explicitly.
+
+**Actor:** A member-state ministry drafting a Social Climate Plan.
+
+**Problem:** All 27 EU member states are legally required to submit plans identifying
+vulnerable households for energy and transport poverty measures, against a fund of
+€86.7bn across 2026–2032. Vulnerability is multi-dimensional by legal definition —
+affordability and access, in national and spatial context.
+
+**Current practice:** National prevalence rates ("9.2% cannot keep their home warm"),
+or bespoke composites built per state.
+
+**Information lost:** Two distinct things. First, whether the burden is concentrated
+among poorer households or merely higher in colder countries. Second — and this is the
+part no scalar can carry — which component terms were missing for which regions.
+States have unequal data coverage, and a composite that silently treats a missing term
+as zero produces a different ranking from one that reweights the remaining terms.
+
+**moveq contributes:** `compute_score` with explicit missing-term reweighting, so
+regions with partial data are scored on what exists rather than penalised for absence,
+with `ScoreResult.dropped` and `weight_used` recording exactly what happened;
+`concentration_index_result` for the burden question.
+
+**Decision affected:** Which regions and households are designated vulnerable, and
+therefore where the money goes.
+
+**Data:** Eurostat energy poverty indicators by NUTS2; EU-SILC income data.
+
+**Buildability:** Buildable.
+
+**Why different:** The only example whose central difficulty is incomplete and
+inconsistent input data rather than a discarded distribution.
+
+---
+
+### 7. Can these countries' figures be compared at all?
+
+**Analytical job:** Schema reconciliation across jurisdictions — making a comparison
+possible, and recording what does not map.
+
+**Actor:** A comparative researcher working across the UK, US, EU, Australia and New
+Zealand.
+
+**Problem:** Every jurisdiction has a small-area deprivation index and none of them
+agree. The UK IMD ranks ~33,000 LSOAs across seven domains. Australia's SEIFA
+publishes four separate indexes. New Zealand runs NZDep and the NZ IMD in parallel.
+In the US, ADI and SVI are documented as not interchangeable. EU-SILC is
+income-based at a coarser geography.
+
+**Current practice:** A private spreadsheet mapping, or quiet omission of the
+sections that do not align, with the omission invisible in the published result.
+
+**Information lost:** Which domains were treated as equivalent, which were substituted,
+and which were dropped. A reader cannot tell whether "deprivation" means the same
+thing on both sides of a comparison.
+
+**moveq contributes:** `moveq-catalogue`'s `same`/`replace`/`omit` contract, with
+`validate()` and `unregistered()` turning silent omission into an explicit, checkable
+declaration.
+
+**Decision affected:** Whether the cross-country comparison is defensible enough to
+publish.
+
+**Data:** Published index documentation from each jurisdiction.
+
+**Buildability:** Buildable.
+
+**Why different:** The only example where the problem is upstream of measurement.
+Nothing is being computed yet; the question is whether the inputs can legitimately be
+placed side by side. It is also the one job with no straightforward R or Stata
+equivalent.
+
+---
+
+### 8. Will this number survive being challenged?
+
+**Analytical job:** Result-level provenance — reconstructing what a published figure
+actually did.
+
+**Actor:** A researcher responding to peer review, or an analyst answering a regulator
+or auditor.
+
+**Problem:** A figure has been published. A reviewer asks how many areas were
+excluded, what happened to zero-population units, and what the parameters were.
+
+**Current practice:** A number, and a methods paragraph written from memory some
+months after the analysis.
+
+**Information lost:** Everything about the computation except its output. Standard
+tools return a float; the exclusions, warnings and parameter choices live only in the
+analyst's script, if anywhere.
+
+**moveq contributes:** `EquityResult` carries `n_dropped`, `n_areas`,
+`total_population`, `warnings`, `note`, `parameters` and `context` alongside the value,
+and `to_dict()` serialises the lot. The example shows a Gini computed on data with
+zero-population areas and demonstrates what the result records about its own
+construction.
+
+**Decision affected:** Whether the finding stands when challenged.
+
+**Data:** Any dataset with realistic imperfections; the example uses one of the
+buildable datasets above.
+
+**Buildability:** Buildable.
+
+**Why different from example 9's validation role:** This is provenance of *your* result
+— what this computation did to this data. Validation against published figures is a
+different question, addressed below.
+
+---
+
+## 4. Candidate held for review
+
+**Independent validation against published figures.** Reproducing a peer-reviewed
+result — the within-city accessibility inequality figures in the 15-minute city
+literature — would demonstrate that moveq's implementation agrees with independently
+published numbers. That is a real and distinct job from example 8: implementation
+correctness rather than result provenance.
+
+It is held rather than committed because it depends on obtaining the study's
+underlying data at sufficient resolution, which has not been confirmed. If the data
+is available, it becomes example 9. If not, it is not replaced by a substitute.
+
+## 5. Rejected examples
+
+Recorded so the reasoning survives, and so tempting candidates are not silently
+regenerated later.
+
+**All "equal policy, unequal burden" entries** — same parking allowance, same
+childcare benefit, same travel reimbursement, same commute allowance, same hybrid
+policy, same remote-work policy. Sixteen entries in the previous draft. They reduce
+to one job: equal input, unequal burden, compute Gini. Different nouns are not
+different applications.
+
+**Household and small-group scenarios** — chore splits, hotel room allocation, wedding
+costs, group trips, fair meeting points, rent-versus-commute balancing. Three failures:
+the actor is not a named decision-maker, no institutional decision changes, and the
+statistics are not well-posed at n≈5. Palma is undefined at that scale and there is no
+deprivation rank. These were the origin of the project and are recorded here as
+deliberately excluded, not overlooked.
+
+**Domain variations absorbed into surviving examples** — pharmacy closures and rail
+station gains into example 2; next-bus allocation into example 3; GP deserts into
+example 4. Each was the same analytical job on a different asset.
+
+**Data-blocked candidates** — pharmacy access by area (the sector evidence is
+qualitative; no per-area provision counts found), library closures by community, food
+bank capacity by area, energy billing complaints by region (only national totals
+published). Real problems, no locatable data. Listed as contribution-wanted rather
+than built with substitutes.
+
+**Weak candidates** — childcare cost comparison (country-level only, n≈27, no
+within-country distribution); regional NHS backlog growth (the +113% versus +71%
+comparison is already legible; a Gini over seven regions adds nothing).
+
+**Withdrawn API change** — `spread_result()`. The previous draft proposed it as a
+small-n counterpart to Palma. Its only justification was making household examples
+possible, and with those examples rejected the justification disappears. It does not
+survive on independent grounds either: at n≈5 `compute_gini` is already well-defined
+and "who has it worst" is `max(values)`, which needs neither a library function nor an
+`EquityResult` wrapper. A Palma counterpart requires population mass to split at
+40/90, which does not exist at that scale. The library drives the gallery, not the
+reverse.
+
+## 6. Coverage, observed
+
+Coverage is recorded as an outcome, not a target.
+
+| Component | Appears in |
+|---|---|
+| `gini_result` / `compute_gini` | 1, 2, 4, 5, 8 |
+| `concentration_index_result` | 1, 2, 3, 4, 5, 6 |
+| `compute_score` | 6 |
+| `EquityResult` audit fields | 8, and displayed throughout |
+| `moveq-catalogue` | 7 |
+| `moveq` (re-export) | all — the default import |
+| `palma_result` | none |
+| `moveq-cli` | none as a subject |
+| `moveq[frames]` | incidental, where data arrives as CSV |
+
+Two absences are deliberate and worth stating plainly.
+
+**Palma appears in no example.** It needs enough units for the 40/90 split to be
+stable, and each surviving example either works at small unit counts or is better
+served by the Concentration Index, which uses a socioeconomic rank rather than
+position in the outcome distribution. Manufacturing a Palma example would violate the
+inclusion test.
+
+**`moveq-cli` is not the subject of any example.** It is a delivery mechanism, not an
+analytical job. Where an example's data arrives as CSV, the example may show the
+command-line equivalent alongside the Python — but no example exists to demonstrate
+the CLI.
+
+## 7. Card schema
+
+Every card carries the same fields, in this order:
 
 | Field | Content |
 |---|---|
-| **The real question** | The decision, in the words of the person making it |
-| **Normally reported as** | The average, count, threshold or ratio currently used |
-| **What moveq adds** | The metric, and what it reveals that the scalar hid |
-| **What changed** | The concrete delta — who is affected differently, by how much |
+| **The real question** | The decision, in the words of the actor making it |
+| **Normally reported as** | The scalar in current practice |
+| **What it throws away** | Specifically what information is lost |
+| **What moveq shows** | The metric and the finding |
+| **What changes** | The decision that moves |
 
-Plus a **buildability status** (see §7) and, where the entry rests on published
-work, a citation.
+Plus the actor, the data source with retrieval date and licence, and a buildability
+status.
 
-## 5. Sections and entries
+## 8. Implementation architecture
 
-### Section A — The average hides the distribution
+**Structure.** Each example is a runnable `.py` under `examples/<slug>/`, following
+the existing `examples/basic_equity/run.py` pattern. Each produces one chart, which
+becomes its gallery thumbnail.
 
-Entries where a mean is reported and the spread is discarded.
-
-| # | Entry | Decision | Components | Status |
-|---|---|---|---|---|
-| A1 | Same average, very different cities | Are these two cities equivalent? | gini | Synthetic |
-| A2 | Emergency department access | Does "24 min average" describe everyone? | CI, frames | Buildable |
-| A3 | Customer support wait times | Does "4 hour average" describe everyone? | gini | Synthetic |
-| A4 | EU energy poverty × income | Is it concentrated among the poor, or just colder countries? | CI, cli, frames | Buildable |
-| A5 | Green space across 26 capitals | What about the 24 cities the headline ignores? | gini, cli | Buildable |
-| A6 | Air pollution × poverty | Who breathes the worst air? | CI, frames | Buildable |
-| A7 | Childcare cost across the EU | Country-level means vs household burden | gini | Weak — country-level only |
-
-A1 is the purest demonstration in the gallery: two constructed cities, identical mean
-service, radically different distributions. A dashboard reports "10" for both. It
-should be the first card.
-
-### Section B — Equal rules, unequal outcomes
-
-Entries where a uniform policy produces a non-uniform burden. This is the strongest
-consumer-facing theme.
-
-| # | Entry | Decision | Components | Status |
-|---|---|---|---|---|
-| B1 | Is hybrid work fair? | Same policy, different commutes and roles | gini, score, spread | Synthetic |
-| B2 | What does commuting really cost employees? | Does the same salary mean the same burden? | score, spread | Synthetic |
-| B3 | Who pays the real cost of an office relocation? | Which employee bears most of the move? | score, spread | Synthetic |
-| B4 | Rent vs commute balancer | Should the long-commute flatmate pay less? | gini, score | Synthetic |
-| B5 | Same commute allowance | £200 each, £40 to £190 actually spent | gini, spread | Synthetic |
-| B6 | Same childcare benefit | Equal payment, unequal local costs | gini | Synthetic |
-| B7 | Same remote-work policy | Equal days, unequal ability to use them | score, spread | Synthetic |
-| B8 | Same parking policy | Equal access, unequal cost and time | score | Synthetic |
-| B9 | Same travel reimbursement rate | Flat rate, unequal effective coverage | gini, spread | Synthetic |
-| B10 | Who gets the worst hotel room? | Six friends, rooms differing on five axes | score | Synthetic |
-| B11 | Who actually pays more for the wedding? | £500 each, plus travel, leave and unpaid hours | score, spread | Synthetic |
-| B12 | Is household work actually shared equally? | Weighted by frequency, duration, inconvenience | gini, spread | Synthetic |
-| B13 | Fair meeting point | Where do we meet, without stranding anyone? | gini, spread | Synthetic |
-| B14 | Shift rota fairness | Who keeps getting the weekends? | gini, spread | Synthetic |
-| B15 | On-call burden | Who carries the unsocial hours? | gini, spread | Synthetic |
-| B16 | Group trip cost split | Weighted by room, nights, participation | score | Synthetic |
-
-B12 is where `spread_result()` earns its existence: at n=4 the small-group measure is
-the *only* honest anti-sacrifice metric, because Palma is undefined at that scale.
-The example should say so explicitly.
-
-### Section C — Counts and thresholds hide who is affected
-
-Entries where an absolute number or a pass/fail rate is reported, and the identity of
-the affected population is lost.
-
-| # | Entry | Decision | Components | Status |
-|---|---|---|---|---|
-| C1 | Which neighbourhoods lost when pharmacies closed? | Before/after service concentration | CI, frames | Data-blocked |
-| C2 | Who actually gets EV charging access? | 1,000 new points — for whom? | CI, frames | Buildable |
-| C3 | School places: who are the 3%? | 97% within distance — and the rest? | CI | Buildable |
-| C4 | Public library closures | Five closed — whose five? | CI | Data-blocked |
-| C5 | ATM and cash access | 15,000 to 10,000 — evenly? | gini, cli | Buildable |
-| C6 | Banking deserts in Spain | Branches down 50% — whose branches? | gini, CI, frames | Buildable |
-| C7 | GP deserts in Wallonia | "Half of communes" — how far below the line? | gini, CI | Buildable |
-| C8 | Dental access across 11 countries | 6% unmet need — concentrated where? | CI, catalogue | Buildable |
-| C9 | SEND / EHC plan waits | "Massive variation" made numerical | gini, CI | Buildable |
-| C10 | Continuing Healthcare by ICB | 2× variation at similar demographics | CI | Buildable |
-| C11 | NHS waits by deprivation | Quintile tables to one signed number | CI, cli, frames | Buildable |
-| C12 | 3-30-300 compliance | The distribution behind the pass rate | gini, frames | Buildable |
-| C13 | Food bank / social support access | 40 centres — matched to need? | CI | Data-blocked |
-| C14 | Rural transport isolation | Who is below the service floor? | gini, palma | Buildable |
-| C15 | Regional poverty risk, NUTS2 | 25 regions above 33% — the shape below | gini, palma, cli | Buildable |
-| C16 | 15-minute city | Within-city inequality, 100k+ cities | gini, frames | Buildable — replication |
-
-C16 is a replication entry: the source study already publishes within-city inequality
-figures, so reproducing them validates moveq against an independent result. That is
-the strongest credibility mechanism available to a young library, and more such
-entries should be sought.
-
-### Section D — Interventions: did it reduce inequality, or raise the average?
-
-Before/after entries. This section carries the library's sharpest argument.
-
-| # | Entry | Decision | Components | Status |
-|---|---|---|---|---|
-| D1 | Did the intervention reduce inequality or just raise the mean? | The manifesto card | gini, CI | Synthetic |
-| D2 | Where should the next bus go? | Two candidate areas, same population | gini, CI | Buildable |
-| D3 | A bus route improved — who benefited? | Before/after, same population and ranks | gini, CI | Buildable |
-| D4 | Who gained from the new rail station? | Did gains accrue to the already well-served? | CI, frames | Buildable |
-| D5 | Which catchment gets the extra weekend clinic? | One session to allocate | CI | Buildable |
-
-D1 should be constructed so that the average rises while the Concentration Index
-worsens — the case that scalar reporting cannot distinguish and that policy
-evaluation most needs to catch.
-
-### Section E — Research and statutory measurement
-
-Entries serving funded research and legal reporting obligations. This section carries
-`moveq-catalogue` and most `moveq-cli` coverage.
-
-| # | Entry | Decision | Components | Status |
-|---|---|---|---|---|
-| E1 | Social Climate Fund vulnerability | 27 states must measure energy and transport poverty | CI, score, catalogue | Buildable |
-| E2 | Transport poverty composite | The EU legal definition is multi-dimensional | score, cli | Buildable |
-| E3 | Harmonizing five deprivation indices | IMD, SEIFA, NZDep, ADI/SVI, EU-SILC | catalogue, CI | Buildable |
-| E4 | Green space × income (JRC) | Signed magnitude, comparable across cities | CI, frames | Buildable |
-| E5 | AURIN Australia × SEIFA | Spatial access with a national rank | CI, catalogue | Buildable |
-| E6 | NZ Indigenous service access × NZDep | Access with a culturally-situated rank | CI, catalogue | Buildable |
-| E7 | Same analysis from the command line | Any entry above, via CSV | cli | Buildable |
-| E8 | Reading the audit trail | `n_dropped`, `warnings`, `note`, `context` | EquityResult | Buildable |
-
-E1 is the single strongest institutional case in the gallery: the Social Climate Fund
-is €86.7bn across 2026–2032, and all 27 member states are legally required to submit
-Social Climate Plans measuring energy and transport poverty. It is a recurring,
-funded, statutory measurement need.
-
-E8 is the differentiator entry. R and Stata return a number; moveq returns a number
-plus what it dropped and why. For any figure that must survive a reviewer, auditor or
-regulator, that is the reason to choose this library.
-
-## 6. Library coverage
-
-| Component | Sections covering it |
-|---|---|
-| `compute_gini` / `gini_result` | A, B, C, D |
-| `compute_score` | A, B, E |
-| `compute_palma_ratio` / `palma_result` | C14, C15 (n≥200, well-posed) |
-| `compute_concentration_index` | A, C, D, E |
-| `spread_result()` (new) | B (small-n entries) |
-| `EquityResult` audit fields | E8, and displayed throughout |
-| `moveq` (re-export) | Every entry — the default import |
-| `moveq-catalogue` | C8, E1, E3, E5, E6 |
-| `moveq-cli` | A4, A5, C5, C15, E2, E7 |
-| `moveq[frames]` | A2, A4, A6, C1, C2, C6, C11, C12, C16, D4, E4 |
-
-Palma appears only where the unit count supports the 40/90 split. It is deliberately
-absent from every small-group entry, and B12 states why.
-
-## 7. Buildability status
-
-Each entry carries one of three states, shown on the card:
-
-- **Buildable** — real published data exists and has been located
-- **Synthetic** — constructed inputs, honest and clearly labelled; appropriate for
-  the consumer and demonstration entries, where the point is the method
-- **Data-blocked** — the problem is real and evidenced, but per-area data could not be
-  sourced. Listed as contribution-wanted rather than hidden.
-
-Known data-blocked entries, all carried in the tables above: C1 pharmacy closures by
-area (PGEU's evidence is qualitative), C4 library closures by community, and C13 food
-bank capacity by area.
-
-One further candidate — energy billing complaints by region — is not listed as an
-entry at all. Only national totals are published (46,532 ombudsman cases in H1 2026),
-with no regional breakdown found. It is recorded here so the omission is deliberate
-rather than an oversight; if a regional source appears, it belongs in Section C.
-
-Synthetic entries must never be presented as measurements of the real world. Each
-states its inputs are constructed and what it is demonstrating.
-
-## 8. Technical design
-
-**Structure.** Each entry is a runnable `.py` under `examples/<section>/<entry>/`,
-following the existing `examples/basic_equity/run.py` pattern. Each produces one
-chart, which becomes its gallery thumbnail.
-
-**Execution.** Examples run in CI. A broken example fails the build. This follows the
+**Execution.** Examples run in CI; a broken example fails the build. This follows the
 existing `scripts/check_website.py` discipline and prevents the documentation rot that
-hand-written code samples suffer.
+hand-maintained code samples suffer.
 
-**Data.** Small committed CSV extracts with provenance notes, not live downloads. Live
-fetching would make CI depend on external availability and licensing. Each dataset
-carries its source URL, retrieval date and licence.
+**Data.** Small committed CSV extracts with provenance notes, not live downloads.
+Live fetching would make CI depend on external availability and licensing. Each
+dataset records its source URL, retrieval date and licence. moveq takes arrays and
+CSVs; the gallery must not turn it into an ingestion or GIS platform.
 
-**Site.** Gallery index at `website/examples/`, between `guides/` and `reference/`.
-Static HTML consistent with the existing site. Cards show thumbnail, title,
-one-line description and buildability badge, grouped under the five section headings.
-No filtering or search in the first version.
+**Site.** Gallery index at `website/examples/`, between `guides/` and `reference/` —
+the missing middle documentation layer. Static HTML consistent with the existing site.
+Cards show thumbnail, title, the real question as a one-line description, and a
+buildability badge. No filtering or search in the first version; eight to nine entries
+do not need it.
 
-**New library code.** `spread_result()` in `moveq-core`, returning an `EquityResult`
-with `metric="spread"`, following the existing `gini_result` / `palma_result`
-pattern. It is the small-n counterpart to Palma: an anti-sacrifice measure that is
-well-defined at n=4. It needs its own tests and a methodology section documenting
-when to use it instead of Palma.
+**No library changes.** The current moveq API is the constraint.
 
 ## 9. Delivery
 
-The gallery ships incrementally. A card is published only when its example runs.
+Examples ship individually; a card is published only when its example runs.
 
-**First tranche — the argument in five cards:**
+**First three — the argument in full:**
 
-- A1 Same average, very different cities (the purest demonstration)
-- D1 Did it reduce inequality or raise the mean? (the manifesto)
-- B13 Fair meeting point (the consumer entry point)
-- B4 Rent vs commute balancer (the most novel consumer case)
-- E8 Reading the audit trail (the differentiator)
+- Example 1, the average improved (the phenomenon, taught directly)
+- Example 5, does the average describe everyone (the phenomenon, empirical, on data
+  already published in the right shape)
+- Example 8, will this number survive challenge (the differentiator)
 
-These five state the whole argument and exercise Gini, score, spread, CI and the
-audit trail.
+These three state the thesis and demonstrate why moveq rather than a Gini function
+copied from a blog post.
 
-**Second tranche:** the buildable statutory and research entries — E1, E3, C11, A4,
-C16 — which carry `catalogue`, `cli` and `frames`.
+**Then:** examples 2, 3, 4 — the evaluation, allocation and threshold jobs, all
+requiring data acquisition.
 
-**Thereafter:** remaining buildable entries, then synthetic ones, with data-blocked
-entries listed as open contributions throughout.
+**Then:** examples 6 and 7 — the statutory composite and the harmonization case, the
+two heaviest builds and the two strongest institutional arguments.
 
 ## 10. Risks
 
-**Data acquisition dominates the buildable entries.** Fetching, cleaning and
-licence-checking real data is most of the work; the moveq calls are a few lines.
-Mitigated by committing small extracts rather than building an ingestion pipeline.
-moveq is a library that takes arrays and CSVs — the gallery must not turn it into a
-GIS or data platform.
+**Data acquisition dominates.** Locating, cleaning and licence-checking real data is
+most of the work; the moveq calls are a few lines each. Mitigated by committing small
+extracts rather than building pipelines.
 
-**Synthetic entries risk reading as toys.** Mitigated by the card schema: naming a
-real decision and a real reported scalar keeps the framing concrete even when the
-numbers are constructed.
+**Eight examples may read as thin next to galleries with fifty.** The mitigation is the
+gallery's own framing: each card names a distinct analytical job, and the set is
+presented as eight different problems rather than eight demonstrations. A ninth
+example that repeats a job would weaken the argument rather than strengthen it.
 
-**`spread_result()` is new public API.** It needs tests, documentation and a clear
-methodology note, and it commits the library to supporting a small-n path.
-
-**The public "dumb pipes" claim needs correcting.** Existing meeting-point products
-already minimise the longest journey; the differentiator is explaining and auditing
-the result, not computing it. Any site copy asserting otherwise should be revised.
+**The public "dumb pipes" claim needs correcting.** Existing consumer meeting-point
+products already minimise the longest journey rather than using naive averages. Any
+site copy asserting otherwise is factually wrong and should be revised independently
+of this work.
 
 ## 11. Sources
 
@@ -302,40 +511,18 @@ Statutory and policy:
 - EU transport poverty definition — https://cer.be/images/publications/facts-figures/250602_CER_Factsheet_Transport_poverty.pdf
 - Energy Poverty Advisory Hub indicators — https://energy-poverty.ec.europa.eu/epah-indicators
 
-Research and data:
-- 15-minute city accessibility inequality — https://www.nature.com/articles/s42949-023-00133-w
-- 3-30-300 assessment of European cities — https://www.nature.com/articles/s41467-026-71523-8
-- JRC urban green space and wealth — https://joint-research-centre.ec.europa.eu/jrc-news-and-updates/urban-green-spaces-are-scarce-while-climate-and-wealth-impact-access-2026-04-13_en
-- Green space inequalities, 26 European cities — https://www.researchgate.net/publication/398290015_Mapping_Green_Space_Inequalities_in_26_European_Cities
-- Energy poverty across 214 NUTS2 regions — https://www.sciencedirect.com/science/article/pii/S2772655X24000247
-- Unable to keep home warm — https://www.eea.europa.eu/en/analysis/maps-and-charts/proportion-of-people-unable-warm
-- Regional living conditions — https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Living_conditions_statistics_at_regional_level
+Data and research:
 - NHS waiting list breakdowns by deprivation — https://www.england.nhs.uk/2025/07/nhs-publishes-waiting-list-breakdowns-to-tackle-health-inequalities/
-- SEND / EHC plan waits — https://www.localgovernmentlawyer.co.uk/education-law/394-education-news/59648-mps-highlight-postcode-lottery-in-wait-times-for-ehc-plans-and-warn-of-send-emergency
-- NHS Continuing Healthcare variation — https://www.moore-tibbits.co.uk/news/postcode-lottery-continues-for-nhs-continuing-healthcare-sparking-inequality-concerns/
-- Dental care access, 11 countries — https://bmcoralhealth.biomedcentral.com/articles/10.1186/s12903-022-02095-4
-- GP shortage in Wallonia — https://www.europeandatajournalism.eu/cp_data_news/belgiums-shortage-of-general-practitioners-a-slow-burning-crisis/
-- Banking deserts in Spain — https://www.sciencedirect.com/science/article/pii/S2666954425000146
-- ECB access to cash — https://www.ecb.europa.eu/press/economic-bulletin/articles/2022/html/ecb.ebart202205_02~74b1fc0841.en.html
-- Air pollution and poverty in European regions — https://www.eurekalert.org/news-releases/1120253
-- Rural mobility (Interreg Europe) — https://www.interregeurope.eu/rural-mobility
-- Deprivation indices: UK IMD — https://data.geods.ac.uk/dataset/index-of-multiple-deprivation-imd
-- SEIFA (Australia) — https://www.abs.gov.au/statistics/detailed-methodology-information/concepts-sources-methods/socio-economic-indexes-areas-seifa-technical-paper/latest-release
+- Energy poverty across 214 NUTS2 regions — https://www.sciencedirect.com/science/article/pii/S2772655X24000247
+- Unable to keep home adequately warm — https://www.eea.europa.eu/en/analysis/maps-and-charts/proportion-of-people-unable-warm
+- Regional living conditions statistics — https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Living_conditions_statistics_at_regional_level
+- 15-minute city accessibility inequality — https://www.nature.com/articles/s42949-023-00133-w
+
+Deprivation indices:
+- UK Index of Multiple Deprivation — https://data.geods.ac.uk/dataset/index-of-multiple-deprivation-imd
+- SEIFA, Australia — https://www.abs.gov.au/statistics/detailed-methodology-information/concepts-sources-methods/socio-economic-indexes-areas-seifa-technical-paper/latest-release
 - NZ Indices of Multiple Deprivation — https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5542612/
 - ADI and SVI are not interchangeable — https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10553799/
-- Australian spatial health inequity — https://onlinelibrary.wiley.com/doi/10.1002/hpja.70156
-- NZ Indigenous mental health service access — https://pmc.ncbi.nlm.nih.gov/articles/PMC12465140/
-
-Consumer-tier evidence:
-- Household chores and relationship breakdown — https://www.modernhusbands.com/post/house-chores-the-ultimate-guide-to-divide-the-household-labor-for-married-couples
-- Shift scheduling bias and turnover — https://rosterlab.com/blog/fairer-scheduling-at-work-reducing-shift-bias
-- Nurse scheduling fairness — https://www.shiftable.app/en/blog/checklist
-- Sibling caregiving resentment — https://www.homeinstead.co.uk/caregiver-sibling-resentment-over-elderly-parents-is-this-you/
-- Carpool burden friction — https://www.hopskipdrive.com/blog/how-the-school-transportation-crisis-is-impacting-parents/
-- Free-riding in group projects — https://feedbackfruits.com/blog/eliminating-free-riding-in-group-work
-- Open source maintainer burden — https://dev.to/opensauced/the-hidden-cost-of-free-why-open-source-sustainability-matters-1jk7
-- Uneven bill splitting — https://expensessplit.com/uneven-bill-split-calculator.html
-- Group accommodation cost splitting — https://avantstay.com/blog/split-vacation-rental-fairly/
 
 Format reference:
 - PyMC-Marketing example gallery — https://www.pymc-marketing.io/en/stable/gallery/gallery.html
