@@ -46,10 +46,12 @@ def test_values_are_clipped_to_unit_interval():
 
 def test_to_dict_rounds_score():
     terms = {"coverage": 0.333333, "evening": 1.0, "frequency": 1.0, "gap": 1.0}
-    result = compute_score(terms, WEIGHTS, labels=LABELS)
+    result = compute_score(terms, WEIGHTS, labels=LABELS, missing_policy="reweight")
     d = result.to_dict()
     assert isinstance(d["score"], float)
     assert d["score"] == round(d["score"], 1)
+    assert "parameters" in d
+    assert "bounds" in d
 
 
 def test_rejects_zero_weight():

@@ -34,10 +34,10 @@ negative values are disadvantage-concentrated. A zero or cancelled mean
 exits with code `3`.
 
 **`moveq score`** builds a 0–100 weighted composite. Terms live in
-`[0, 1]`; JSON `null` means “this term was not collected.” Missing terms
-are dropped and remaining weights are renormalised — they are never
-treated as zero. You can pass terms and weights on the command line or
-in a JSON file (`--json`).
+`[0, 1]`; JSON `null` means “this term was not collected.” The CLI still
+uses the default `reweight` policy (drop missing terms and renormalise).
+The Python API also offers `as_zero`, `exclude`, and `bounds`. You can
+pass terms and weights on the command line or in a JSON file (`--json`).
 
 **`moveq catalogue validate`** checks a country catalogue JSON against
 the same / replace / omit rules: every base section must have an

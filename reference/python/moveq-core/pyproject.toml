@@ -42,7 +42,7 @@ dependencies = [
 
 [project.optional-dependencies]
 frames = ["pandas>=2.0"]
-test = ["pytest>=7"]
+test = ["pytest>=7", "pytest-cov>=4"]
 
 [project.urls]
 Homepage = "https://github.com/SVamseekar/moveq"
