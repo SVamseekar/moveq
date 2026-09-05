@@ -24,7 +24,11 @@ departures, coverage) and a **population** weight. Sometimes there is also a
 
 ### Population-weighted Gini
 
-Gini answers: *how unevenly is this service spread across people?*
+Gini answers a question that depends on the weights. With population
+weights it is *how unevenly is this service spread across people?* With
+equal (area) weights it is *how unevenly is it spread across places?*
+Those are different quantities; `weight_kind` records which question you
+asked. The library does not change the numbers.
 
 Areas are sorted from lowest to highest service. Cumulative population share
 is plotted against cumulative service share (a Lorenz curve). Gini is `1`
@@ -72,20 +76,14 @@ in `[-1, 1]`:
 This is the metric to use when the policy question is about *socioeconomic
 targeting*, not only about overall unevenness.
 
-### Composite score with missing-term renormalisation
+### Composite score with a declared missing-term policy
 
 `compute_score` builds a 0–100 weighted index from named terms in `[0, 1]`.
-The important behaviour is what happens when a term is `None`:
-
-1. that term is **dropped**, not treated as zero
-2. remaining design weights are **renormalised** to sum to 1
-3. the result records `weight_used` vs `design_weight`, the dropped ids,
-   and a `note`
-
-If every term is missing, `score` is `None`. Design weights must be finite
-and strictly positive; non-finite term values are rejected rather than
-clipped. Callers keep control of which indicators exist; the library
-refuses to invent a zero.
+When a term is `None`, `missing_policy` chooses among `reweight` (default;
+today's arithmetic), `as_zero`, `exclude` (no score), and `bounds` (best-
+and worst-case, never a midpoint). Reweighting is not the correct policy;
+it is the one that preserves existing callers. The resolved policy is
+always recorded in `ScoreResult.parameters`.
 
 ### Optional DataFrame helpers (`moveq_core.frames`)
 

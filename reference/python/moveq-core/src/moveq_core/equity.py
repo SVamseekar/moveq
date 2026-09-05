@@ -28,11 +28,23 @@ MetricId = Literal["gini", "palma", "ci"]
 RankDirection = Literal["higher_is_advantaged", "higher_is_disadvantaged"]
 ZeroMeanResult = Literal["undefined", "legacy_zero"]
 ZeroMeanScalar = Literal["raise", "legacy_zero"]
+WeightKind = Literal["population", "area", "need", "user", "unweighted"]
+OutcomeKind = Literal["benefit", "burden"]
+CIVariant = Literal["standard", "generalized", "erreygers", "wagstaff_normalized"]
 
 _PALMA_BOTTOM_CUT = 0.40
 _PALMA_TOP_CUT = 0.90
 _ZERO_MEAN_RTOL = 1e-9
 _RANK_DIRECTIONS = ("higher_is_advantaged", "higher_is_disadvantaged")
+_WEIGHT_KINDS = ("population", "area", "need", "user", "unweighted")
+_OUTCOME_KINDS = ("benefit", "burden")
+_CI_VARIANTS = ("standard", "generalized", "erreygers", "wagstaff_normalized")
+_WEIGHT_KIND_OMITTED = "weight_kind omitted; recorded as 'population'"
+_BOUNDED_VARIANT_WARNING = (
+    "outcome appears bounded in [0, 1]; compare variant='standard' with "
+    "'generalized', 'erreygers', and 'wagstaff_normalized' — the library does "
+    "not switch variant"
+)
 
 
 class MoveqError(Exception):
@@ -133,6 +145,7 @@ class EquityResult:
     context: dict[str, str] = field(default_factory=dict)
     status: Literal["ok", "undefined"] = "ok"
     reason: str | None = None
+    interpretation: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -148,22 +161,39 @@ class EquityResult:
             "context": dict(self.context),
             "status": self.status,
             "reason": self.reason,
+            "interpretation": self.interpretation,
         }
 
 
+def _resolve_weight_kind(weight_kind: WeightKind | None) -> tuple[WeightKind, list[str]]:
+    if weight_kind is None:
+        return "population", [_WEIGHT_KIND_OMITTED]
+    if weight_kind not in _WEIGHT_KINDS:
+        raise ValueError(
+            "weight_kind must be one of 'population', 'area', 'need', "
+            "'user', or 'unweighted'"
+        )
+    return weight_kind, []
+
+
 def gini_result(
-    values: np.ndarray, weights: np.ndarray, *, context: dict[str, str] | None = None
+    values: np.ndarray,
+    weights: np.ndarray,
+    *,
+    weight_kind: WeightKind | None = None,
+    context: dict[str, str] | None = None,
 ) -> EquityResult:
     """Population-weighted Gini coefficient with audit fields.
 
     See :func:`compute_gini` for the numeric definition.
     """
+    resolved_kind, kind_warnings = _resolve_weight_kind(weight_kind)
     values, weights = _prepare_weighted(values, weights)
     (values, weights), n_areas, n_dropped, total_population = _drop_unpopulated(
         values, weights, population=weights
     )
 
-    warnings: list[str] = []
+    warnings: list[str] = list(kind_warnings)
     note = None
     total_service = float((values * weights).sum())
     if total_service == 0:
@@ -188,7 +218,7 @@ def gini_result(
         n_areas=n_areas,
         n_dropped=n_dropped,
         total_population=total_population,
-        parameters={},
+        parameters={"weight_kind": resolved_kind},
         warnings=warnings,
         note=note,
         context=dict(context or {}),
@@ -196,12 +226,17 @@ def gini_result(
 
 
 def palma_result(
-    values: np.ndarray, weights: np.ndarray, *, context: dict[str, str] | None = None
+    values: np.ndarray,
+    weights: np.ndarray,
+    *,
+    weight_kind: WeightKind | None = None,
+    context: dict[str, str] | None = None,
 ) -> EquityResult:
     """Palma ratio with audit fields.
 
     See :func:`compute_palma_ratio` for the numeric definition.
     """
+    resolved_kind, kind_warnings = _resolve_weight_kind(weight_kind)
     values, weights = _prepare_weighted(values, weights)
     (values, weights), n_areas, n_dropped, total_population = _drop_unpopulated(
         values, weights, population=weights
@@ -227,7 +262,7 @@ def palma_result(
     bottom_mean = float(np.sum(values * bottom_overlap) / bottom_weight) if bottom_weight > 0 else 0.0
     top_mean = float(np.sum(values * top_overlap) / top_weight) if top_weight > 0 else 0.0
 
-    warnings: list[str] = []
+    warnings: list[str] = list(kind_warnings)
     note = None
     if bottom_mean == 0.0 and top_mean == 0.0:
         value = 1.0
@@ -247,7 +282,11 @@ def palma_result(
         n_areas=n_areas,
         n_dropped=n_dropped,
         total_population=total_population,
-        parameters={"bottom_cut": _PALMA_BOTTOM_CUT, "top_cut": _PALMA_TOP_CUT},
+        parameters={
+            "bottom_cut": _PALMA_BOTTOM_CUT,
+            "top_cut": _PALMA_TOP_CUT,
+            "weight_kind": resolved_kind,
+        },
         warnings=warnings,
         note=note,
         context=dict(context or {}),
@@ -263,12 +302,82 @@ def _parse_rank_direction(rank_direction: str) -> RankDirection:
     return rank_direction  # type: ignore[return-value]
 
 
+def _parse_outcome_kind(outcome_kind: OutcomeKind | None) -> OutcomeKind | None:
+    if outcome_kind is None:
+        return None
+    if outcome_kind not in _OUTCOME_KINDS:
+        raise ValueError("outcome_kind must be 'benefit' or 'burden'")
+    return outcome_kind
+
+
+def _parse_variant(variant: CIVariant | None) -> CIVariant:
+    if variant is None:
+        return "standard"
+    if variant not in _CI_VARIANTS:
+        raise ValueError(
+            "variant must be one of 'standard', 'generalized', "
+            "'erreygers', or 'wagstaff_normalized'"
+        )
+    return variant
+
+
+def _service_in_unit_interval(service: np.ndarray) -> bool:
+    return bool(np.all(service >= 0.0) and np.all(service <= 1.0))
+
+
+def _apply_ci_variant(
+    standard_ci: float,
+    mean_service: float,
+    service: np.ndarray,
+    variant: CIVariant,
+) -> tuple[float | None, Literal["ok", "undefined"], str | None]:
+    """Map the relative Wagstaff CI onto a named index family.
+
+    Identities (Erreygers 2009; Wagstaff 2005): generalised CI is μ·CI;
+    Erreygers is 4μ·CI on [0, 1]; Wagstaff's normalised index is CI/(1−μ)
+    on [0, 1] with μ not 0 or 1. Production must match these, not rineq.
+    """
+    if variant == "standard":
+        return standard_ci, "ok", None
+    if variant == "generalized":
+        return float(mean_service * standard_ci), "ok", None
+    in_unit = _service_in_unit_interval(service)
+    if variant == "erreygers":
+        if not in_unit:
+            return None, "undefined", "variant_requires_unit_interval"
+        return float(4.0 * mean_service * standard_ci), "ok", None
+    # wagstaff_normalized
+    if not in_unit:
+        return None, "undefined", "variant_requires_unit_interval"
+    if mean_service == 0.0 or mean_service == 1.0:
+        return None, "undefined", "variant_requires_unit_interval"
+    return float(standard_ci / (1.0 - mean_service)), "ok", None
+
+
+def _interpretation_for(
+    value: float | None,
+    outcome_kind: OutcomeKind | None,
+    context: dict[str, str],
+) -> str | None:
+    if outcome_kind is None or value is None:
+        return None
+    if not np.isfinite(value) or value == 0.0:
+        return None
+    name = context.get("outcome") or "The outcome"
+    if value > 0:
+        return f"{name} is concentrated among more-advantaged units."
+    return f"{name} is concentrated among less-advantaged units."
+
+
 def concentration_index_result(
     service: np.ndarray,
     rank: np.ndarray,
     population: np.ndarray,
     *,
     rank_direction: RankDirection,
+    outcome_kind: OutcomeKind | None = None,
+    weight_kind: WeightKind | None = None,
+    variant: CIVariant | None = None,
     context: dict[str, str] | None = None,
     zero_mean: ZeroMeanResult = "undefined",
 ) -> EquityResult:
@@ -279,6 +388,9 @@ def concentration_index_result(
     if zero_mean not in ("undefined", "legacy_zero"):
         raise ValueError("zero_mean must be 'undefined' or 'legacy_zero'")
     rank_direction = _parse_rank_direction(rank_direction)
+    resolved_outcome = _parse_outcome_kind(outcome_kind)
+    resolved_kind, kind_warnings = _resolve_weight_kind(weight_kind)
+    resolved_variant = _parse_variant(variant)
 
     service, population = _prepare_weighted(
         service, population, values_name="service", weights_name="population", allow_negative_values=True
@@ -314,11 +426,12 @@ def concentration_index_result(
 
     mean_service = float(np.average(service_sorted, weights=pop_sorted))
     mean_abs = float(np.average(np.abs(service_sorted), weights=pop_sorted))
-    warn_list: list[str] = []
+    warn_list: list[str] = list(kind_warnings)
     note = None
     status: Literal["ok", "undefined"] = "ok"
     reason: str | None = None
     value: float | None
+    interpretation: str | None = None
 
     if mean_abs == 0.0:
         undefined, undef_reason = True, "zero_mean"
@@ -332,7 +445,11 @@ def concentration_index_result(
         "rank_direction_canonical": "higher_is_advantaged",
         "rank_transformed": rank_transformed,
         "zero_mean_rtol": _ZERO_MEAN_RTOL,
+        "weight_kind": resolved_kind,
+        "variant": resolved_variant,
     }
+    if resolved_outcome is not None:
+        parameters["outcome_kind"] = resolved_outcome
 
     if undefined:
         if zero_mean == "legacy_zero":
@@ -361,7 +478,26 @@ def concentration_index_result(
         cov = float(
             np.average((service_sorted - mean_service) * (frac_rank - 0.5), weights=pop_sorted)
         )
-        value = float(2 * cov / mean_service)
+        standard_ci = float(2 * cov / mean_service)
+        value, status, reason = _apply_ci_variant(
+            standard_ci, mean_service, service_sorted, resolved_variant
+        )
+        if status == "undefined":
+            warn_list.append(
+                "this Concentration Index variant is undefined for the given outcome"
+            )
+            note = (
+                "Erreygers and Wagstaff-normalised indices require an outcome "
+                "in [0, 1]; the Wagstaff-normalised index is also undefined "
+                "when the mean is 0 or 1."
+            )
+        elif (
+            _service_in_unit_interval(service_sorted)
+            and not np.all(service_sorted == service_sorted[0])
+        ):
+            warn_list.append(_BOUNDED_VARIANT_WARNING)
+
+    interpretation = _interpretation_for(value, resolved_outcome, dict(context or {}))
 
     return EquityResult(
         metric="ci",
@@ -376,6 +512,7 @@ def concentration_index_result(
         context=dict(context or {}),
         status=status,
         reason=reason,
+        interpretation=interpretation,
     )
 
 

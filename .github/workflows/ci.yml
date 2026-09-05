@@ -52,7 +52,12 @@ jobs:
         run: python scripts/check_release_version.py
 
       - name: Run test suite
-        run: pytest -v
+        run: >
+          pytest -v
+          --cov=moveq_core
+          --cov=moveq_catalogue
+          --cov-report=term
+          --cov-fail-under=98
 
       - name: Run example integration test
         run: python examples/basic_equity/run.py
