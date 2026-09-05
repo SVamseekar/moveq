@@ -20,6 +20,13 @@ PyPI.
 
 ### Added
 
+- `CITATION.cff` at the repository root so GitHub can render a citation
+  widget. Version is kept in lockstep with the packages; no DOI (Zenodo
+  is a separate, deferred decision).
+- Commit-message types already in use (`feat`, `fix`, `docs`, `test`,
+  `ci`, `chore`) recorded in `CONTRIBUTING.md`, with a pointer to
+  `CLAUDE.md`.
+
 - CI job **Git release rules** fails if package version drifts from the
   latest `v*` tag unless `CHANGELOG.md` has a `## [X.Y.Z]` release heading.
 - Independent second-implementation tests for Gini, Palma, the Concentration

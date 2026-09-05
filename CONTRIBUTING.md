@@ -11,7 +11,9 @@ packages that are versioned and released together:
 | `moveq-cli` | `moveq` command | `reference/python/moveq-cli` |
 
 Please also read the [Code of Conduct](CODE_OF_CONDUCT.md) and the
-[security policy](SECURITY.md).
+[security policy](SECURITY.md). Agent sessions should follow
+[CLAUDE.md](CLAUDE.md) (working agreement: commits are not releases,
+scientific-Python versioning, claims discipline, metric-test oracles).
 
 ## Development setup
 
@@ -74,6 +76,23 @@ plus `twine check --strict`). The **Website** job must pass for the static
 site. Changes under `website/` also get a Vercel preview URL on the pull
 request; production is https://moveq.souravamseekar.com.
 
+## Commit messages
+
+This repository uses [Conventional Commits](https://www.conventionalcommits.org/)
+in the form already visible in `git log`. The types in use are:
+
+```
+feat:   fix:   docs:   test:   ci:   chore:
+```
+
+Match existing history. Do not invent additional types, and do not restyle
+existing practice. Prose in commits, PRs, issues, docs and the website is
+predominantly British (`-ise` / `-isation`); existing API identifiers such as
+`harmonization` keep their spelling.
+
+Release commits use `chore: release vX.Y.Z` or `release: vX.Y.Z` as already
+in the log.
+
 ## Versioning
 
 This project uses [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PATCH`,
@@ -123,7 +142,8 @@ git config core.hooksPath scripts/git-hooks
 All four packages share the same version string in their `pyproject.toml` files
 (and matching `__version__` in each `__init__.py`). Bump every file in the same
 commit. A Git tag `v0.1.0` must match that version exactly or the publish
-workflow will fail.
+workflow will fail. The `version` field in [`CITATION.cff`](CITATION.cff) is
+kept in the same lockstep so the GitHub citation widget matches the release.
 
 ## Releasing
 
