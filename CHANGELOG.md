@@ -11,6 +11,25 @@ PyPI.
 
 ## [Unreleased]
 
+### Added
+
+- CI job **Git release rules** fails if package version drifts from the
+  latest `v*` tag unless `CHANGELOG.md` has a `## [X.Y.Z]` release heading.
+- Independent second-implementation tests for Gini, Palma, the Concentration
+  Index, and composite scores, plus scale/permutation invariance, documented
+  bounds, and empty / single-observation cases.
+- `EquityResult` and `gini_result` / `palma_result` /
+  `concentration_index_result` for auditable Gini, Palma, and Concentration
+  Index outputs. The existing `compute_*` functions still return `float`.
+  `moveq gini|palma|ci --json` emits `EquityResult.to_dict()`.
+
+## [0.2.0] — 2026-09-06
+
+Required `rank_direction` on the Concentration Index, and an undefined
+result when mean service is zero. This is a minor bump: a required
+keyword argument is a signature change, and treating a cancelled mean
+as undefined is an intentional redefinition (previously `0.0`).
+
 ### Changed
 
 - Guides no longer treat a 5% Concentration Index change as triggering a
@@ -50,18 +69,6 @@ rather than introducing it.
   or Kepler/GPU rendering as moveq capabilities. Remaining examples use
   the required `rank_direction` argument. A 5% CI change is not treated
   as a Title VI trigger.
-
-### Added
-
-- CI job **Git release rules** fails if package version drifts from the
-  latest `v*` tag unless `CHANGELOG.md` has a `## [X.Y.Z]` release heading.
-- Independent second-implementation tests for Gini, Palma, the Concentration
-  Index, and composite scores, plus scale/permutation invariance, documented
-  bounds, and empty / single-observation cases.
-- `EquityResult` and `gini_result` / `palma_result` /
-  `concentration_index_result` for auditable Gini, Palma, and Concentration
-  Index outputs. The existing `compute_*` functions still return `float`.
-  `moveq gini|palma|ci --json` emits `EquityResult.to_dict()`.
 
 ## [0.1.2] — 2026-08-25
 
