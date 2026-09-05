@@ -48,10 +48,10 @@ asks whether service rises or falls along that ranking. Tied ranks share
 a group-midpoint fractional rank so input order does not change the
 answer. For non-negative service the index lies in `[-1, 1]`:
 
-- **positive** — service is concentrated among *less* deprived areas
-  (pro-rich)
-- **negative** — service is concentrated among *more* deprived areas
-  (pro-poor)
+- **positive** — outcome concentrated among more-advantaged observations
+  (advantage-concentrated)
+- **negative** — outcome concentrated among less-advantaged observations
+  (disadvantage-concentrated)
 - **zero** — no systematic gradient with rank
 
 **A composite score that does not treat missing data as zero.** Accessibility
@@ -113,7 +113,9 @@ deprivation_rank = np.array([1, 3, 2, 5, 4])  # 1 = most deprived
 
 gini = compute_gini(service, population)
 palma = compute_palma_ratio(service, population)
-ci = compute_concentration_index(service, deprivation_rank, population)
+ci = compute_concentration_index(
+    service, deprivation_rank, population, rank_direction="higher_is_advantaged"
+)
 gini_audit = gini_result(service, population)  # EquityResult: value, method, n_areas, …
 
 result = compute_score(

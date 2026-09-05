@@ -18,7 +18,9 @@ def test_palma_rejects_empty():
 
 def test_concentration_index_rejects_empty():
     with pytest.raises(ValueError, match="empty"):
-        compute_concentration_index(np.array([]), np.array([]), np.array([]))
+        compute_concentration_index(
+            np.array([]), np.array([]), np.array([]), rank_direction="higher_is_advantaged"
+        )
 
 
 def test_gini_single_observation_is_zero():
@@ -32,7 +34,7 @@ def test_palma_single_observation_is_one():
 
 def test_concentration_index_single_observation_is_zero():
     assert compute_concentration_index(
-        np.array([7.5]), np.array([3.0]), np.array([120.0])
+        np.array([7.5]), np.array([3.0]), np.array([120.0]), rank_direction="higher_is_advantaged"
     ) == pytest.approx(0.0, abs=1e-12)
 
 
@@ -54,7 +56,10 @@ def test_palma_rejects_nan_weights():
 def test_concentration_index_rejects_nan_rank():
     with pytest.raises(ValueError, match="finite"):
         compute_concentration_index(
-            np.array([1.0, 2.0]), np.array([1.0, np.nan]), np.array([1.0, 1.0])
+            np.array([1.0, 2.0]),
+            np.array([1.0, np.nan]),
+            np.array([1.0, 1.0]),
+            rank_direction="higher_is_advantaged",
         )
 
 
@@ -77,5 +82,8 @@ def test_palma_rejects_all_zero_weights():
 def test_concentration_index_rejects_all_zero_population():
     with pytest.raises(ValueError):
         compute_concentration_index(
-            np.array([1.0, 2.0]), np.array([1.0, 2.0]), np.array([0.0, 0.0])
+            np.array([1.0, 2.0]),
+            np.array([1.0, 2.0]),
+            np.array([0.0, 0.0]),
+            rank_direction="higher_is_advantaged",
         )

@@ -27,10 +27,11 @@ population weight. By default they print a single number:
   equal, including all-zero service; `inf` if the bottom 40% have no
   service and the top 10% do not)
 
-**`moveq ci`** is the Wagstaff Concentration Index. It needs a third
-column: socioeconomic rank (`1` = most deprived in this library).
-Positive values mean service is concentrated in less-deprived areas;
-negative values mean the opposite.
+**`moveq ci`** is the Wagstaff Concentration Index. It needs a rank
+column and **`--rank-direction`** (`higher-is-advantaged` or
+`higher-is-disadvantaged`). Positive values are advantage-concentrated;
+negative values are disadvantage-concentrated. A zero or cancelled mean
+exits with code `3`.
 
 **`moveq score`** builds a 0–100 weighted composite. Terms live in
 `[0, 1]`; JSON `null` means “this term was not collected.” Missing terms
@@ -64,7 +65,7 @@ Inequality from a CSV (headers `trips`, `population`, `deprivation_rank`):
 ```bash
 moveq gini data.csv --value trips --weight population
 moveq palma data.csv --value trips --weight population
-moveq ci data.csv --value trips --rank deprivation_rank --weight population
+moveq ci data.csv --value trips --rank deprivation_rank --weight population --rank-direction higher-is-advantaged
 ```
 
 Composite score, inline or from a file:

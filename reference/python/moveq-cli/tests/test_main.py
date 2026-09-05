@@ -1,7 +1,7 @@
 import csv
 import io
 import json
-from contextlib import redirect_stdout
+from contextlib import redirect_stderr, redirect_stdout
 
 import pytest
 
@@ -73,7 +73,20 @@ def test_ci_command(tmp_path):
     )
     buf = io.StringIO()
     with redirect_stdout(buf):
-        code = main(["ci", str(csv_path), "--value", "trips", "--rank", "dep_rank", "--weight", "population"])
+        code = main(
+            [
+                "ci",
+                str(csv_path),
+                "--value",
+                "trips",
+                "--rank",
+                "dep_rank",
+                "--weight",
+                "population",
+                "--rank-direction",
+                "higher-is-advantaged",
+            ]
+        )
     assert code == 0
     out = buf.getvalue()
     assert "concentration_index:" in out
@@ -120,6 +133,8 @@ def test_ci_json_contains_metric_and_value(tmp_path):
                 "dep_rank",
                 "--weight",
                 "population",
+                "--rank-direction",
+                "higher-is-advantaged",
                 "--json",
             ]
         )
@@ -214,6 +229,172 @@ def test_catalogue_validate_invalid_unmapped(tmp_path):
     data = json.loads(buf.getvalue())
     assert data["valid"] is False
     assert len(data["issues"]) == 1
+
+
+def test_ci_missing_rank_direction_exits_nonzero(tmp_path):
+    csv_path = tmp_path / "data.csv"
+    _write_csv(
+        csv_path,
+        [
+            {"trips": "10", "dep_rank": "1", "population": "100"},
+            {"trips": "20", "dep_rank": "2", "population": "100"},
+        ],
+        ["trips", "dep_rank", "population"],
+    )
+    with pytest.raises(SystemExit) as excinfo:
+        main(
+            [
+                "ci",
+                str(csv_path),
+                "--value",
+                "trips",
+                "--rank",
+                "dep_rank",
+                "--weight",
+                "population",
+            ]
+        )
+    assert excinfo.value.code != 0
+
+
+def test_ci_invalid_rank_direction_exits_2(tmp_path):
+    csv_path = tmp_path / "data.csv"
+    _write_csv(
+        csv_path,
+        [
+            {"trips": "10", "dep_rank": "1", "population": "100"},
+            {"trips": "20", "dep_rank": "2", "population": "100"},
+        ],
+        ["trips", "dep_rank", "population"],
+    )
+    with pytest.raises(SystemExit) as excinfo:
+        main(
+            [
+                "ci",
+                str(csv_path),
+                "--value",
+                "trips",
+                "--rank",
+                "dep_rank",
+                "--weight",
+                "population",
+                "--rank-direction",
+                "sideways",
+            ]
+        )
+    assert excinfo.value.code == 2
+
+
+def test_ci_reversed_rank_with_flipped_direction_matches(tmp_path):
+    csv_a = tmp_path / "a.csv"
+    csv_b = tmp_path / "b.csv"
+    _write_csv(
+        csv_a,
+        [
+            {"trips": "10", "dep_rank": "1", "population": "100"},
+            {"trips": "20", "dep_rank": "2", "population": "100"},
+            {"trips": "30", "dep_rank": "3", "population": "100"},
+            {"trips": "40", "dep_rank": "4", "population": "100"},
+        ],
+        ["trips", "dep_rank", "population"],
+    )
+    _write_csv(
+        csv_b,
+        [
+            {"trips": "10", "dep_rank": "4", "population": "100"},
+            {"trips": "20", "dep_rank": "3", "population": "100"},
+            {"trips": "30", "dep_rank": "2", "population": "100"},
+            {"trips": "40", "dep_rank": "1", "population": "100"},
+        ],
+        ["trips", "dep_rank", "population"],
+    )
+    buf_a = io.StringIO()
+    buf_b = io.StringIO()
+    with redirect_stdout(buf_a):
+        code_a = main(
+            [
+                "ci",
+                str(csv_a),
+                "--value",
+                "trips",
+                "--rank",
+                "dep_rank",
+                "--weight",
+                "population",
+                "--rank-direction",
+                "higher-is-advantaged",
+            ]
+        )
+    with redirect_stdout(buf_b):
+        code_b = main(
+            [
+                "ci",
+                str(csv_b),
+                "--value",
+                "trips",
+                "--rank",
+                "dep_rank",
+                "--weight",
+                "population",
+                "--rank-direction",
+                "higher-is-disadvantaged",
+            ]
+        )
+    assert code_a == 0
+    assert code_b == 0
+    assert buf_a.getvalue() == buf_b.getvalue()
+
+
+def test_ci_undefined_exits_3(tmp_path):
+    csv_path = tmp_path / "data.csv"
+    _write_csv(
+        csv_path,
+        [
+            {"trips": "0", "dep_rank": "1", "population": "100"},
+            {"trips": "0", "dep_rank": "2", "population": "100"},
+        ],
+        ["trips", "dep_rank", "population"],
+    )
+    err = io.StringIO()
+    with redirect_stderr(err):
+        code = main(
+            [
+                "ci",
+                str(csv_path),
+                "--value",
+                "trips",
+                "--rank",
+                "dep_rank",
+                "--weight",
+                "population",
+                "--rank-direction",
+                "higher-is-advantaged",
+            ]
+        )
+    assert code == 3
+    assert "undefined" in err.getvalue()
+
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        json_code = main(
+            [
+                "ci",
+                str(csv_path),
+                "--value",
+                "trips",
+                "--rank",
+                "dep_rank",
+                "--weight",
+                "population",
+                "--rank-direction",
+                "higher-is-advantaged",
+                "--json",
+            ]
+        )
+    assert json_code == 3
+    data = json.loads(buf.getvalue())
+    assert data["value"] is None
+    assert data["status"] == "undefined"
 
 
 def test_help_command():

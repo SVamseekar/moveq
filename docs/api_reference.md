@@ -34,17 +34,21 @@ Computes the Palma ratio: the ratio of the mean service level in the top 10% hig
 
 ---
 
-### `compute_concentration_index(service: np.ndarray, rank: np.ndarray, population: np.ndarray) -> float`
+### `compute_concentration_index(service: np.ndarray, rank: np.ndarray, population: np.ndarray, *, rank_direction, zero_mean="raise") -> float`
 Computes the Wagstaff Concentration Index using the fractional rank covariance method.
 
 - **Parameters**:
-  - `service` (`np.ndarray`): Service level per areal unit.
-  - `rank` (`np.ndarray`): Socioeconomic or deprivation rank per unit (where \(1\) = most deprived, higher numbers = less deprived).
+  - `service` (`np.ndarray`): Outcome per areal unit.
+  - `rank` (`np.ndarray`): Ranking variable per unit.
   - `population` (`np.ndarray`): Population weight per unit.
+  - `rank_direction` (`"higher_is_advantaged"` \| `"higher_is_disadvantaged"`): **required**. Which end of `rank` is advantaged. There is no default.
+  - `zero_mean` (`"raise"` \| `"legacy_zero"`): default `"raise"`.
 - **Returns**:
-  - `float`: Concentration Index. For non-negative service this lies in \([-1, 1]\). Positive values indicate pro-rich concentration; negative values indicate pro-poor concentration. Tied ranks share a group-midpoint fractional rank. Unpopulated units are ignored. Zero mean service returns `0.0`.
+  - `float`: Concentration Index. For non-negative service this lies in \([-1, 1]\). Positive values are advantage-concentrated; negative values are disadvantage-concentrated. Tied ranks share a group-midpoint fractional rank. Unpopulated units are ignored.
 - **Raises**:
-  - `ValueError`: if any array is not 1-dimensional, lengths differ, inputs are empty or non-finite, or total population is not positive. Negative service is allowed.
+  - `TypeError`: if `rank_direction` is omitted.
+  - `ValueError`: if any array is not 1-dimensional, lengths differ, inputs are empty or non-finite, total population is not positive, or `rank_direction` is not a valid option. Negative service is allowed.
+  - `UndefinedMetricError`: if mean service is zero or cancelled (the relative index divides by the mean). `.result` carries the structured `EquityResult`.
 
 ---
 
@@ -54,23 +58,28 @@ Same Gini calculation as `compute_gini`, returned as an `EquityResult` (`method=
 ### `palma_result(values, weights, *, context=None) -> EquityResult`
 Same Palma calculation as `compute_palma_ratio`, returned as an `EquityResult` (`method="palma-split-40-90"`). `parameters` records the population cuts `bottom_cut=0.40` and `top_cut=0.90`. All-zero service and infinite Palma each record a warning.
 
-### `concentration_index_result(service, rank, population, *, context=None) -> EquityResult`
-Same Concentration Index calculation as `compute_concentration_index`, returned as an `EquityResult` (`method="wagstaff-covariance"`). Unpopulated units are dropped (`n_dropped` / `n_areas`). Zero mean service records a warning and sets `value` to `0.0`.
+### `concentration_index_result(service, rank, population, *, rank_direction, context=None, zero_mean="undefined") -> EquityResult`
+Same Concentration Index calculation as `compute_concentration_index`, returned as an `EquityResult` (`method="wagstaff-covariance"`). Unpopulated units are dropped (`n_dropped` / `n_areas`). Zero or cancelled mean service sets `value` to `None`, `status` to `"undefined"`, and `reason` to `"zero_mean"` or `"near_zero_mean"`. `parameters` records `rank_direction_input`, `rank_direction_canonical`, `rank_transformed`, and `zero_mean_rtol`.
+
+### `UndefinedMetricError`
+Raised by `compute_concentration_index` when the index is undefined. Attributes: `metric`, `reason`, `result` (the structured `EquityResult`). Subclass of `MoveqError`.
 
 ### `EquityResult`
-Frozen dataclass analogous to `ScoreResult`. `value` is the same number the corresponding `compute_*` function returns (`inf` is allowed for Palma).
+Frozen dataclass analogous to `ScoreResult`. `value` is the same number the corresponding `compute_*` function returns (`inf` is allowed for Palma; `None` when a Concentration Index is undefined).
 
 - `metric: "gini" | "palma" | "ci"`
-- `value: float`
+- `value: float | None`
 - `method: str` — documented method id (`lorenz-trapezoid`, `palma-split-40-90`, `wagstaff-covariance`)
 - `n_areas: int` — live areal units used
 - `n_dropped: int` — units dropped (for example zero-population units)
 - `total_population: float` — sum of weights actually used
-- `parameters: dict` — method parameters (Palma cuts, and so on)
+- `parameters: dict` — method parameters (Palma cuts, rank direction, and so on)
 - `warnings: list[str]` — empty if none
 - `note: str | None` — optional explanation of conventions
 - `context: dict[str, str]` — free-form metadata, default `{}`
-- `to_dict() -> dict` — JSON-serializable copy of the fields
+- `status: "ok" | "undefined"` — default `"ok"`
+- `reason: str | None` — e.g. `"zero_mean"` when undefined
+- `to_dict() -> dict` — JSON-serializable copy of the fields (`value` is JSON `null` when undefined)
 
 The existing `compute_gini`, `compute_palma_ratio`, and `compute_concentration_index` functions still return `float` (they return `.value` from the corresponding `*_result` function).
 

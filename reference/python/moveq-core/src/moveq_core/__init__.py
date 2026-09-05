@@ -2,6 +2,8 @@
 
 from moveq_core.equity import (
     EquityResult,
+    MoveqError,
+    UndefinedMetricError,
     compute_concentration_index,
     compute_gini,
     compute_palma_ratio,
@@ -19,6 +21,8 @@ __all__ = [
     "palma_result",
     "concentration_index_result",
     "EquityResult",
+    "MoveqError",
+    "UndefinedMetricError",
     "compute_score",
     "clip01",
     "ScoreComponent",

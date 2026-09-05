@@ -99,20 +99,20 @@ def test_concentration_index_is_invariant_to_positive_service_scale():
     service = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
     rank = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
     population = np.array([100.0, 80.0, 60.0, 40.0, 20.0])
-    base = compute_concentration_index(service, rank, population)
-    assert compute_concentration_index(2.0 * service, rank, population) == pytest.approx(
-        base, abs=1e-12
-    )
+    base = compute_concentration_index(service, rank, population, rank_direction="higher_is_advantaged")
+    assert compute_concentration_index(
+        2.0 * service, rank, population, rank_direction="higher_is_advantaged"
+    ) == pytest.approx(base, abs=1e-12)
 
 
 def test_concentration_index_is_invariant_to_positive_population_scale():
     service = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
     rank = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
     population = np.array([100.0, 80.0, 60.0, 40.0, 20.0])
-    base = compute_concentration_index(service, rank, population)
-    assert compute_concentration_index(service, rank, 3.0 * population) == pytest.approx(
-        base, abs=1e-12
-    )
+    base = compute_concentration_index(service, rank, population, rank_direction="higher_is_advantaged")
+    assert compute_concentration_index(
+        service, rank, 3.0 * population, rank_direction="higher_is_advantaged"
+    ) == pytest.approx(base, abs=1e-12)
 
 
 def test_concentration_index_is_permutation_invariant():
@@ -120,18 +120,22 @@ def test_concentration_index_is_permutation_invariant():
     service = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
     rank = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
     population = np.array([100.0, 80.0, 60.0, 40.0, 20.0])
-    base = compute_concentration_index(service, rank, population)
+    base = compute_concentration_index(service, rank, population, rank_direction="higher_is_advantaged")
     shuffled = _shuffled_together(rng, service, rank, population)
-    assert compute_concentration_index(*shuffled) == pytest.approx(base, abs=1e-12)
+    assert compute_concentration_index(
+        *shuffled, rank_direction="higher_is_advantaged"
+    ) == pytest.approx(base, abs=1e-12)
 
 
 def test_concentration_index_rank_reversal_negates():
     service = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
     rank = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
     population = np.array([100.0, 80.0, 60.0, 40.0, 20.0])
-    base = compute_concentration_index(service, rank, population)
+    base = compute_concentration_index(service, rank, population, rank_direction="higher_is_advantaged")
     reversed_rank = -rank
-    assert compute_concentration_index(service, reversed_rank, population) == pytest.approx(
+    assert compute_concentration_index(
+        service, reversed_rank, population, rank_direction="higher_is_advantaged"
+    ) == pytest.approx(
         -base, abs=1e-12
     )
 
@@ -140,7 +144,7 @@ def test_concentration_index_constant_service_is_zero():
     service = np.array([4.0, 4.0, 4.0, 4.0])
     rank = np.array([1.0, 8.0, 3.0, 2.0])
     population = np.array([10.0, 40.0, 5.0, 20.0])
-    assert compute_concentration_index(service, rank, population) == pytest.approx(0.0, abs=1e-12)
+    assert compute_concentration_index(service, rank, population, rank_direction="higher_is_advantaged") == pytest.approx(0.0, abs=1e-12)
 
 
 def test_concentration_index_in_unit_interval_for_non_negative_service():
@@ -150,5 +154,5 @@ def test_concentration_index_in_unit_interval_for_non_negative_service():
         service = rng.uniform(0.0, 80.0, size=n)
         rank = rng.uniform(0.0, 10.0, size=n)
         population = rng.uniform(0.1, 30.0, size=n)
-        ci = compute_concentration_index(service, rank, population)
+        ci = compute_concentration_index(service, rank, population, rank_direction="higher_is_advantaged")
         assert -1.0 - 1e-12 <= ci <= 1.0 + 1e-12

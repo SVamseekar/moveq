@@ -6,13 +6,15 @@ weight, and we ask how unevenly the resource is spread across the weight.
     Gini                 — overall inequality via the Lorenz curve, in [0, 1]
     Palma ratio          — top-10% mean service / bottom-40% mean service
     Concentration Index  — inequality correlated with a rank (e.g. deprivation);
-                            positive = pro-rich, negative = pro-poor
+                            positive = advantage-concentrated,
+                            negative = disadvantage-concentrated
 
 NumPy 2.x guard: uses ``trapezoid`` with a fallback to the removed ``trapz``.
 """
 
 from __future__ import annotations
 
+import warnings
 from dataclasses import dataclass, field
 from typing import Any, Literal
 
@@ -23,9 +25,28 @@ if _trapezoid is None:
     raise ImportError("NumPy has neither 'trapezoid' nor 'trapz' — unsupported version")
 
 MetricId = Literal["gini", "palma", "ci"]
+RankDirection = Literal["higher_is_advantaged", "higher_is_disadvantaged"]
+ZeroMeanResult = Literal["undefined", "legacy_zero"]
+ZeroMeanScalar = Literal["raise", "legacy_zero"]
 
 _PALMA_BOTTOM_CUT = 0.40
 _PALMA_TOP_CUT = 0.90
+_ZERO_MEAN_RTOL = 1e-9
+_RANK_DIRECTIONS = ("higher_is_advantaged", "higher_is_disadvantaged")
+
+
+class MoveqError(Exception):
+    """Base for all moveq errors."""
+
+
+class UndefinedMetricError(MoveqError):
+    """A metric is mathematically undefined for the given input."""
+
+    def __init__(self, metric: str, reason: str, result: EquityResult) -> None:
+        self.metric = metric
+        self.reason = reason
+        self.result = result
+        super().__init__(f"{metric} is undefined ({reason})")
 
 
 def _as_1d(name: str, x: object) -> np.ndarray:
@@ -101,7 +122,7 @@ class EquityResult:
     """
 
     metric: MetricId
-    value: float
+    value: float | None
     method: str
     n_areas: int
     n_dropped: int
@@ -110,6 +131,8 @@ class EquityResult:
     warnings: list[str]
     note: str | None
     context: dict[str, str] = field(default_factory=dict)
+    status: Literal["ok", "undefined"] = "ok"
+    reason: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -123,6 +146,8 @@ class EquityResult:
             "warnings": list(self.warnings),
             "note": self.note,
             "context": dict(self.context),
+            "status": self.status,
+            "reason": self.reason,
         }
 
 
@@ -229,17 +254,32 @@ def palma_result(
     )
 
 
+def _parse_rank_direction(rank_direction: str) -> RankDirection:
+    if rank_direction not in _RANK_DIRECTIONS:
+        raise ValueError(
+            "rank_direction must be 'higher_is_advantaged' or "
+            "'higher_is_disadvantaged'"
+        )
+    return rank_direction  # type: ignore[return-value]
+
+
 def concentration_index_result(
     service: np.ndarray,
     rank: np.ndarray,
     population: np.ndarray,
     *,
+    rank_direction: RankDirection,
     context: dict[str, str] | None = None,
+    zero_mean: ZeroMeanResult = "undefined",
 ) -> EquityResult:
     """Wagstaff Concentration Index with audit fields.
 
     See :func:`compute_concentration_index` for the numeric definition.
     """
+    if zero_mean not in ("undefined", "legacy_zero"):
+        raise ValueError("zero_mean must be 'undefined' or 'legacy_zero'")
+    rank_direction = _parse_rank_direction(rank_direction)
+
     service, population = _prepare_weighted(
         service, population, values_name="service", weights_name="population", allow_negative_values=True
     )
@@ -253,8 +293,11 @@ def concentration_index_result(
         service, rank, population, population=population
     )
 
-    order = np.argsort(rank, kind="stable")
-    rank_sorted = rank[order]
+    rank_transformed = rank_direction == "higher_is_disadvantaged"
+    rank_key = rank if rank_direction == "higher_is_advantaged" else -rank
+
+    order = np.argsort(rank_key, kind="stable")
+    rank_sorted = rank_key[order]
     pop_sorted = population[order]
     service_sorted = service[order]
 
@@ -270,12 +313,50 @@ def concentration_index_result(
     frac_rank = (group_before + 0.5 * group_pop)[group_id] / total_population
 
     mean_service = float(np.average(service_sorted, weights=pop_sorted))
-    warnings: list[str] = []
+    mean_abs = float(np.average(np.abs(service_sorted), weights=pop_sorted))
+    warn_list: list[str] = []
     note = None
-    if mean_service == 0.0:
-        value = 0.0
-        warnings.append("zero mean service treated as Concentration Index = 0")
-        note = "Zero mean service is treated as CI = 0."
+    status: Literal["ok", "undefined"] = "ok"
+    reason: str | None = None
+    value: float | None
+
+    if mean_abs == 0.0:
+        undefined, undef_reason = True, "zero_mean"
+    elif abs(mean_service) <= _ZERO_MEAN_RTOL * mean_abs:
+        undefined, undef_reason = True, "near_zero_mean"
+    else:
+        undefined, undef_reason = False, None
+
+    parameters: dict[str, Any] = {
+        "rank_direction_input": rank_direction,
+        "rank_direction_canonical": "higher_is_advantaged",
+        "rank_transformed": rank_transformed,
+        "zero_mean_rtol": _ZERO_MEAN_RTOL,
+    }
+
+    if undefined:
+        if zero_mean == "legacy_zero":
+            warnings.warn(
+                "zero_mean='legacy_zero' is deprecated and will be removed in "
+                "the next minor release; a zero or near-zero mean makes the "
+                "Concentration Index undefined",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            value = 0.0
+            warn_list.append("zero mean service treated as Concentration Index = 0")
+            note = "Zero mean service is treated as CI = 0 (legacy_zero)."
+        else:
+            value = None
+            status = "undefined"
+            reason = undef_reason
+            warn_list.append(
+                "mean service is zero or cancelled; Concentration Index is undefined"
+            )
+            note = (
+                "The relative Concentration Index divides by mean service, "
+                "which is zero or cancelled for this input."
+            )
     else:
         cov = float(
             np.average((service_sorted - mean_service) * (frac_rank - 0.5), weights=pop_sorted)
@@ -289,10 +370,12 @@ def concentration_index_result(
         n_areas=n_areas,
         n_dropped=n_dropped,
         total_population=total_population,
-        parameters={},
-        warnings=warnings,
+        parameters=parameters,
+        warnings=warn_list,
         note=note,
         context=dict(context or {}),
+        status=status,
+        reason=reason,
     )
 
 
@@ -331,13 +414,20 @@ def compute_palma_ratio(values: np.ndarray, weights: np.ndarray) -> float:
 
 
 def compute_concentration_index(
-    service: np.ndarray, rank: np.ndarray, population: np.ndarray
+    service: np.ndarray,
+    rank: np.ndarray,
+    population: np.ndarray,
+    *,
+    rank_direction: RankDirection,
+    zero_mean: ZeroMeanScalar = "raise",
 ) -> float:
     """Wagstaff Concentration Index (CI) via the covariance method.
 
-    Positive CI = service concentrated in areas with a higher rank value
-    (e.g. less deprived, if rank is a deprivation rank). Negative CI = service
-    concentrated in lower-rank (e.g. more deprived) areas.
+    Positive CI means the outcome is concentrated among more-advantaged
+    observations (advantage-concentrated). Negative CI means it is
+    concentrated among less-advantaged observations
+    (disadvantage-concentrated). ``rank_direction`` states which end of
+    ``rank`` is advantaged; there is no default.
 
     Units that tie on ``rank`` share the population-weighted average
     fractional rank of their tied group, so the result doesn't depend on
@@ -345,12 +435,37 @@ def compute_concentration_index(
 
     Args:
         service: Service level per areal unit.
-        rank: Ranking variable per unit (e.g. deprivation rank; 1 = most
-            deprived, higher = less deprived).
+        rank: Ranking variable per unit.
         population: Population weight per unit.
+        rank_direction: ``higher_is_advantaged`` or
+            ``higher_is_disadvantaged``. Required.
+        zero_mean: ``raise`` (default) or ``legacy_zero``.
 
     Returns:
         Concentration Index. For non-negative service this lies in [-1, 1].
-        Zero mean service returns ``0.0``.
+
+    Raises:
+        TypeError: if ``rank_direction`` is omitted.
+        ValueError: if ``rank_direction`` is not a valid option.
+        UndefinedMetricError: if mean service is zero or cancelled.
     """
-    return concentration_index_result(service, rank, population).value
+    if zero_mean not in ("raise", "legacy_zero"):
+        raise ValueError("zero_mean must be 'raise' or 'legacy_zero'")
+    result_zero_mean: ZeroMeanResult = (
+        "legacy_zero" if zero_mean == "legacy_zero" else "undefined"
+    )
+    result = concentration_index_result(
+        service,
+        rank,
+        population,
+        rank_direction=rank_direction,
+        zero_mean=result_zero_mean,
+    )
+    if result.status == "undefined":
+        raise UndefinedMetricError(
+            metric="ci",
+            reason=result.reason or "undefined",
+            result=result,
+        )
+    assert result.value is not None
+    return result.value
