@@ -48,7 +48,6 @@
 
     let cmd = 'pip install "moveq[cli,frames]"';
     if (type === "uv") cmd = 'uv add "moveq[cli,frames]"';
-    else if (type === "conda") cmd = 'conda install -c conda-forge moveq';
     else if (type === "core" || type === "pip-core") cmd = 'pip install moveq-core';
 
     cmdEl.innerText = cmd;

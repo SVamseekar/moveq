@@ -11,6 +11,13 @@ PyPI.
 
 ## [Unreleased]
 
+### Changed
+
+- Website no longer offers `conda install -c conda-forge moveq` (the package
+  is not on conda-forge) and no longer claims a browser WebAssembly runtime.
+  `moveq-core` is described as a pure-NumPy engine with no I/O or GIS
+  dependencies.
+
 ### Added
 
 - CI job **Git release rules** fails if package version drifts from the

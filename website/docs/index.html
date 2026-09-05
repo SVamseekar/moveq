@@ -185,7 +185,7 @@
 
         <ul>
           <li>
-            <strong>1. Pure NumPy Zero-Bloat Core</strong>: The primary mathematical engine (<code>moveq-core</code>) depends strictly on NumPy. It imports in under 5 milliseconds and runs identically on laptops, embedded IoT routers, microservices, AWS Lambda, and browser WebAssembly.
+            <strong>1. Pure NumPy Zero-Bloat Core</strong>: The primary mathematical engine (<code>moveq-core</code>) depends strictly on NumPy, with no I/O or GIS dependencies.
           </li>
           <li>
             <strong>2. Continuous Boundary Slicing</strong>: Standard quantile binning produces erratic jumps when demographic zones cross the 40% or 90% population thresholds. <code>moveq</code> calculates exact continuous proportional splitting across boundary units.
@@ -204,7 +204,7 @@
         <div class="code-wrapper">
           <div class="code-header">
             <span>Terminal</span>
-            <span>pip / uv / conda</span>
+            <span>pip / uv</span>
           </div>
           <pre><code># 1. Full Stack: Core math + Composite Scoring + Catalogue + CLI + Pandas DataFrame helpers
 pip install "moveq[cli,frames]"
@@ -213,10 +213,7 @@ pip install "moveq[cli,frames]"
 uv add "moveq[cli,frames]"
 
 # 3. Pure NumPy Core Only (zero GIS/Pandas dependencies, < 50KB package size)
-pip install moveq-core
-
-# 4. Conda Forge Distribution
-conda install -c conda-forge moveq</code></pre>
+pip install moveq-core</code></pre>
         </div>
 
         <h2 id="quickstart">Quickstart Tutorial</h2>
