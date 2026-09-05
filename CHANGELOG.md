@@ -16,6 +16,35 @@ PyPI.
 - Guides no longer treat a 5% Concentration Index change as triggering a
   Title VI review. moveq reports distributional change; it does not
   determine compliance.
+- `compute_concentration_index` and `concentration_index_result` now
+  require `rank_direction` (`higher_is_advantaged` or
+  `higher_is_disadvantaged`). There is no default: omitting it is a
+  `TypeError`. Positive CI is advantage-concentrated; negative CI is
+  disadvantage-concentrated.
+- A zero or cancelled mean service makes the relative Concentration
+  Index **undefined**. The result API returns `value=None` with
+  `status="undefined"`; the scalar API raises `UndefinedMetricError`.
+  Previously this returned `0.0`. `zero_mean="legacy_zero"` restores the
+  old number and emits `DeprecationWarning`.
+- `moveq ci` requires `--rank-direction` (hyphen form). An undefined
+  result exits with code `3`.
+
+Migration:
+
+```python
+# Before (0.1.x) — direction ambiguous, sign could be wrong
+ci = compute_concentration_index(service, imd_rank, population)
+
+# After — IMD rank: 1 = most deprived, so higher = more advantaged
+ci = compute_concentration_index(
+    service, imd_rank, population,
+    rank_direction="higher_is_advantaged",
+)
+```
+
+Callers must check their rank column. A caller who declared the wrong
+direction was already getting a wrong sign; this change surfaces that
+rather than introducing it.
 
 ### Added
 

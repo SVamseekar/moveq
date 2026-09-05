@@ -2,7 +2,7 @@
 
     moveq gini data.csv --value trips --weight population
     moveq palma data.csv --value trips --weight population
-    moveq ci data.csv --value trips --rank deprivation_rank --weight population
+    moveq ci data.csv --value trips --rank deprivation_rank --weight population --rank-direction higher-is-advantaged
     moveq score --terms '{"coverage": 0.8, "evening": 0.5}' --weights '{"coverage": 0.6, "evening": 0.4}'
     moveq score config.json
     moveq catalogue validate config.json
@@ -41,11 +41,23 @@ def _read_columns(path: str, columns: list[str]) -> dict[str, np.ndarray]:
     return {c: np.array([float(r[c]) for r in rows]) for c in columns}
 
 
+_RANK_DIRECTION_CLI = {
+    "higher-is-advantaged": "higher_is_advantaged",
+    "higher-is-disadvantaged": "higher_is_disadvantaged",
+}
+
+
 def _print_equity(result: EquityResult, label: str, as_json: bool) -> int:
     if as_json:
         print(json.dumps(result.to_dict(), indent=2))
-        return 0
-    print(f"{label}: {result.value:.4f}")
+    elif result.status == "undefined" or result.value is None:
+        print(f"{label}: undefined", file=sys.stderr)
+        if result.reason:
+            print(f"reason: {result.reason}", file=sys.stderr)
+    else:
+        print(f"{label}: {result.value:.4f}")
+    if result.status == "undefined":
+        return 3
     return 0
 
 
@@ -61,8 +73,14 @@ def _cmd_palma(args: argparse.Namespace) -> int:
 
 def _cmd_ci(args: argparse.Namespace) -> int:
     cols = _read_columns(args.csv, [args.value, args.rank, args.weight])
+    rank_direction = _RANK_DIRECTION_CLI[args.rank_direction]
     return _print_equity(
-        concentration_index_result(cols[args.value], cols[args.rank], cols[args.weight]),
+        concentration_index_result(
+            cols[args.value],
+            cols[args.rank],
+            cols[args.weight],
+            rank_direction=rank_direction,
+        ),
         "concentration_index",
         args.json,
     )
@@ -202,6 +220,12 @@ def build_parser() -> argparse.ArgumentParser:
     ci.add_argument("--value", required=True, help="Service-level column")
     ci.add_argument("--rank", required=True, help="Ranking column (e.g. deprivation rank)")
     ci.add_argument("--weight", required=True, help="Population-weight column")
+    ci.add_argument(
+        "--rank-direction",
+        required=True,
+        choices=sorted(_RANK_DIRECTION_CLI),
+        help="Which end of --rank is advantaged (required)",
+    )
     ci.add_argument("--json", action="store_true", help="Output machine-readable JSON")
     ci.set_defaults(func=_cmd_ci)
 

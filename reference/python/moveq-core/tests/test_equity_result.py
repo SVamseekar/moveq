@@ -7,6 +7,7 @@ import pytest
 
 from moveq_core import (
     EquityResult,
+    UndefinedMetricError,
     compute_concentration_index,
     compute_gini,
     compute_palma_ratio,
@@ -33,6 +34,8 @@ TO_DICT_KEYS = {
     "warnings",
     "note",
     "context",
+    "status",
+    "reason",
 }
 
 
@@ -47,9 +50,11 @@ def test_palma_result_value_matches_compute_palma():
 
 
 def test_concentration_index_result_value_matches_compute_ci():
-    result = concentration_index_result(UNEVEN_SERVICE, UNEVEN_RANK, UNEVEN_WEIGHTS)
+    result = concentration_index_result(
+        UNEVEN_SERVICE, UNEVEN_RANK, UNEVEN_WEIGHTS, rank_direction="higher_is_advantaged"
+    )
     assert result.value == compute_concentration_index(
-        UNEVEN_SERVICE, UNEVEN_RANK, UNEVEN_WEIGHTS
+        UNEVEN_SERVICE, UNEVEN_RANK, UNEVEN_WEIGHTS, rank_direction="higher_is_advantaged"
     )
 
 
@@ -65,18 +70,29 @@ def test_palma_result_inf_matches_compute_palma():
 def test_zero_service_result_values_match_compute_functions():
     gini = gini_result(ZERO_SERVICE, EQUAL_WEIGHTS)
     palma = palma_result(ZERO_SERVICE, EQUAL_WEIGHTS)
-    ci = concentration_index_result(ZERO_SERVICE[:3], UNEVEN_RANK[:3], EQUAL_WEIGHTS[:3])
+    ci = concentration_index_result(
+        ZERO_SERVICE[:3], UNEVEN_RANK[:3], EQUAL_WEIGHTS[:3], rank_direction="higher_is_advantaged"
+    )
     assert gini.value == compute_gini(ZERO_SERVICE, EQUAL_WEIGHTS) == pytest.approx(0.0)
     assert palma.value == compute_palma_ratio(ZERO_SERVICE, EQUAL_WEIGHTS) == pytest.approx(1.0)
-    assert ci.value == compute_concentration_index(
-        ZERO_SERVICE[:3], UNEVEN_RANK[:3], EQUAL_WEIGHTS[:3]
-    ) == pytest.approx(0.0)
+    with pytest.raises(UndefinedMetricError):
+        compute_concentration_index(
+            ZERO_SERVICE[:3],
+            UNEVEN_RANK[:3],
+            EQUAL_WEIGHTS[:3],
+            rank_direction="higher_is_advantaged",
+        )
+    assert ci.value is None
+    assert ci.status == "undefined"
+    assert ci.reason == "zero_mean"
 
 
 def test_zero_service_conventions_emit_warnings():
     gini = gini_result(ZERO_SERVICE, EQUAL_WEIGHTS)
     palma = palma_result(ZERO_SERVICE, EQUAL_WEIGHTS)
-    ci = concentration_index_result(ZERO_SERVICE[:3], UNEVEN_RANK[:3], EQUAL_WEIGHTS[:3])
+    ci = concentration_index_result(
+        ZERO_SERVICE[:3], UNEVEN_RANK[:3], EQUAL_WEIGHTS[:3], rank_direction="higher_is_advantaged"
+    )
     assert gini.warnings
     assert palma.warnings
     assert ci.warnings
@@ -89,11 +105,15 @@ def test_ci_zero_population_units_are_dropped():
     service = np.array([1.0, 99.0, 5.0])
     rank = np.array([1.0, 99.0, 2.0])
     population = np.array([100.0, 0.0, 100.0])
-    result = concentration_index_result(service, rank, population)
+    result = concentration_index_result(
+        service, rank, population, rank_direction="higher_is_advantaged"
+    )
     assert result.n_dropped == 1
     assert result.n_areas == 2
     assert result.total_population == pytest.approx(200.0)
-    assert result.value == compute_concentration_index(service, rank, population)
+    assert result.value == compute_concentration_index(
+        service, rank, population, rank_direction="higher_is_advantaged"
+    )
 
 
 def test_gini_zero_weight_unit_is_dropped_from_counts():
@@ -117,7 +137,9 @@ def test_live_units_have_no_drops():
 def test_method_ids_and_palma_parameters():
     gini = gini_result(EQUAL_SERVICE, EQUAL_WEIGHTS)
     palma = palma_result(EQUAL_SERVICE, EQUAL_WEIGHTS)
-    ci = concentration_index_result(UNEVEN_SERVICE, UNEVEN_RANK, UNEVEN_WEIGHTS)
+    ci = concentration_index_result(
+        UNEVEN_SERVICE, UNEVEN_RANK, UNEVEN_WEIGHTS, rank_direction="higher_is_advantaged"
+    )
     assert gini.method == "lorenz-trapezoid"
     assert palma.method == "palma-split-40-90"
     assert ci.method == "wagstaff-covariance"

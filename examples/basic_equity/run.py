@@ -39,7 +39,12 @@ def main() -> None:
 
     gini = compute_gini(cols["trips"], cols["population"])
     palma = compute_palma_ratio(cols["trips"], cols["population"])
-    ci = compute_concentration_index(cols["trips"], cols["deprivation_rank"], cols["population"])
+    ci = compute_concentration_index(
+        cols["trips"],
+        cols["deprivation_rank"],
+        cols["population"],
+        rank_direction="higher_is_advantaged",
+    )
 
     print(f"Gini:                  {gini:.4f}")
     print(f"Palma ratio:           {palma:.4f}")

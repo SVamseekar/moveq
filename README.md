@@ -104,7 +104,9 @@ deprivation_rank = np.array([1, 3, 2, 5, 4])  # 1 = most deprived
 # 1. Inequality metrics
 gini = compute_gini(service, population)
 palma = compute_palma_ratio(service, population)
-ci = compute_concentration_index(service, deprivation_rank, population)
+ci = compute_concentration_index(
+    service, deprivation_rank, population, rank_direction="higher_is_advantaged"
+)
 
 print(f"Gini: {gini:.4f}")
 print(f"Palma Ratio: {palma:.4f}")
@@ -124,7 +126,7 @@ print(result.to_dict())
 ```bash
 moveq gini examples/basic_equity/data.csv --value trips --weight population
 moveq palma examples/basic_equity/data.csv --value trips --weight population
-moveq ci examples/basic_equity/data.csv --value trips --rank deprivation_rank --weight population
+moveq ci examples/basic_equity/data.csv --value trips --rank deprivation_rank --weight population --rank-direction higher-is-advantaged
 
 moveq score --terms '{"coverage": 0.8, "evening": 0.5}' --weights '{"coverage": 0.6, "evening": 0.4}'
 

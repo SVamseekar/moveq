@@ -29,7 +29,9 @@ def run_benchmarks():
 
     # 3. Concentration Index (with 1,000 tied rank buckets)
     t0 = time.perf_counter()
-    ci = compute_concentration_index(service, deprivation_rank, population)
+    ci = compute_concentration_index(
+        service, deprivation_rank, population, rank_direction="higher_is_advantaged"
+    )
     t_ci = (time.perf_counter() - t0) * 1000
     print(f"✓ compute_concentration_index: {t_ci:6.2f} ms  (result: {ci:.4f})")
 

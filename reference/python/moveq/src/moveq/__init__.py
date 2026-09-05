@@ -3,8 +3,10 @@
 from moveq_catalogue import Catalogue, SectionAction, SectionMapping
 from moveq_core import (
     EquityResult,
+    MoveqError,
     ScoreComponent,
     ScoreResult,
+    UndefinedMetricError,
     clip01,
     compute_concentration_index,
     compute_gini,
@@ -23,6 +25,8 @@ __all__ = [
     "palma_result",
     "concentration_index_result",
     "EquityResult",
+    "MoveqError",
+    "UndefinedMetricError",
     "compute_score",
     "clip01",
     "ScoreComponent",

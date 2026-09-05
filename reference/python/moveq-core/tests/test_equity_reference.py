@@ -70,14 +70,18 @@ def test_concentration_index_equal_weight_closed_form():
     population = np.array([100.0, 100.0, 100.0, 100.0, 100.0])
     expected = 0.8 / 3.0
     assert concentration_index_grouped(service, rank, population) == pytest.approx(expected, abs=1e-12)
-    assert compute_concentration_index(service, rank, population) == pytest.approx(expected, abs=1e-12)
+    assert compute_concentration_index(
+        service, rank, population, rank_direction="higher_is_advantaged"
+    ) == pytest.approx(expected, abs=1e-12)
 
 
 def test_concentration_index_tied_ranks_match_grouped_oracle():
     service = np.array([10.0, 2.0, 5.0])
     rank = np.array([1.0, 1.0, 2.0])
     population = np.array([50.0, 150.0, 200.0])
-    got = compute_concentration_index(service, rank, population)
+    got = compute_concentration_index(
+        service, rank, population, rank_direction="higher_is_advantaged"
+    )
     expected = concentration_index_grouped(service, rank, population)
     assert got == pytest.approx(expected, abs=1e-12)
 
@@ -86,7 +90,9 @@ def test_concentration_index_negative_mean_matches_grouped_oracle():
     service = np.array([-5.0, -4.0, -3.0, -2.0, -1.0])
     rank = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
     population = np.array([1.0, 1.0, 1.0, 1.0, 1.0])
-    got = compute_concentration_index(service, rank, population)
+    got = compute_concentration_index(
+        service, rank, population, rank_direction="higher_is_advantaged"
+    )
     expected = concentration_index_grouped(service, rank, population)
     assert got == pytest.approx(expected, abs=1e-12)
     assert expected == pytest.approx(-0.8 / 3.0, abs=1e-12)
@@ -103,6 +109,8 @@ def test_random_draws_match_oracles():
             gini_pairwise(values, weights), rel=1e-9, abs=1e-12
         )
         assert finite_or_equal(compute_palma_ratio(values, weights), palma_split_loop(values, weights))
-        assert compute_concentration_index(values, rank, weights) == pytest.approx(
+        assert compute_concentration_index(
+            values, rank, weights, rank_direction="higher_is_advantaged"
+        ) == pytest.approx(
             concentration_index_grouped(values, rank, weights), rel=1e-9, abs=1e-12
         )

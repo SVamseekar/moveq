@@ -65,8 +65,8 @@ in `[-1, 1]`:
 
 | Sign | Meaning |
 | --- | --- |
-| `CI > 0` | service concentrated in **less** deprived areas (pro-rich) |
-| `CI < 0` | service concentrated in **more** deprived areas (pro-poor) |
+| `CI > 0` | outcome concentrated among more-advantaged observations (advantage-concentrated) |
+| `CI < 0` | outcome concentrated among less-advantaged observations (disadvantage-concentrated) |
 | `CI = 0` | no systematic gradient with rank |
 
 This is the metric to use when the policy question is about *socioeconomic
@@ -127,7 +127,9 @@ deprivation_rank = np.array([1, 3, 2, 5, 4])  # 1 = most deprived
 
 gini = compute_gini(service, population)
 palma = compute_palma_ratio(service, population)
-ci = compute_concentration_index(service, deprivation_rank, population)
+ci = compute_concentration_index(
+    service, deprivation_rank, population, rank_direction="higher_is_advantaged"
+)
 gini_audit = gini_result(service, population)  # EquityResult: value, method, n_areas, …
 
 score_res = compute_score(

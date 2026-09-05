@@ -86,7 +86,9 @@ palma = compute_palma_ratio(trips, population)
 print(f"Palma Ratio: {palma:.4f}")
 
 # 3. Wagstaff Concentration Index
-ci = compute_concentration_index(trips, deprivation_rank, population)
+ci = compute_concentration_index(
+    trips, deprivation_rank, population, rank_direction="higher_is_advantaged"
+)
 print(f"Concentration Index: {ci:.4f}")
 ```
 
@@ -136,7 +138,7 @@ moveq gini data.csv --value trips --weight population
 moveq palma data.csv --value trips --weight population
 
 # Wagstaff Concentration Index
-moveq ci data.csv --value trips --rank deprivation_rank --weight population
+moveq ci data.csv --value trips --rank deprivation_rank --weight population --rank-direction higher-is-advantaged
 
 # Same metrics as JSON (EquityResult.to_dict)
 moveq gini data.csv --value trips --weight population --json
