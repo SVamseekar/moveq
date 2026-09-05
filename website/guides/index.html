@@ -93,125 +93,76 @@
   <div class="container" style="padding: 48px 24px;">
     <div style="margin-bottom: 40px;">
       <span class="section-tag">Cookbook & Tutorials</span>
-      <h1 style="font-size: 2.75rem; font-weight: 800; color: var(--text-fg); margin-top: 8px;">Practical Guides & Ecosystem Workflows</h1>
+      <h1 style="font-size: 2.75rem; font-weight: 800; color: var(--text-fg); margin-top: 8px;">Practical Guides</h1>
       <p style="color: var(--text-muted); font-size: 1.1rem; max-width: 720px; margin-top: 8px;">
-        End-to-end recipes for evaluating transit networks from raw GTFS schedules, spatial aggregation to Uber H3 hex grids, Federal Title VI compliance reporting, and GPU choropleth rendering in Kepler.gl.
+        Worked examples of Gini, Palma, and the Concentration Index on arrays you already have. moveq does not parse GTFS, aggregate to H3, route, or render maps: those belong in the tools that produce the arrays.
       </p>
     </div>
 
-    <!-- Guide 1: GTFS Routing -->
-    <div style="margin-bottom: 48px; padding: 32px; background-color: var(--bg-surface); border: 1px solid var(--border-rule); border-radius: 12px;" id="gtfs">
-      <span class="tool-stamp stamp-blue">Transit Routing Pipeline</span>
-      <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-fg); margin-top: 8px;">1. Compute Transit Access Equity from GTFS via r5py</h2>
+    <div style="margin-bottom: 48px; padding: 32px; background-color: var(--bg-surface); border: 1px solid var(--border-rule); border-radius: 12px;" id="arrays">
+      <span class="tool-stamp stamp-blue">Core metrics</span>
+      <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-fg); margin-top: 8px;">1. Inequality of a service array</h2>
       <p style="color: var(--text-muted); margin: 12px 0 16px;">
-        This recipe demonstrates how to calculate origin-destination transit travel time matrices using <code>r5py</code> (the Python wrapper for Conway's R5 routing engine) and evaluate spatial inequality across neighborhood origins.
+        The same pattern as <code>examples/basic_equity/run.py</code>. Service is the resource; population is the weight; rank is a socioeconomic ordering you must declare.
       </p>
 
       <div class="code-wrapper">
         <div class="code-header">
-          <span>gtfs_r5py_equity.py</span>
+          <span>basic_equity.py</span>
           <span>Python 3.10+</span>
         </div>
-        <pre><code>import datetime
-import geopandas as gpd
-import r5py
+        <pre><code>import numpy as np
 from moveq import compute_gini, compute_palma_ratio, compute_concentration_index
 
-# 1. Initialize R5 Transport Network (OSM road network + GTFS zip)
-transport_network = r5py.TransportNetwork("osm_city.pbf", ["transit_feed.gtfs.zip"])
+service = np.array([10.0, 20.0, 5.0, 50.0, 8.0])
+population = np.array([1000, 800, 1200, 300, 900])
+deprivation_rank = np.array([1, 3, 2, 5, 4])  # 1 = most deprived; higher = more advantaged
 
-# 2. Load origin census centroids and destination employment opportunities
-origins = gpd.read_file("census_tract_centroids.geojson")
-destinations = gpd.read_file("job_centers.geojson")
+gini = compute_gini(service, population)
+palma = compute_palma_ratio(service, population)
+ci = compute_concentration_index(
+    service, deprivation_rank, population,
+    rank_direction="higher_is_advantaged",
+)
 
-# 3. Compute Travel Time Matrix for Tuesday morning peak (08:00 - 09:00)
-travel_time_matrix = r5py.TravelTimeMatrixComputer(
-    transport_network,
-    origins=origins,
-    destinations=destinations,
-    departure=datetime.datetime(2026, 9, 15, 8, 0),
-    transport_modes=[r5py.TransportMode.WALK, r5py.TransportMode.TRANSIT],
-).compute_travel_times()
-
-# 4. Calculate cumulative jobs accessible within 45 minutes per origin zone
-access_45 = travel_time_matrix[travel_time_matrix["travel_time"] <= 45]
-jobs_per_origin = access_45.groupby("from_id")["jobs_count"].sum().values
-population = origins["population"].values
-deprivation_rank = origins["deprivation_decile"].values
-
-# 5. Evaluate Equity Metrics
-gini = compute_gini(jobs_per_origin, population)
-palma = compute_palma_ratio(jobs_per_origin, population)
-ci = compute_concentration_index(jobs_per_origin, deprivation_rank, population)
-
-print(f"45-Min Job Access Gini: {gini:.4f}")
-print(f"Palma Ratio (Top 10% / Bottom 40%): {palma:.2f}")
-print(f"Concentration Index: {ci:.4f} ({'Pro-Poor' if ci < 0 else 'Pro-Rich'})")</code></pre>
+print(f"Gini: {gini:.4f}")
+print(f"Palma ratio: {palma:.4f}")
+print(f"Concentration Index: {ci:.4f}")</code></pre>
       </div>
     </div>
 
-    <!-- Guide 2: H3 Hexagonal Aggregation -->
-    <div style="margin-bottom: 48px; padding: 32px; background-color: var(--bg-surface); border: 1px solid var(--border-rule); border-radius: 12px;" id="h3">
-      <span class="tool-stamp stamp-emerald">Spatial Hexagonal Indexing</span>
-      <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-fg); margin-top: 8px;">2. Mitigate MAUP via Uber H3 Hexagonal Resampling</h2>
+    <div style="margin-bottom: 48px; padding: 32px; background-color: var(--bg-surface); border: 1px solid var(--border-rule); border-radius: 12px;" id="baseline-proposal">
+      <span class="tool-stamp stamp-crimson">Distributional change</span>
+      <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-fg); margin-top: 8px;">2. Baseline versus proposal</h2>
       <p style="color: var(--text-muted); margin: 12px 0 16px;">
-        The <strong>Modifiable Areal Unit Problem (MAUP)</strong> distorts equity metrics when census boundaries have arbitrary irregular shapes. Resampling stop frequencies and population density to Uber H3 hexagons (Resolution 8 / ~460m edge) yields uniform spatial cells.
+        Compare two service arrays on the same units and rank. Interpretation, and any regulatory determination, rest with the analyst. moveq generates evidence; it does not determine compliance.
       </p>
 
       <div class="code-wrapper">
         <div class="code-header">
-          <span>h3_equity_resampling.py</span>
-          <span>h3 + moveq</span>
-        </div>
-        <pre><code>import h3
-import pandas as pd
-from moveq import compute_gini
-
-# 1. Map transit stops and population points to H3 Resolution 8 index
-df["h3_res8"] = df.apply(lambda r: h3.latlng_to_cell(r["lat"], r["lng"], res=8), axis=1)
-
-# 2. Group by hexagonal cell to obtain uniform spatial bins
-hex_df = df.groupby("h3_res8").agg({
-    "hourly_departures": "sum",
-    "estimated_population": "sum"
-}).reset_index()
-
-# 3. Compute H3-standardized Gini coefficient
-h3_gini = compute_gini(hex_df["hourly_departures"].values, hex_df["estimated_population"].values)
-print(f"H3 Standardized Gini: {h3_gini:.4f}")</code></pre>
-      </div>
-    </div>
-
-    <!-- Guide 3: Title VI Compliance -->
-    <div style="margin-bottom: 48px; padding: 32px; background-color: var(--bg-surface); border: 1px solid var(--border-rule); border-radius: 12px;" id="title-vi">
-      <span class="tool-stamp stamp-crimson">Federal Compliance Auditing</span>
-      <h2 style="font-size: 1.6rem; font-weight: 800; color: var(--text-fg); margin-top: 8px;">3. Audit Title VI Disparate Impact & Environmental Justice</h2>
-      <p style="color: var(--text-muted); margin: 12px 0 16px;">
-        Federal Title VI audits require transit agencies to demonstrate that major service reductions or fare changes do not create statistically significant disparate impacts on protected minority or low-income populations.
-      </p>
-
-      <div class="code-wrapper">
-        <div class="code-header">
-          <span>title_vi_audit.py</span>
-          <span>Federal Reporting</span>
+          <span>baseline_proposal.py</span>
+          <span>Python 3.10+</span>
         </div>
         <pre><code>from moveq import compute_concentration_index
 
-# Rank 1 = Highest minority concentration / Highest poverty tracts
-minority_rank = tract_df["minority_percentage_rank"].values
+# Rank: 1 = most deprived, higher = more advantaged
+rank = tract_df["deprivation_rank"].values
 baseline_service = tract_df["trips_2025"].values
 proposed_service = tract_df["trips_2026_proposed"].values
 population = tract_df["population"].values
 
-ci_baseline = compute_concentration_index(baseline_service, minority_rank, population)
-ci_proposed = compute_concentration_index(proposed_service, minority_rank, population)
+ci_baseline = compute_concentration_index(
+    baseline_service, rank, population,
+    rank_direction="higher_is_advantaged",
+)
+ci_proposed = compute_concentration_index(
+    proposed_service, rank, population,
+    rank_direction="higher_is_advantaged",
+)
 
-delta_ci = ci_proposed - ci_baseline
 print(f"Baseline CI: {ci_baseline:+.4f}")
 print(f"Proposed CI: {ci_proposed:+.4f}")
-print(f"Change in CI: {delta_ci:+.4f}")
-# Interpretation and any regulatory determination rest with the analyst.
-# moveq generates evidence; it does not determine compliance.</code></pre>
+print(f"Change in CI: {ci_proposed - ci_baseline:+.4f}")</code></pre>
       </div>
     </div>
   </div>

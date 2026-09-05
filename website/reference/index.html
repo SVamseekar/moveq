@@ -111,8 +111,8 @@
       <h3><code>compute_palma_ratio(values, weights) -> float</code></h3>
       <p>Calculates the Palma ratio (top 10% mean service / bottom 40% mean service) with continuous boundary splitting.</p>
 
-      <h3><code>compute_concentration_index(service, rank, population) -> float</code></h3>
-      <p>Calculates the Wagstaff Concentration Index with group-averaged fractional ranks for tied rank values.</p>
+      <h3><code>compute_concentration_index(service, rank, population, *, rank_direction) -> float</code></h3>
+      <p>Wagstaff Concentration Index. <code>rank_direction</code> is required. Positive is advantage-concentrated; negative is disadvantage-concentrated. Tied ranks share a group-midpoint fractional rank.</p>
 
       <h2>Module <code>moveq_core.score</code></h2>
       <h3><code>compute_score(terms, weights, *, labels=None, n_areas=None, context=None) -> ScoreResult</code></h3>

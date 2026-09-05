@@ -46,6 +46,11 @@ Callers must check their rank column. A caller who declared the wrong
 direction was already getting a wrong sign; this change surfaces that
 rather than introducing it.
 
+- Website guides no longer claim GTFS parsing, H3 aggregation, routing,
+  or Kepler/GPU rendering as moveq capabilities. Remaining examples use
+  the required `rank_direction` argument. A 5% CI change is not treated
+  as a Title VI trigger.
+
 ### Added
 
 - CI job **Git release rules** fails if package version drifts from the
