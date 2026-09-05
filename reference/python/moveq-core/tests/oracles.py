@@ -93,6 +93,48 @@ def concentration_index_grouped(
     return 2.0 * cov / mean
 
 
+def _live_mean(service: np.ndarray, population: np.ndarray) -> float:
+    live = population > 0
+    return float(np.average(np.asarray(service, dtype=float)[live], weights=np.asarray(population, dtype=float)[live]))
+
+
+def _in_unit_interval(service: np.ndarray, population: np.ndarray) -> bool:
+    live = population > 0
+    y = np.asarray(service, dtype=float)[live]
+    return bool(np.all(y >= 0.0) and np.all(y <= 1.0))
+
+
+def concentration_index_generalized(
+    service: np.ndarray, rank: np.ndarray, population: np.ndarray
+) -> float:
+    """Generalised CI: μ · CI, using the grouped-rank relative index."""
+    ci = concentration_index_grouped(service, rank, population)
+    return _live_mean(service, population) * ci
+
+
+def concentration_index_erreygers(
+    service: np.ndarray, rank: np.ndarray, population: np.ndarray
+) -> float | None:
+    """Erreygers index: 4μ · CI when y is in [0, 1]; else undefined."""
+    if not _in_unit_interval(service, population):
+        return None
+    ci = concentration_index_grouped(service, rank, population)
+    return 4.0 * _live_mean(service, population) * ci
+
+
+def concentration_index_wagstaff_normalized(
+    service: np.ndarray, rank: np.ndarray, population: np.ndarray
+) -> float | None:
+    """Wagstaff normalised CI: CI / (1 − μ) on (0, 1) means in [0, 1]."""
+    if not _in_unit_interval(service, population):
+        return None
+    mu = _live_mean(service, population)
+    if mu == 0.0 or mu == 1.0:
+        return None
+    ci = concentration_index_grouped(service, rank, population)
+    return ci / (1.0 - mu)
+
+
 def composite_score(terms: dict[str, float | None], weights: dict[str, float]) -> float | None:
     """100 × Σ (w'_k · clip01(y_k)) with missing terms dropped and renormalised."""
     present: dict[str, float] = {}
@@ -106,6 +148,26 @@ def composite_score(terms: dict[str, float | None], weights: dict[str, float]) -
     weight_sum = sum(weights[k] for k in present)
     weighted = sum((weights[k] / weight_sum) * present[k] for k in present)
     return 100.0 * weighted
+
+
+def composite_score_as_zero(terms: dict[str, float | None], weights: dict[str, float]) -> float:
+    """100 × Σ (w_k / Σ w) · y_k with missing y_k treated as 0 (no reweight)."""
+    total = sum(weights.values())
+    acc = 0.0
+    for key, design_w in weights.items():
+        raw = terms.get(key)
+        y = 0.0 if raw is None else max(0.0, min(1.0, float(raw)))
+        acc += (design_w / total) * y
+    return 100.0 * acc
+
+
+def composite_score_bounds(
+    terms: dict[str, float | None], weights: dict[str, float]
+) -> tuple[float, float]:
+    """Best- and worst-case scores filling missing terms with {0, 1}."""
+    low_terms = {k: (0.0 if terms.get(k) is None else terms[k]) for k in weights}
+    high_terms = {k: (1.0 if terms.get(k) is None else terms[k]) for k in weights}
+    return composite_score_as_zero(low_terms, weights), composite_score_as_zero(high_terms, weights)
 
 
 def finite_or_equal(a: float, b: float) -> bool:

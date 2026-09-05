@@ -13,6 +13,7 @@ build/
 htmlcov/
 .coverage
 coverage.xml
+coverage.json
 
 
 # Internal planning and specs (not shipped documentation)

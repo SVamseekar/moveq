@@ -11,12 +11,32 @@ PyPI.
 
 ## [Unreleased]
 
+### Added
+
+- Optional `outcome_kind` on `concentration_index_result` populates
+  `EquityResult.interpretation` (location of a benefit or burden; never
+  fairness or causation). Omission preserves descriptive-only output.
+- `weight_kind` on `gini_result`, `palma_result`, and
+  `concentration_index_result`. Omission records `"population"` and
+  warns; arithmetic is unchanged.
+- `missing_policy` on `compute_score`: `reweight` (default), `as_zero`,
+  `exclude`, `bounds`. `ScoreResult` gains `parameters` and `bounds`.
+  `exclude` and incomplete `bounds` return `score=None` (no midpoint).
+- Concentration Index `variant` (`standard`, `generalized`, `erreygers`,
+  `wagstaff_normalized`) recorded in `parameters`. `method` stays
+  `wagstaff-covariance`. Bounded outcomes warn; the library does not
+  switch variant.
+- CI coverage measurement for `moveq_core` and `moveq_catalogue` with a
+  98% floor (observed ~99% on 322 statements).
+
 ### Changed
 
 - Website no longer offers `conda install -c conda-forge moveq` (the package
   is not on conda-forge) and no longer claims a browser WebAssembly runtime.
   `moveq-core` is described as a pure-NumPy engine with no I/O or GIS
   dependencies.
+- Documentation no longer describes population weighting or missing-term
+  reweighting as inherently correct.
 
 ### Added
 

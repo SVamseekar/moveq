@@ -52,14 +52,17 @@ Computes the Wagstaff Concentration Index using the fractional rank covariance m
 
 ---
 
-### `gini_result(values, weights, *, context=None) -> EquityResult`
-Same Gini calculation as `compute_gini`, returned as an `EquityResult` (`method="lorenz-trapezoid"`). Zero-weight units are counted in `n_dropped` and excluded from `n_areas` and `total_population`. Zero total service records a warning and sets `value` to `0.0`.
+### `gini_result(values, weights, *, weight_kind=None, context=None) -> EquityResult`
+Same Gini calculation as `compute_gini`, returned as an `EquityResult` (`method="lorenz-trapezoid"`). Zero-weight units are counted in `n_dropped` and excluded from `n_areas` and `total_population`. Zero total service records a warning and sets `value` to `0.0`. `weight_kind` (`"population"` \| `"area"` \| `"need"` \| `"user"` \| `"unweighted"`) is recorded in `parameters`; omission resolves to `"population"` and adds a warning. It does not change the arithmetic: `"unweighted"` means the caller passed equal weights, not that the library replaces them.
 
-### `palma_result(values, weights, *, context=None) -> EquityResult`
-Same Palma calculation as `compute_palma_ratio`, returned as an `EquityResult` (`method="palma-split-40-90"`). `parameters` records the population cuts `bottom_cut=0.40` and `top_cut=0.90`. All-zero service and infinite Palma each record a warning.
+### `palma_result(values, weights, *, weight_kind=None, context=None) -> EquityResult`
+Same Palma calculation as `compute_palma_ratio`, returned as an `EquityResult` (`method="palma-split-40-90"`). `parameters` records the population cuts `bottom_cut=0.40` and `top_cut=0.90`, and the resolved `weight_kind` (same rules as `gini_result`). All-zero service and infinite Palma each record a warning.
 
-### `concentration_index_result(service, rank, population, *, rank_direction, context=None, zero_mean="undefined") -> EquityResult`
-Same Concentration Index calculation as `compute_concentration_index`, returned as an `EquityResult` (`method="wagstaff-covariance"`). Unpopulated units are dropped (`n_dropped` / `n_areas`). Zero or cancelled mean service sets `value` to `None`, `status` to `"undefined"`, and `reason` to `"zero_mean"` or `"near_zero_mean"`. `parameters` records `rank_direction_input`, `rank_direction_canonical`, `rank_transformed`, and `zero_mean_rtol`.
+### `concentration_index_result(service, rank, population, *, rank_direction, outcome_kind=None, weight_kind=None, variant=None, context=None, zero_mean="undefined") -> EquityResult`
+Same Concentration Index calculation as `compute_concentration_index`, returned as an `EquityResult` (`method="wagstaff-covariance"` — the estimator identity, for every variant). Unpopulated units are dropped (`n_dropped` / `n_areas`). Zero or cancelled mean service sets `value` to `None`, `status` to `"undefined"`, and `reason` to `"zero_mean"` or `"near_zero_mean"`. `parameters` records `rank_direction_input`, `rank_direction_canonical`, `rank_transformed`, `zero_mean_rtol`, resolved `weight_kind`, and resolved `variant`.
+
+- `outcome_kind` (`"benefit"` \| `"burden"`): optional. When supplied and `value` is a non-zero finite CI, `interpretation` states where the outcome sits (never fairness or causation). Recorded in `parameters` only when supplied.
+- `variant` (`"standard"` \| `"generalized"` \| `"erreygers"` \| `"wagstaff_normalized"`): omission is `"standard"` (today's relative CI). `"generalized"` is `μ · CI`. `"erreygers"` is `4μ · CI` when the outcome is in `[0, 1]`; otherwise undefined (`variant_requires_unit_interval`). `"wagstaff_normalized"` is `CI / (1 − μ)` when the outcome is in `[0, 1]` and `μ` is not 0 or 1. Bounded or binary outcomes in `[0, 1]` that are not constant emit a warning naming the four variants; the library never switches variant automatically.
 
 ### `UndefinedMetricError`
 Raised by `compute_concentration_index` when the index is undefined. Attributes: `metric`, `reason`, `result` (the structured `EquityResult`). Subclass of `MoveqError`.
@@ -79,6 +82,7 @@ Frozen dataclass analogous to `ScoreResult`. `value` is the same number the corr
 - `context: dict[str, str]` — free-form metadata, default `{}`
 - `status: "ok" | "undefined"` — default `"ok"`
 - `reason: str | None` — e.g. `"zero_mean"` when undefined
+- `interpretation: str | None` — location of a signed CI when `outcome_kind` was supplied; otherwise `None`
 - `to_dict() -> dict` — JSON-serializable copy of the fields (`value` is JSON `null` when undefined)
 
 The existing `compute_gini`, `compute_palma_ratio`, and `compute_concentration_index` functions still return `float` (they return `.value` from the corresponding `*_result` function).
@@ -87,7 +91,7 @@ The existing `compute_gini`, `compute_palma_ratio`, and `compute_concentration_i
 
 ## 2. `moveq_core.score`
 
-Configurable weighted composite scoring with dynamic missing-term weight renormalization.
+Configurable weighted composite scoring with a declared missing-term policy.
 
 ### `compute_score(...) -> ScoreResult`
 ```python
@@ -99,6 +103,7 @@ def compute_score(
     n_areas: int | None = None,
     context: dict[str, str] | None = None,
     empty_note: str = "No score for this cut — required inputs are missing.",
+    missing_policy: MissingPolicy | None = None,
 ) -> ScoreResult
 ```
 - **Parameters**:
@@ -107,17 +112,30 @@ def compute_score(
   - `labels` (`dict[str, str] | None`): Optional human-readable labels for each term.
   - `n_areas` (`int | None`): Optional count of areal units contributing to this score.
   - `context` (`dict[str, str] | None`): Free-form metadata dict preserved in results.
-  - `empty_note` (`str`): Informational message returned when all terms are missing.
+  - `empty_note` (`str`): Informational message returned when all terms are missing under `reweight` / `exclude`.
+  - `missing_policy` (`"reweight"` \| `"as_zero"` \| `"exclude"` \| `"bounds"` \| omitted): Omission resolves to `"reweight"` (today's arithmetic) and emits a warning. Recorded in `ScoreResult.parameters` even when defaulted.
 - **Returns**:
-  - `ScoreResult`: Dataclass containing the computed score, component breakdown, list of dropped terms, and audit notes.
+  - `ScoreResult`: Dataclass containing the computed score (or `None`), optional `bounds`, component breakdown, dropped terms, and audit notes.
+
+| Policy | `score` | `bounds` |
+| --- | --- | --- |
+| `reweight` | point estimate; remaining weights renormalised | `None` |
+| `as_zero` | point estimate; missing terms contribute 0 under design weights | `None` |
+| `exclude` | `None` if any term is missing | `None` |
+| `bounds` (missing terms) | `None` (not a midpoint) | `(low, high)` best- and worst-case over missing terms in `{0, 1}` |
+| `bounds` (complete data) | the complete-data point | `(s, s)` |
+
+None of these is the inherently correct policy. Reweighting redistributes weight across observed indicators and can move a ranking by tens of points relative to treating missing as zero.
 
 ### `ScoreResult`
-- `score: float | None`: Overall composite score \([0, 100]\), or `None` if all terms were missing.
+- `score: float | None`: Overall composite score \([0, 100]\), or `None` when the policy refuses a point estimate.
 - `components: list[ScoreComponent]`: Breakdown of individual score components.
 - `dropped: list[str]`: Keys of terms that were omitted due to missing data.
 - `n_areas: int | None`: Number of units evaluated.
-- `note: str | None`: Explanatory notice (e.g. renormalizations).
+- `note: str | None`: Explanatory notice (e.g. renormalisation, exclude, bounds).
 - `context: dict[str, str]`: Custom contextual metadata.
+- `parameters: dict`: At least `{"missing_policy": <resolved>}`.
+- `bounds: tuple[float, float] | None`: Present under `bounds`; `to_dict()` serialises as a two-element list or `null`.
 - `to_dict() -> dict[str, Any]`: Serializes the score result into a JSON-compatible dictionary.
 
 ---

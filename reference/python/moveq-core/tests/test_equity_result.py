@@ -36,6 +36,7 @@ TO_DICT_KEYS = {
     "context",
     "status",
     "reason",
+    "interpretation",
 }
 
 
@@ -127,7 +128,7 @@ def test_gini_zero_weight_unit_is_dropped_from_counts():
 
 
 def test_live_units_have_no_drops():
-    result = gini_result(EQUAL_SERVICE, EQUAL_WEIGHTS)
+    result = gini_result(EQUAL_SERVICE, EQUAL_WEIGHTS, weight_kind="population")
     assert result.n_areas == 4
     assert result.n_dropped == 0
     assert result.total_population == pytest.approx(400.0)

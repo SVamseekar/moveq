@@ -54,14 +54,13 @@ answer. For non-negative service the index lies in `[-1, 1]`:
   (disadvantage-concentrated)
 - **zero** — no systematic gradient with rank
 
-**A composite score that does not treat missing data as zero.** Accessibility
-work almost always has holes: night frequency was not collected, weekend
-service is unknown for one cut. `compute_score` takes named terms in
-`[0, 1]` and design weights. Any term that is `None` is **dropped** and
-the remaining weights are **renormalised**. The result is a 0–100 score
-plus a component table (`design_weight` vs `weight_used`, which terms
-were dropped, and a human-readable `note`). If every term is missing,
-the score is `None` rather than a silent `0`.
+**A composite score with a named missing-data policy.** Accessibility
+work almost always has holes. `compute_score` takes named terms in
+`[0, 1]` and design weights. `missing_policy` chooses `reweight`
+(default), `as_zero`, `exclude`, or `bounds`. Reweighting is one
+declared choice, not the proper one: the same gap can move a ranking
+from 73.33 to 55.00. The result records the policy, the component table,
+and either a point score or bounds.
 
 **A same / replace / omit registry for multi-country work.** When a
 questionnaire or indicator list is reused in a second country, some
