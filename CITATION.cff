@@ -1,0 +1,31 @@
+# Citation File Format 1.2.0 — https://citation-file-format.github.io/
+# Version is kept in lockstep with the four package versions and is
+# updated on each release. There is no DOI here: Zenodo archiving is
+# deferred (issue #47); a DOI is a permanent public record.
+cff-version: 1.2.0
+message: If you use this software, please cite it using these metadata.
+type: software
+title: moveq
+version: "0.2.0"
+date-released: "2026-09-06"
+abstract: >-
+  Python libraries for transport-equity analysis: population-weighted
+  Gini, Palma, and Wagstaff Concentration Index, composite scores that
+  drop missing terms, and a same/replace/omit catalogue for
+  cross-country studies.
+authors:
+  - family-names: Vamseekar
+    given-names: Soura
+    email: martisoura@gmail.com
+license: BSD-3-Clause
+repository-code: "https://github.com/SVamseekar/moveq"
+url: "https://moveq.souravamseekar.com"
+keywords:
+  - transport
+  - equity
+  - accessibility
+  - inequality
+  - gini
+  - palma
+  - concentration-index
+  - harmonization
