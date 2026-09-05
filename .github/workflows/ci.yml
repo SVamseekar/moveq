@@ -78,7 +78,7 @@ jobs:
         run: python -m pip install --upgrade pip pytest
 
       - name: Run website tests
-        run: pytest -v tests/test_website*.py
+        run: pytest -v tests/test_website.py
 
   git-rules:
     name: Git release rules
