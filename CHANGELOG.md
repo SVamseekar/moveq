@@ -11,6 +11,12 @@ PyPI.
 
 ## [Unreleased]
 
+### Changed
+
+- Guides no longer treat a 5% Concentration Index change as triggering a
+  Title VI review. moveq reports distributional change; it does not
+  determine compliance.
+
 ### Added
 
 - CI job **Git release rules** fails if package version drifts from the

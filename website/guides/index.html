@@ -209,10 +209,9 @@ ci_proposed = compute_concentration_index(proposed_service, minority_rank, popul
 delta_ci = ci_proposed - ci_baseline
 print(f"Baseline CI: {ci_baseline:+.4f}")
 print(f"Proposed CI: {ci_proposed:+.4f}")
-print(f"Disparity Delta: {delta_ci:+.4f}")
-
-if delta_ci > 0.05:
-    print("⚠ WARNING: Proposed service changes increase pro-rich disparity by > 5%. Title VI review required.")</code></pre>
+print(f"Change in CI: {delta_ci:+.4f}")
+# Interpretation and any regulatory determination rest with the analyst.
+# moveq generates evidence; it does not determine compliance.</code></pre>
       </div>
     </div>
   </div>
