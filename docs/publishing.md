@@ -237,17 +237,21 @@ files that already exist; it cannot replace them.
 1. Tests on `main` are green.
 2. Set `version = "X.Y.Z"` in all four `pyproject.toml` files.
 3. Move notes in `CHANGELOG.md` from **Unreleased** into `## [X.Y.Z] — YYYY-MM-DD`.
-4. Commit and push `main`:
+4. Open a release PR (direct pushes to `main` are blocked):
 
    ```bash
+   git checkout -b chore/release-X.Y.Z origin/main
    git add -u
    git commit -m "chore: release vX.Y.Z"
-   git push origin main
+   git push -u origin chore/release-X.Y.Z
    ```
 
-5. Tag the **same** commit (annotated tag):
+   Wait for CI, then merge.
+
+5. Tag the **merge commit on main** (annotated tag):
 
    ```bash
+   git checkout main && git pull origin main
    git tag -a vX.Y.Z -m "Release vX.Y.Z"
    git push origin vX.Y.Z
    ```
@@ -303,17 +307,30 @@ These match GitHub's recommended defaults for a public library:
 - Default branch: `main`
 - Actions: allow GitHub-hosted runners; restrict third-party actions if you
   later need a tighter allow-list. `pypa/gh-action-pypi-publish` must remain
-  allowed.
-- Dependabot: enabled for `github-actions` (see `.github/dependabot.yml`)
+  allowed. Pin Actions to commit SHAs (Dependabot updates those pins).
+- Dependabot: `github-actions` and `pip` (see `.github/dependabot.yml`), plus
+  Dependabot security updates
+- Secret scanning and push protection: enabled
 - Private vulnerability reporting: enabled (see [SECURITY.md](../SECURITY.md))
 - Delete head branches on merge: enabled
 - Do not grant `id-token: write` or `contents: write` at the workflow level
   globally. Those permissions stay on the individual publish / release jobs.
 
-Recommended later, when there is more than one maintainer:
+Branch protection on `main` (classic rules plus the **Protect main**
+ruleset):
 
-- Branch protection on `main`: require the CI workflow, disallow force pushes
-- Required reviewers on the `pypi-*` environments
+- No force pushes, no branch deletion
+- Pull requests required (zero approving reviews: self-review is enough)
+- Required CI checks must pass; the branch must be up to date with `main`
+- Review conversations must be resolved
+- `enforce_admins` is on for the status-check rules
+
+The **Protect release tags** ruleset blocks moving or deleting `v*` tags.
+A broken release is superseded by the next patch, never rewritten.
+
+Required reviewers on the `pypi-*` environments are optional for a solo
+maintainer. Do **not** enable "Prevent self-review" on a one-person
+project or you will be unable to publish.
 
 ## Troubleshooting
 

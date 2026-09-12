@@ -17,6 +17,14 @@ PyPI.
   is not on conda-forge) and no longer claims a browser WebAssembly runtime.
   `moveq-core` is described as a pure-NumPy engine with no I/O or GIS
   dependencies.
+- CI pins GitHub Actions to commit SHAs, and adds a Ruff job (error-class
+  rules only) plus `pip-audit`. Dependabot now watches the four Python
+  packages as well as Actions.
+
+### Removed
+
+- Agent-generated gallery design note under `docs/superpowers/` (not
+  product documentation).
 
 ### Added
 

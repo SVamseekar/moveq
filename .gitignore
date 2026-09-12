@@ -1,19 +1,72 @@
+# Virtual environments and local secrets
 .venv/
-.vercel/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Python
 __pycache__/
+*.py[cod]
+*$py.class
 *.egg-info/
 .pytest_cache/
-*.pyc
-dist/
-build/
-.DS_Store
-.env
 .mypy_cache/
 .ruff_cache/
+.tox/
+.nox/
 htmlcov/
 .coverage
+.coverage.*
 coverage.xml
+coverage.json
+dist/
+build/
+*.whl
 
+# Node (website lockfile is tracked; install trees are not)
+node_modules/
 
-# Internal planning and specs (not shipped documentation)
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
+
+# Logs and scratch
+*.log
+tmp/
+temp/
+.cache/
+
+# Local databases / dumps
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+
+# Development captures (product images live under website/assets/)
+*.orig
+
+# Vercel CLI
+.vercel/
+
+# Isolated worktrees
+.worktrees/
+
+# Agent / local planning (not product documentation)
 planning/
+.claude/
+.agent/
+.agents/
+docs/superpowers/
+
+# Keep the versioning skill; ignore other local Grok state
+.grok/*
+!.grok/skills/
+!.grok/skills/**
