@@ -41,6 +41,15 @@ python examples/basic_equity/run.py
 
 CI runs the same tests on Python 3.10, 3.11, 3.12, and 3.13. The
 **Website** job checks the static site (`python scripts/check_website.py`).
+**Lint** runs Ruff (error-class rules only). **Dependency audit** runs
+`pip-audit` against the installed environment.
+
+```bash
+ruff check reference/python scripts tests examples
+pip-audit
+```
+
+This library has no runtime environment variables. Do not add `.env` files.
 
 ## Project layout
 
@@ -54,12 +63,31 @@ moveq/
 └── .github/workflows/    # Python CI and Trusted Publishing
 ```
 
-Do not commit virtual environments, `dist/`, caches, or secrets. See `.gitignore`.
+Do not commit virtual environments, `dist/`, caches, secrets, coverage output,
+editor state, or agent working files. See `.gitignore`. Python packages are
+libraries: install from the version ranges in each `pyproject.toml`. There is
+no root lockfile. `website/package-lock.json` is tracked for the static site.
+
+## Branching
+
+`main` is the stable, production-ready branch. Do not develop substantial
+work directly on it.
+
+1. Branch from the latest `main`.
+2. Use a short-lived name such as `feature/<name>`, `fix/<name>`,
+   `refactor/<name>`, or `chore/<name>`.
+3. Open a pull request. GitHub requires PRs for `main` (self-review is
+   enough; there is no second-human approval requirement).
+4. Delete the branch after merge. GitHub already deletes head branches
+   on merge.
+
+Do not add GitFlow release/develop branches. A feature branch → PR →
+`main` → annotated `vX.Y.Z` tag is the whole release path.
 
 ## Pull requests
 
 1. Open a pull request against `main` with a focused change.
-2. Use the PR template checklist.
+2. Use the PR template checklist. Review the complete diff before merge.
 3. Add or update tests when behaviour changes.
 4. Update `CHANGELOG.md` under **Unreleased** for user-facing changes.
 5. Keep the four package versions in lockstep:
@@ -71,10 +99,13 @@ Do not commit virtual environments, `dist/`, caches, or secrets. See `.gitignore
 6. If you change a public function, class, or CLI flag, update
    [`docs/api_reference.md`](docs/api_reference.md) and any affected guide.
 
-CI must pass before merge. Packaging is also checked on every PR (`python -m build`
-plus `twine check --strict`). The **Website** job must pass for the static
+CI must pass before merge. Do not merge with failing required checks.
+Packaging is also checked on every PR (`python -m build` plus
+`twine check --strict`). The **Website** job must pass for the static
 site. Changes under `website/` also get a Vercel preview URL on the pull
 request; production is https://moveq.souravamseekar.com.
+
+Unresolved review conversations must be resolved before merge.
 
 ## Commit messages
 
@@ -85,10 +116,14 @@ in the form already visible in `git log`. The types in use are:
 feat:   fix:   docs:   test:   ci:   chore:
 ```
 
-Match existing history. Do not invent additional types, and do not restyle
-existing practice. Prose in commits, PRs, issues, docs and the website is
-predominantly British (`-ise` / `-isation`); existing API identifiers such as
-`harmonization` keep their spelling.
+`refactor:`, `perf:`, and `build:` are also accepted when they describe the
+change more accurately. Do not invent types beyond these, and do not restyle
+existing history. Never use messages such as "update", "changes", "fix",
+"stuff", or "final". One commit is one logical change.
+
+Prose in commits, PRs, issues, docs and the website is predominantly British
+(`-ise` / `-isation`); existing API identifiers such as `harmonization` keep
+their spelling.
 
 Release commits use `chore: release vX.Y.Z` or `release: vX.Y.Z` as already
 in the log.
@@ -154,14 +189,31 @@ The full maintainer runbook is in [docs/publishing.md](docs/publishing.md).
 The short path after Trusted Publishers are configured:
 
 ```bash
-# 1. Set version = "X.Y.Z" in all four pyproject.toml files
-# 2. Move CHANGELOG Unreleased notes into [X.Y.Z]
+# 1. Branch from latest main (PRs are required; do not push main directly)
+git checkout -b chore/release-X.Y.Z origin/main
+# 2. Set version = "X.Y.Z" in all four pyproject.toml files and __init__.py files
+# 3. Move CHANGELOG Unreleased notes into [X.Y.Z]
+python scripts/check_release_version.py X.Y.Z
 git add -u
 git commit -m "chore: release vX.Y.Z"
-git push origin main
+git push -u origin chore/release-X.Y.Z
+# Open a PR, wait for CI, merge.
 
+# 4. Tag the merge commit on main, then push the tag (triggers PyPI)
+git checkout main && git pull origin main
 git tag -a vX.Y.Z -m "Release vX.Y.Z"
 git push origin vX.Y.Z
 ```
 
 Never store a production PyPI API token in this repository or on your machine.
+
+Never move, delete, or re-point a published `v*` tag. A bad release is
+fixed by the next patch (`v1.4.0` stays; ship `v1.4.1`). Rollback is a
+new commit and a new version, not a rewritten tag.
+
+## History safety
+
+Never rewrite shared `main` history and never force-push `main`. If a
+personal feature branch must be rewritten, use `--force-with-lease`, not
+`--force`. Do not run destructive Git commands without checking `git
+status`, the current branch, and the remote.

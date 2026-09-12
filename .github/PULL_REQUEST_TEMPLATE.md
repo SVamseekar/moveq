@@ -17,3 +17,5 @@
 - [ ] Package versions remain lockstep (`python scripts/check_release_version.py`)
 - [ ] Version bump follows CONTRIBUTING.md (numerical/correctness fixes are a **patch**, not a minor)
 - [ ] Docs updated when the public API or install path changed
+- [ ] Reviewed the complete diff; this PR is one focused change
+- [ ] Required CI checks are green (do not merge while they fail)

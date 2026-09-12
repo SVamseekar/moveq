@@ -98,21 +98,24 @@ release is superseded by the next patch, never rewritten.
 ### Release sequence
 
 ```bash
-# 1. Bump all 8 files (4 pyproject.toml + 4 __init__.py) in ONE commit
-# 2. CHANGELOG.md gains "## [X.Y.Z] - YYYY-MM-DD"
-# 3. Verify before tagging
+# 1. Branch from latest main (PRs are required; do not push main directly)
+git checkout -b chore/release-X.Y.Z origin/main
+# 2. Bump all 8 files (4 pyproject.toml + 4 __init__.py) in ONE commit
+# 3. CHANGELOG.md gains "## [X.Y.Z] - YYYY-MM-DD"
 python scripts/check_release_version.py X.Y.Z
 python scripts/check_release_version.py --git-rules
 pytest -v
-
-# 4. Commit, tag, push
 git commit -am "release: vX.Y.Z"
+git push -u origin chore/release-X.Y.Z
+# Open a PR, wait for CI, merge.
+
+# 4. Tag the merge commit on main, then push the tag (triggers PyPI)
+git checkout main && git pull origin main
 git tag -a vX.Y.Z -m "moveq X.Y.Z"
-git push origin main
 git push origin vX.Y.Z          # ← this triggers the PyPI publish
 ```
 
-Push the branch **before** the tag, so CI validates the release commit first.
+Merge the release PR **before** the tag, so CI validates the release commit first.
 
 **Never put a production PyPI token on a laptop or in repo secrets.** Releases
 use [PyPI Trusted Publishing](https://docs.pypi.org/trusted-publishers/) with
@@ -158,10 +161,12 @@ imposing a house style from elsewhere.
 
 ## 6. Branching and PRs
 
-- Work on a branch; do not commit directly to `main`
+- Work on a branch (`feature/`, `fix/`, `refactor/`, `chore/`); do not commit directly to `main`
+- Significant changes go through a pull request; self-review is enough (no fake second reviewer)
 - One logical change per PR; keep them reviewable
-- CI must be green: tests on all supported Pythons, website check, git release rules
+- CI must be green: tests on all supported Pythons, website check, git release rules, lint, dependency audit
 - Do not bump versions in feature PRs (§1)
+- Never force-push `main`. If a personal branch must be rewritten, `--force-with-lease` only
 
 ---
 

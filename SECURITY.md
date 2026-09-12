@@ -6,7 +6,8 @@ Until `1.0.0`, security fixes go to the latest published `0.x` release.
 
 | Version | Supported |
 | --- | --- |
-| 0.1.x | Yes, once published to PyPI |
+| 0.2.x | Yes |
+| 0.1.x | No — upgrade to 0.2.x |
 | < 0.1 | No |
 
 ## Reporting a vulnerability
