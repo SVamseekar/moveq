@@ -1,0 +1,77 @@
+{
+  "name": "odonnell-2008-india-u5",
+  "title": "Under-five deaths in India, 1982–92 (O'Donnell et al. 2008, Table 8.1)",
+  "profile": "data-package",
+  "licenses": [
+    {
+      "name": "CC-BY-3.0-IGO",
+      "path": "https://creativecommons.org/licenses/by/3.0/igo/",
+      "title": "Creative Commons Attribution 3.0 IGO"
+    }
+  ],
+  "sources": [
+    {
+      "title": "O'Donnell, van Doorslaer, Wagstaff and Lindelow, Analyzing Health Equity Using Household Survey Data, World Bank, 2008, Table 8.1",
+      "path": "https://doi.org/10.1596/978-0-8213-6933-3"
+    },
+    {
+      "title": "Open Knowledge Repository record (CC BY 3.0 IGO)",
+      "path": "https://openknowledge.worldbank.org/entities/publication/8c581d2b-ea86-56f4-8e9d-fbde5419bc2a"
+    }
+  ],
+  "resources": [
+    {
+      "name": "table8.1",
+      "path": "table8.1.csv",
+      "format": "csv",
+      "hash": "sha256:444ae352417ecbbe1e92acbd62fc35f3a78d24b975a682d089e21f130ceaca4e",
+      "schema": {
+        "fields": [
+          {"name": "wealth_group", "type": "string"},
+          {"name": "wealth_rank", "type": "integer"},
+          {"name": "births", "type": "integer"},
+          {"name": "u5mr_per_1000", "type": "number"},
+          {"name": "deaths", "type": "integer"}
+        ]
+      }
+    }
+  ],
+  "moveq": {
+    "claim": "reproduced",
+    "original": "The concentration index of under-five deaths by wealth quintile in India, 1982–92, is −0.1694.",
+    "moveq_question": "Does moveq's covariance concentration index on Table 8.1 match the published −0.1694?",
+    "outcome": {
+      "name": "under_five_mortality",
+      "unit": "deaths_per_1000_births",
+      "kind": "burden",
+      "nonnegative": true
+    },
+    "rank": {
+      "name": "wealth_rank",
+      "direction": "higher_is_advantaged"
+    },
+    "population": {
+      "column": "births"
+    },
+    "method": {
+      "metric": "ci",
+      "variant": "standard",
+      "weight_kind": "population",
+      "tie_policy": "weighted_midrank",
+      "missing_policy": "exclude",
+      "value_column": "u5mr_per_1000",
+      "weight_column": "births",
+      "rank_column": "wealth_rank"
+    },
+    "expected": {
+      "value": -0.1694,
+      "tolerance": 5e-5
+    },
+    "limitations": [
+      "Five wealth-quintile rows from Table 8.1, not NFHS microdata. The published −0.1694 is the grouped Kakwani (8.4) sum printed in that table.",
+      "moveq uses the covariance form of the same index on the five U5MR rows weighted by births. That form agrees with −0.1694 to the four decimal places the book reports.",
+      "U5MR is printed to one decimal place; implied deaths are integer. Using death rates (deaths/births) instead of U5MR changes the fifth decimal only.",
+      "The measure is descriptive, not causal. Redistribution of this table is not an endorsement by the World Bank."
+    ]
+  }
+}

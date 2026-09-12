@@ -8,7 +8,9 @@ from pathlib import Path
 
 import pytest
 
-from oracles import composite_score
+import numpy as np
+
+from oracles import composite_score, concentration_index_grouped
 
 from moveq_core import evidence as evidence_mod
 from moveq_core.evidence import (
@@ -904,3 +906,35 @@ def test_validation_report_is_frozen():
     assert isinstance(report, ValidationReport)
     with pytest.raises(AttributeError):
         report.ok = False  # type: ignore[misc]
+
+
+def test_odonnell_2008_table_8_1_matches_published_concentration_index():
+    """Published −0.1694 vs the grouped-rank oracle, not vs production CI."""
+    root = Path(__file__).resolve().parents[4] / "examples" / "evidence" / "odonnell-2008-india-u5"
+    csv_text = (root / "table8.1.csv").read_text(encoding="utf-8")
+    rows = [line.split(",") for line in csv_text.strip().splitlines()[1:]]
+    u5mr = np.array([float(row[3]) for row in rows])
+    births = np.array([float(row[2]) for row in rows])
+    wealth = np.array([float(row[1]) for row in rows])
+    oracle = concentration_index_grouped(u5mr, wealth, births)
+    published = -0.1694
+    assert abs(oracle - published) <= 5e-5
+
+    descriptor = json.loads((root / "datapackage.json").read_text(encoding="utf-8"))
+    blobs = {item["path"]: (root / item["path"]).read_bytes() for item in descriptor["resources"]}
+    report = validate_descriptor(descriptor, blobs)
+    assert report.ok, report.issues
+    assert descriptor["moveq"]["claim"] == "reproduced"
+    assert report.computed is not None
+    assert abs(report.computed - published) <= 5e-5
+    assert report.result.method == "wagstaff-covariance"
+
+
+def test_committed_examples_include_one_reproduced_case():
+    root = Path(__file__).resolve().parents[4] / "examples" / "evidence"
+    reproduced = []
+    for package in sorted(root.glob("*/datapackage.json")):
+        descriptor = json.loads(package.read_text(encoding="utf-8"))
+        if descriptor.get("moveq", {}).get("claim") == "reproduced":
+            reproduced.append(package.parent.name)
+    assert reproduced == ["odonnell-2008-india-u5"]
