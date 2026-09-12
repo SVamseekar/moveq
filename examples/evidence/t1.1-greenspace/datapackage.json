@@ -1,0 +1,60 @@
+{
+  "name": "t1.1-greenspace",
+  "title": "Greenspace exposure inequality, Global North vs Global South",
+  "profile": "data-package",
+  "licenses": [
+    {
+      "name": "BSD-3-Clause",
+      "path": "https://spdx.org/licenses/BSD-3-Clause.html"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Chen et al., Contrasting inequality in human exposure to greenspace between cities of Global North and Global South, Nature Communications 13:4636 (2022)",
+      "path": "https://doi.org/10.1038/s41467-022-32258-4"
+    },
+    {
+      "title": "Chen, City-scale greenspace exposure and inequality, HKU DataHub",
+      "path": "https://doi.org/10.25442/hku.19914988"
+    }
+  ],
+  "resources": [
+    {
+      "name": "licence-gate",
+      "path": "licence-gate.json",
+      "format": "json",
+      "hash": "sha256:741927244dc678d735e6770a3b98b02d78e8b58c291f736898fa9d242add6042"
+    }
+  ],
+  "moveq": {
+    "claim": "proposed",
+    "original": "Greenspace exposure inequality in Global South cities (Gini 0.47) is nearly twice that of Global North cities (Gini 0.24–0.27).",
+    "moveq_question": "Do per-city Gini values deposited with the paper match moveq's Lorenz-trapezoid Gini within a stated tolerance?",
+    "outcome": {
+      "name": "greenspace_exposure",
+      "unit": "fraction",
+      "kind": "benefit",
+      "nonnegative": true
+    },
+    "rank": {
+      "name": null,
+      "direction": null
+    },
+    "population": {
+      "column": null
+    },
+    "method": {
+      "metric": null,
+      "variant": null,
+      "weight_kind": "population",
+      "tie_policy": "weighted_midrank",
+      "missing_policy": "exclude"
+    },
+    "limitations": [
+      "The city-level extract is not in this repository. The deposit is CC BY-NC 4.0, which cannot be redistributed under moveq's BSD-3-Clause licence.",
+      "The paper is CC-BY-4.0 and reports regional means, not the per-city table needed to recompute those means.",
+      "HTTP 403 on the DataHub project page is a retrieval inconvenience; the licence, not the 403, is why the extract is absent.",
+      "Promotion to REPRODUCED requires a committable extract under a redistribution-compatible licence, plus a CI check against oracles.py — not against concentrationMetrics."
+    ]
+  }
+}

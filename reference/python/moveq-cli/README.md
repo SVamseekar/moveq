@@ -43,6 +43,12 @@ pass terms and weights on the command line or in a JSON file (`--json`).
 the same / replace / omit rules: every base section must have an
 explicit decision, replacements need a title, omissions need a note.
 
+**`moveq evidence validate`** checks a Frictionless `datapackage.json`,
+a 30-entry gallery `registry.json`, or a directory of those files:
+schema, resource hashes, that the declared method is what ran, and
+`expected.tolerance`. Blocked cases are allowed to have no computed
+value. A failure names the check and exits non-zero.
+
 `moveq gini`, `moveq palma`, and `moveq ci` accept `--json` to print the
 full `EquityResult` (`metric`, `value`, `method`, `n_areas`, warnings).
 The default line is unchanged.
@@ -76,6 +82,13 @@ moveq score \
   --weights '{"coverage": 0.5, "evening": 0.3, "frequency": 0.2}'
 
 moveq score score_config.json --json
+```
+
+Evidence manifests (Frictionless `datapackage.json` plus a `moveq` block):
+
+```bash
+moveq evidence validate examples/evidence
+moveq evidence validate examples/evidence/t1.6-missing-term/datapackage.json --json
 ```
 
 Catalogue file:

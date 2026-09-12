@@ -6,6 +6,7 @@
     moveq score --terms '{"coverage": 0.8, "evening": 0.5}' --weights '{"coverage": 0.6, "evening": 0.4}'
     moveq score config.json
     moveq catalogue validate config.json
+    moveq evidence validate examples/evidence
 """
 
 from __future__ import annotations
@@ -26,6 +27,8 @@ from moveq_core import (
     concentration_index_result,
     gini_result,
     palma_result,
+    validate_descriptor,
+    validate_registry,
 )
 
 
@@ -194,6 +197,83 @@ def _cmd_catalogue_validate(args: argparse.Namespace) -> int:
     return 0
 
 
+def _load_json(path: Path) -> Any:
+    with path.open(encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+def _resource_bytes(manifest_path: Path, descriptor: dict[str, Any]) -> dict[str, bytes]:
+    blobs: dict[str, bytes] = {}
+    root = manifest_path.parent
+    for resource in descriptor.get("resources") or []:
+        if not isinstance(resource, dict):
+            continue
+        rel = resource.get("path")
+        if not isinstance(rel, str):
+            continue
+        target = (root / rel).resolve()
+        if not target.is_file():
+            continue
+        blobs[rel] = target.read_bytes()
+    return blobs
+
+
+def _print_report(label: str, report: Any, as_json: bool) -> int:
+    payload = {
+        "path": label,
+        "valid": report.ok,
+        "computed": report.computed,
+        "issues": [{"check": issue.check, "message": issue.message} for issue in report.issues],
+    }
+    if as_json:
+        print(json.dumps(payload, indent=2))
+    else:
+        print(f"path: {label}")
+        if report.ok:
+            print("status: valid")
+            if report.computed is not None:
+                print(f"computed: {report.computed}")
+        else:
+            print("status: invalid")
+            print("validation errors:")
+            for issue in report.issues:
+                print(f"  - [{issue.check}] {issue.message}")
+    return 0 if report.ok else 1
+
+
+def _validate_one(path: Path, as_json: bool) -> int:
+    data = _load_json(path)
+    if path.name == "registry.json" or (isinstance(data, dict) and "cases" in data and "moveq" not in data):
+        return _print_report(str(path), validate_registry(data), as_json)
+    blobs = _resource_bytes(path, data)
+    return _print_report(str(path), validate_descriptor(data, blobs), as_json)
+
+
+def _iter_evidence_paths(root: Path) -> list[Path]:
+    if root.is_file():
+        return [root]
+    paths = sorted(root.rglob("datapackage.json"))
+    registry = root / "registry.json"
+    if registry.is_file():
+        paths.insert(0, registry)
+    return paths
+
+
+def _cmd_evidence_validate(args: argparse.Namespace) -> int:
+    target = Path(args.path)
+    if not target.exists():
+        raise FileNotFoundError(target)
+    paths = _iter_evidence_paths(target)
+    if not paths:
+        raise ValueError(f"no datapackage.json or registry.json under {target}")
+    worst = 0
+    for path in paths:
+        code = _validate_one(path, args.json)
+        if code != 0:
+            worst = code
+    return worst
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="moveq", description="Transport-equity metrics and catalogue tools.")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -248,6 +328,16 @@ def build_parser() -> argparse.ArgumentParser:
     cat_val.add_argument("config", help="Path to JSON catalogue configuration file")
     cat_val.add_argument("--json", action="store_true", help="Output machine-readable JSON")
     cat_val.set_defaults(func=_cmd_catalogue_validate)
+
+    evidence = sub.add_parser("evidence", help="Validate published-case manifests")
+    evidence_sub = evidence.add_subparsers(dest="subcommand", required=True)
+    ev_val = evidence_sub.add_parser(
+        "validate",
+        help="Validate a datapackage.json, a registry.json, or a directory of cases",
+    )
+    ev_val.add_argument("path", help="Manifest file or directory of cases")
+    ev_val.add_argument("--json", action="store_true", help="Output machine-readable JSON")
+    ev_val.set_defaults(func=_cmd_evidence_validate)
 
     return parser
 

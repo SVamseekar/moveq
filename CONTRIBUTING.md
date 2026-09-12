@@ -58,7 +58,7 @@ moveq/
 ├── reference/python/     # installable packages (src layout)
 ├── website/              # static site (Vercel → moveq.souravamseekar.com)
 ├── docs/                 # user and maintainer documentation
-├── examples/             # runnable demos
+├── examples/             # runnable demos and evidence cases
 ├── scripts/              # release helpers used by CI
 └── .github/workflows/    # Python CI and Trusted Publishing
 ```

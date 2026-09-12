@@ -1,0 +1,59 @@
+{
+  "name": "t1.6-missing-term",
+  "title": "Missing-term reweighting changes a composite ranking",
+  "profile": "data-package",
+  "licenses": [
+    {
+      "name": "BSD-3-Clause",
+      "path": "https://spdx.org/licenses/BSD-3-Clause.html"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Constructed sensitivity example (moveq spec 07 T1.6)",
+      "path": "https://github.com/SVamseekar/moveq"
+    }
+  ],
+  "resources": [
+    {
+      "name": "terms",
+      "path": "terms.json",
+      "format": "json",
+      "hash": "sha256:42b8a3f24666b1a37f20e17889d471f1c78f2256aee55ef683c4fc5300ecb5a2"
+    }
+  ],
+  "moveq": {
+    "claim": "demonstrated",
+    "original": "A missing composite term can be dropped or zeroed without changing the ranking.",
+    "moveq_question": "Does the missing-term policy change the score enough to reorder a ranking?",
+    "outcome": {
+      "name": "composite_score",
+      "unit": "score_0_100",
+      "kind": "benefit",
+      "nonnegative": true
+    },
+    "rank": {
+      "name": null,
+      "direction": null
+    },
+    "population": {
+      "column": null
+    },
+    "method": {
+      "metric": "score",
+      "variant": null,
+      "weight_kind": "unweighted",
+      "tie_policy": "weighted_midrank",
+      "missing_policy": "reweight"
+    },
+    "expected": {
+      "value": 73.33333333333333,
+      "tolerance": 1e-9
+    },
+    "limitations": [
+      "Constructed inputs; not a finding about a named NUTS2 region.",
+      "The 73.33 versus 55.00 swing is two policies on the same vector, not a measured place.",
+      "The measure is descriptive, not causal."
+    ]
+  }
+}

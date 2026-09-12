@@ -62,6 +62,9 @@ jobs:
       - name: Run example integration test
         run: python examples/basic_equity/run.py
 
+      - name: Validate evidence manifests
+        run: moveq evidence validate examples/evidence
+
   website:
     name: Website
     runs-on: ubuntu-latest

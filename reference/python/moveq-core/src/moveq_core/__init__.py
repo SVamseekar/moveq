@@ -11,6 +11,15 @@ from moveq_core.equity import (
     gini_result,
     palma_result,
 )
+from moveq_core.evidence import (
+    CLAIM_BADGES,
+    PROMOTION_RULES,
+    ValidationIssue,
+    ValidationReport,
+    sha256_bytes,
+    validate_descriptor,
+    validate_registry,
+)
 from moveq_core.score import ScoreComponent, ScoreResult, clip01, compute_score
 
 __all__ = [
@@ -27,6 +36,13 @@ __all__ = [
     "clip01",
     "ScoreComponent",
     "ScoreResult",
+    "CLAIM_BADGES",
+    "PROMOTION_RULES",
+    "ValidationIssue",
+    "ValidationReport",
+    "sha256_bytes",
+    "validate_descriptor",
+    "validate_registry",
 ]
 
 __version__ = "0.2.0"

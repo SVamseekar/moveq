@@ -1,0 +1,24 @@
+{
+  "dataset": "City-scale greenspace exposure and inequality",
+  "doi": "10.25442/hku.19914988",
+  "figshare_article_id": 19914988,
+  "project_page": "https://datahub.hku.hk/projects/GreenExposure/140290",
+  "paper_doi": "10.1038/s41467-022-32258-4",
+  "paper_licence": "CC-BY-4.0",
+  "dataset_licence": "CC BY-NC 4.0",
+  "dataset_licence_url": "https://creativecommons.org/licenses/by-nc/4.0/",
+  "retrieved": "2026-09-12",
+  "retrieval_notes": [
+    "The HKU DataHub project page returned HTTP 403 to automated HTML fetch.",
+    "The Figshare API at https://api.figshare.com/v2/articles/19914988 is public and names the licence as CC BY-NC 4.0.",
+    "moveq is licensed BSD-3-Clause. CC BY-NC forbids commercial reuse, so the city-level extract cannot be committed to this repository.",
+    "No shapefile, DBF or city-level Gini table is stored here."
+  ],
+  "published_aggregates_from_the_paper": {
+    "global_north_cities": 522,
+    "global_south_cities": 506,
+    "global_north_mean_gini": "0.24 ± 0.13",
+    "global_south_mean_gini": "0.47 ± 0.13",
+    "exposure_formula": "GEd = Σ(Pi × Gid) / ΣPi"
+  }
+}
