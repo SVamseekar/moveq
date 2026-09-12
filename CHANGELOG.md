@@ -13,6 +13,16 @@ PyPI.
 
 ### Added
 
+- Evidence layer: six-badge claim ladder, Frictionless case manifests
+  with a required `limitations` list and the six contract decisions,
+  `moveq evidence validate`, and CI that fails a case which stops
+  matching. Provenance fields `source_id`, `software_version`, and
+  `data_hash` on `EquityResult` (the last two optional; version is
+  filled automatically). Three published cases:
+  T1.6 missing-term score (**demonstrated**), T1.7 nursing workforce
+  (**blocked**), T1.1 greenspace (**proposed** — the HKU deposit is
+  CC BY-NC 4.0 and cannot be committed here). There is no reproduced
+  case yet. See `docs/evidence.md`.
 - Optional `outcome_kind` on `concentration_index_result` populates
   `EquityResult.interpretation` (location of a benefit or burden; never
   fairness or causation). Omission preserves descriptive-only output.

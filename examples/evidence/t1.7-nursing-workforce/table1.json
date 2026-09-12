@@ -1,0 +1,43 @@
+{
+  "source": "Kharazmi, Bordbar and Bordbar, BMC Nursing 22:151 (2023), Table 1",
+  "doi": "10.1186/s12912-023-01313-w",
+  "licence": "CC-BY-4.0",
+  "note": "HDI-group aggregates only. The paper publishes no country-by-country table.",
+  "groups": [
+    {
+      "hdi_group": "very high",
+      "n_countries": 66,
+      "population_total": 1574622110,
+      "nurses_total": 15050758
+    },
+    {
+      "hdi_group": "high",
+      "n_countries": 53,
+      "population_total": 2990714471,
+      "nurses_total": 9824244
+    },
+    {
+      "hdi_group": "medium",
+      "n_countries": 37,
+      "population_total": 2269929924,
+      "nurses_total": 4395145
+    },
+    {
+      "hdi_group": "low",
+      "n_countries": 33,
+      "population_total": 965508671,
+      "nurses_total": 697959
+    }
+  ],
+  "stated_formula": "Gini = 1 − Σ(Xi × Yi)",
+  "formula_symbols": {
+    "n": "Total number of groups",
+    "Yi": "Cumulative percentage of nurses in the group",
+    "Xi": "Cumulative percentage of the population in the group"
+  },
+  "published_gini": {
+    "within_hdi_groups": "0.217 to 0.283",
+    "between_hdi_groups": 0.467,
+    "world": 0.667
+  }
+}

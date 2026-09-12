@@ -2,6 +2,7 @@ import csv
 import io
 import json
 from contextlib import redirect_stderr, redirect_stdout
+from pathlib import Path
 
 import pytest
 
@@ -395,6 +396,111 @@ def test_ci_undefined_exits_3(tmp_path):
     data = json.loads(buf.getvalue())
     assert data["value"] is None
     assert data["status"] == "undefined"
+
+
+def test_evidence_validate_demonstrated_case(tmp_path):
+    from moveq_core.evidence import sha256_bytes, validate_descriptor
+
+    terms = '{"terms":{"access":0.8,"climate":null,"frequency":0.6},"weights":{"access":0.5,"climate":0.25,"frequency":0.25}}'
+    payload = terms.encode("utf-8")
+    case_dir = tmp_path / "case"
+    case_dir.mkdir()
+    (case_dir / "terms.json").write_bytes(payload)
+    descriptor = {
+        "name": "demo",
+        "title": "Demo",
+        "profile": "data-package",
+        "licenses": [{"name": "BSD-3-Clause", "path": "https://spdx.org/licenses/BSD-3-Clause.html"}],
+        "sources": [{"title": "constructed", "path": "https://github.com/SVamseekar/moveq"}],
+        "resources": [
+            {"name": "terms", "path": "terms.json", "format": "json", "hash": sha256_bytes(payload)}
+        ],
+        "moveq": {
+            "claim": "demonstrated",
+            "original": "missing term",
+            "moveq_question": "does reweighting change the score?",
+            "outcome": {"name": "score", "unit": "score_0_100", "kind": "benefit", "nonnegative": True},
+            "rank": {"name": None, "direction": None},
+            "population": {"column": None},
+            "method": {
+                "metric": "score",
+                "variant": None,
+                "weight_kind": "unweighted",
+                "tie_policy": "weighted_midrank",
+                "missing_policy": "reweight",
+            },
+            "expected": {"value": 73.33333333333333, "tolerance": 1e-9},
+            "limitations": ["constructed"],
+        },
+    }
+    manifest = case_dir / "datapackage.json"
+    manifest.write_text(json.dumps(descriptor), encoding="utf-8")
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        code = main(["evidence", "validate", str(manifest)])
+    assert code == 0
+    assert "status: valid" in buf.getvalue()
+    # Sanity: the same descriptor validates in-process.
+    assert validate_descriptor(descriptor, {"terms.json": payload}).ok
+
+
+def test_evidence_validate_hash_mismatch_exits_1(tmp_path):
+    case_dir = tmp_path / "case"
+    case_dir.mkdir()
+    (case_dir / "terms.json").write_text("{}", encoding="utf-8")
+    descriptor = {
+        "name": "demo",
+        "title": "Demo",
+        "profile": "data-package",
+        "resources": [
+            {
+                "name": "terms",
+                "path": "terms.json",
+                "format": "json",
+                "hash": "sha256:" + "0" * 64,
+            }
+        ],
+        "moveq": {
+            "claim": "proposed",
+            "original": "x",
+            "moveq_question": "y",
+            "outcome": {"name": "y", "unit": "1", "kind": "benefit", "nonnegative": True},
+            "rank": {"name": None, "direction": None},
+            "population": {"column": None},
+            "method": {
+                "metric": None,
+                "variant": None,
+                "weight_kind": None,
+                "tie_policy": None,
+                "missing_policy": None,
+            },
+            "limitations": ["none yet"],
+        },
+    }
+    manifest = case_dir / "datapackage.json"
+    manifest.write_text(json.dumps(descriptor), encoding="utf-8")
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        code = main(["evidence", "validate", str(manifest)])
+    assert code == 1
+    assert "[hash]" in buf.getvalue()
+
+
+def test_evidence_validate_missing_path_exits_1():
+    err = io.StringIO()
+    with redirect_stderr(err):
+        code = main(["evidence", "validate", "no-such-manifest.json"])
+    assert code == 1
+    assert "error:" in err.getvalue()
+
+
+def test_evidence_validate_committed_examples():
+    root = Path(__file__).resolve().parents[4] / "examples" / "evidence"
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        code = main(["evidence", "validate", str(root)])
+    assert code == 0
+    assert "status: valid" in buf.getvalue()
 
 
 def test_help_command():

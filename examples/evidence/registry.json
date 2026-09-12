@@ -1,0 +1,216 @@
+{
+  "title": "moveq gallery claim ladder",
+  "spec": "planning/07-gallery.md",
+  "cases": [
+    {
+      "id": "t1.1-greenspace",
+      "spec": "T1.1",
+      "title": "Greenspace exposure inequality, Global North vs Global South",
+      "claim": "proposed",
+      "published": true
+    },
+    {
+      "id": "t1.2-gini-reporting",
+      "spec": "T1.2",
+      "title": "The Gini reporting problem in urban greening",
+      "claim": "demonstrated",
+      "published": false
+    },
+    {
+      "id": "t1.3-nhs-wlmds",
+      "spec": "T1.3",
+      "title": "NHS elective waiting lists by deprivation decile",
+      "claim": "extended",
+      "published": false
+    },
+    {
+      "id": "t1.4-bus-travel-time",
+      "spec": "T1.4",
+      "title": "Bus-based healthcare access and travel time variability",
+      "claim": "extended",
+      "published": false
+    },
+    {
+      "id": "t1.5-london-ptal",
+      "spec": "T1.5",
+      "title": "London public transport accessibility, 2011–2021",
+      "claim": "extended",
+      "published": false
+    },
+    {
+      "id": "t1.6-missing-term",
+      "spec": "T1.6",
+      "title": "EU energy poverty and the Social Climate Fund",
+      "claim": "demonstrated",
+      "published": true
+    },
+    {
+      "id": "t1.7-nursing-workforce",
+      "spec": "T1.7",
+      "title": "Global nursing workforce distribution",
+      "claim": "blocked",
+      "published": true
+    },
+    {
+      "id": "t1.8-pm25-pittsburgh",
+      "spec": "T1.8",
+      "title": "PM2.5 exposure and social deprivation",
+      "claim": "extended",
+      "published": false
+    },
+    {
+      "id": "t1.9-access-to-cash",
+      "spec": "T1.9",
+      "title": "Access to cash after bank branch closures",
+      "claim": "extended",
+      "published": false
+    },
+    {
+      "id": "t1.10-e-food-deserts",
+      "spec": "T1.10",
+      "title": "E-food deserts across Great Britain",
+      "claim": "extended",
+      "published": false
+    },
+    {
+      "id": "t1.11-ev-charging",
+      "spec": "T1.11",
+      "title": "EV charging infrastructure and regional inequality",
+      "claim": "extended",
+      "published": false
+    },
+    {
+      "id": "t1.12-school-spending",
+      "spec": "T1.12",
+      "title": "School spending inequality across local authorities",
+      "claim": "extended",
+      "published": false
+    },
+    {
+      "id": "t1.13-broadband",
+      "spec": "T1.13",
+      "title": "Broadband and full-fibre adoption inequality",
+      "claim": "extended",
+      "published": false
+    },
+    {
+      "id": "t1.14-flood-risk",
+      "spec": "T1.14",
+      "title": "Flood risk and social vulnerability",
+      "claim": "extended",
+      "published": false
+    },
+    {
+      "id": "t1.15-deprivation-catalogue",
+      "spec": "T1.15",
+      "title": "Cross-country deprivation index harmonization",
+      "claim": "demonstrated",
+      "published": false
+    },
+    {
+      "id": "t2.1-recurring-duty-rota",
+      "spec": "T2.1",
+      "title": "Is the recurring duty rota actually fair?",
+      "claim": "demonstrated",
+      "published": false
+    },
+    {
+      "id": "t2.2-flexible-hours",
+      "spec": "T2.2",
+      "title": "Did the flexible-hours change help everyone on the team?",
+      "claim": "demonstrated",
+      "published": false
+    },
+    {
+      "id": "t2.3-holiday-split",
+      "spec": "T2.3",
+      "title": "Splitting a holiday when everyone flies from a different city",
+      "claim": "demonstrated",
+      "published": false
+    },
+    {
+      "id": "t2.4-recurring-meetup",
+      "spec": "T2.4",
+      "title": "Where should we hold the recurring meetup?",
+      "claim": "demonstrated",
+      "published": false
+    },
+    {
+      "id": "t2.5-equal-bill-split",
+      "spec": "T2.5",
+      "title": "Is this equal bill split actually equal?",
+      "claim": "demonstrated",
+      "published": false
+    },
+    {
+      "id": "t2.6-neighbourhood-choice",
+      "spec": "T2.6",
+      "title": "Which neighbourhood actually suits us?",
+      "claim": "demonstrated",
+      "published": false
+    },
+    {
+      "id": "t2.7-household-load",
+      "spec": "T2.7",
+      "title": "How much of the household load do I actually carry?",
+      "claim": "demonstrated",
+      "published": false
+    },
+    {
+      "id": "t2.8-savings-goals",
+      "spec": "T2.8",
+      "title": "Are our savings goals actually progressing together?",
+      "claim": "demonstrated",
+      "published": false
+    },
+    {
+      "id": "t2.9-accessible-route",
+      "spec": "T2.9",
+      "title": "Is our accessible route actually usable?",
+      "claim": "demonstrated",
+      "published": false
+    },
+    {
+      "id": "t2.10-shared-subscription",
+      "spec": "T2.10",
+      "title": "Is the shared subscription worth it for everyone?",
+      "claim": "demonstrated",
+      "published": false
+    },
+    {
+      "id": "t2.11-giving-up-the-car",
+      "spec": "T2.11",
+      "title": "Would giving up the car actually work?",
+      "claim": "demonstrated",
+      "published": false
+    },
+    {
+      "id": "t2.12-earnings-volatility",
+      "spec": "T2.12",
+      "title": "Are my earnings as steady as the average suggests?",
+      "claim": "demonstrated",
+      "published": false
+    },
+    {
+      "id": "t2.13-service-closure",
+      "spec": "T2.13",
+      "title": "Which services did the closure actually cost us?",
+      "claim": "demonstrated",
+      "published": false
+    },
+    {
+      "id": "t2.14-time-of-use-tariff",
+      "spec": "T2.14",
+      "title": "Would a time-of-use energy tariff actually save us money?",
+      "claim": "demonstrated",
+      "published": false
+    },
+    {
+      "id": "t2.15-elder-care",
+      "spec": "T2.15",
+      "title": "Who is actually carrying the care for our parent?",
+      "claim": "demonstrated",
+      "published": false
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "name": "t1.7-nursing-workforce",
+  "title": "Published global nursing Gini cannot be checked from the paper",
+  "profile": "data-package",
+  "licenses": [
+    {
+      "name": "CC-BY-4.0",
+      "path": "https://creativecommons.org/licenses/by/4.0/"
+    }
+  ],
+  "sources": [
+    {
+      "title": "Kharazmi, Bordbar and Bordbar, Distribution of nursing workforce in the world using Gini coefficient, BMC Nursing 22:151 (2023)",
+      "path": "https://doi.org/10.1186/s12912-023-01313-w"
+    }
+  ],
+  "resources": [
+    {
+      "name": "table1",
+      "path": "table1.json",
+      "format": "json",
+      "hash": "sha256:fc801a9c6e5640e4207ac3a4079bc3b38244cd94852de67da68b5afe442916f9"
+    }
+  ],
+  "moveq": {
+    "claim": "blocked",
+    "original": "The global Gini of the nursing workforce is 0.667.",
+    "moveq_question": "Can 0.667 be independently verified from the paper?",
+    "outcome": {
+      "name": "nurses_per_10000",
+      "unit": "count_per_10000",
+      "kind": "benefit",
+      "nonnegative": true
+    },
+    "rank": {
+      "name": null,
+      "direction": null
+    },
+    "population": {
+      "column": null
+    },
+    "method": {
+      "metric": null,
+      "variant": null,
+      "weight_kind": null,
+      "tie_policy": null,
+      "missing_policy": null
+    },
+    "blocked_reasons": [
+      "The stated formula is Gini = 1 − Σ(Xi × Yi), with Xi and Yi as cumulative percentages of population and nurses. That is not the trapezoid Lorenz form used by moveq, and it is incomplete as written.",
+      "Table 1 publishes HDI-group aggregates only (four rows). There is no country-by-country table for the 189 countries, so the headline 0.667 cannot be rebuilt from the article.",
+      "Data availability is 'from the corresponding author on reasonable request', not a deposited per-country file.",
+      "Country-equal versus population weighting is undisclosed; either convention is defensible and they are not the same number."
+    ],
+    "limitations": [
+      "This case documents why the published 0.667 cannot be checked. It does not estimate a substitute Gini.",
+      "The four HDI-group rows are the between-group table (published 0.467), not the 189-country series.",
+      "A WHO NHWA and UN rebuild would be a separate RECOMPUTED case, never a reproduction of 0.667.",
+      "The measure, were it computable, would still be descriptive, not causal."
+    ]
+  }
+}

@@ -9,7 +9,9 @@
 This is the calculation engine of the [moveq](https://pypi.org/project/moveq/)
 stack. It has **no I/O**: you pass NumPy arrays (or, with the optional
 `frames` extra, a pandas DataFrame) and get numbers and small result objects
-back. There is no database, GIS library, or network client.
+back. There is no database, GIS library, or network client. Manifest
+validation (`validate_descriptor`) is in-memory: the caller supplies the
+descriptor dict and resource bytes. The CLI reads files.
 
 Most applications should install the umbrella package
 [`moveq`](https://pypi.org/project/moveq/), which re-exports this API.

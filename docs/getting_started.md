@@ -159,3 +159,12 @@ moveq score score_config.json --json
 ```bash
 moveq catalogue validate country_catalogue.json
 ```
+
+### Evidence manifests
+
+```bash
+moveq evidence validate examples/evidence
+moveq evidence validate path/to/datapackage.json --json
+```
+
+See [Evidence layer](evidence.md). A failing hash or tolerance check exits non-zero.

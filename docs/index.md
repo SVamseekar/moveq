@@ -51,6 +51,7 @@ PyPI: <https://pypi.org/project/moveq/>.
 - [**Getting Started**](getting_started.md): Installation, quickstart recipes, and CLI guide.
 - [**Methodology Guide**](methodology.md): Mathematical formulations of Gini, Palma, Concentration Index, and scoring algorithms.
 - [**Catalogue Harmonization Guide**](catalogue_guide.md): The `SAME` / `REPLACE` / `OMIT` decision framework for international studies.
+- [**Evidence layer**](evidence.md): Claim-ladder badges, case manifests, and `moveq evidence validate`.
 - [**API Reference**](api_reference.md): Complete module, class, and function documentation.
 - [**Publishing to PyPI**](publishing.md): Maintainer runbook for versioning, Trusted Publishing, and GitHub Releases.
 - [**Changelog**](../CHANGELOG.md): User-facing history of each lockstep release.

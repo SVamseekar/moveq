@@ -83,9 +83,38 @@ Frozen dataclass analogous to `ScoreResult`. `value` is the same number the corr
 - `status: "ok" | "undefined"` — default `"ok"`
 - `reason: str | None` — e.g. `"zero_mean"` when undefined
 - `interpretation: str | None` — location of a signed CI when `outcome_kind` was supplied; otherwise `None`
+- `source_id: str | None` — optional link to a case manifest `name`
+- `software_version: str | None` — `moveq-core` version that produced the result (filled automatically)
+- `data_hash: str | None` — optional SHA-256 of the input file (`sha256:<hex>`)
 - `to_dict() -> dict` — JSON-serializable copy of the fields (`value` is JSON `null` when undefined)
 
 The existing `compute_gini`, `compute_palma_ratio`, and `compute_concentration_index` functions still return `float` (they return `.value` from the corresponding `*_result` function).
+
+`gini_result`, `palma_result`, and `concentration_index_result` accept optional `source_id` and `data_hash` keyword arguments and record them on the result.
+
+---
+
+## 1b. `moveq_core.evidence`
+
+Claim-ladder constants and in-memory manifest validation. This module does not read the filesystem.
+
+### `CLAIM_BADGES`
+`("reproduced", "recomputed", "extended", "blocked", "demonstrated", "proposed")`
+
+### `PROMOTION_RULES`
+Mapping of each badge to the condition that must hold before a case may carry it.
+
+### `validate_descriptor(descriptor, resource_bytes=None) -> ValidationReport`
+Validate a Frictionless Data Package dict plus a `moveq` contract block. `resource_bytes` maps relative paths to file contents. Checks schema, SHA-256 hashes, that the declared method is what ran, and `expected.tolerance`.
+
+### `validate_registry(registry) -> ValidationReport`
+A gallery registry must contain 30 cases, unique ids, and exactly one badge each.
+
+### `sha256_bytes(data: bytes) -> str`
+Frictionless-style `sha256:<hex>`.
+
+### `ValidationReport`
+Frozen. `ok`, `issues` (each with `check` in `schema` / `hash` / `method` / `tolerance`), `computed`, `result`.
 
 ---
 

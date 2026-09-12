@@ -37,6 +37,9 @@ TO_DICT_KEYS = {
     "status",
     "reason",
     "interpretation",
+    "source_id",
+    "software_version",
+    "data_hash",
 }
 
 
@@ -176,6 +179,29 @@ def test_to_dict_round_trip_shape():
     assert data["warnings"] == result.warnings
     assert data["note"] == result.note
     assert data["context"] == {"region": "north"}
+
+
+def test_provenance_fields_default_and_round_trip():
+    result = gini_result(UNEVEN_SERVICE, UNEVEN_WEIGHTS)
+    assert result.source_id is None
+    assert result.data_hash is None
+    assert result.software_version
+    data = result.to_dict()
+    assert data["source_id"] is None
+    assert data["data_hash"] is None
+    assert data["software_version"] == result.software_version
+
+
+def test_provenance_fields_record_source_and_hash():
+    result = palma_result(
+        UNEVEN_SERVICE,
+        UNEVEN_WEIGHTS,
+        source_id="t1.6-missing-term",
+        data_hash="sha256:" + "ab" * 32,
+    )
+    assert result.source_id == "t1.6-missing-term"
+    assert result.data_hash.startswith("sha256:")
+    assert result.to_dict()["source_id"] == "t1.6-missing-term"
 
 
 def test_to_dict_preserves_palma_inf():

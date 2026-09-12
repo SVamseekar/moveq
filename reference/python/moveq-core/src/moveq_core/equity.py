@@ -47,6 +47,17 @@ _BOUNDED_VARIANT_WARNING = (
 )
 
 
+def _software_version() -> str:
+    try:
+        from importlib.metadata import version
+
+        return version("moveq-core")
+    except Exception:
+        from moveq_core import __version__
+
+        return __version__
+
+
 class MoveqError(Exception):
     """Base for all moveq errors."""
 
@@ -146,6 +157,9 @@ class EquityResult:
     status: Literal["ok", "undefined"] = "ok"
     reason: str | None = None
     interpretation: str | None = None
+    source_id: str | None = None
+    software_version: str | None = None
+    data_hash: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -162,6 +176,9 @@ class EquityResult:
             "status": self.status,
             "reason": self.reason,
             "interpretation": self.interpretation,
+            "source_id": self.source_id,
+            "software_version": self.software_version,
+            "data_hash": self.data_hash,
         }
 
 
@@ -182,6 +199,8 @@ def gini_result(
     *,
     weight_kind: WeightKind | None = None,
     context: dict[str, str] | None = None,
+    source_id: str | None = None,
+    data_hash: str | None = None,
 ) -> EquityResult:
     """Population-weighted Gini coefficient with audit fields.
 
@@ -222,6 +241,9 @@ def gini_result(
         warnings=warnings,
         note=note,
         context=dict(context or {}),
+        source_id=source_id,
+        software_version=_software_version(),
+        data_hash=data_hash,
     )
 
 
@@ -231,6 +253,8 @@ def palma_result(
     *,
     weight_kind: WeightKind | None = None,
     context: dict[str, str] | None = None,
+    source_id: str | None = None,
+    data_hash: str | None = None,
 ) -> EquityResult:
     """Palma ratio with audit fields.
 
@@ -290,6 +314,9 @@ def palma_result(
         warnings=warnings,
         note=note,
         context=dict(context or {}),
+        source_id=source_id,
+        software_version=_software_version(),
+        data_hash=data_hash,
     )
 
 
@@ -380,6 +407,8 @@ def concentration_index_result(
     variant: CIVariant | None = None,
     context: dict[str, str] | None = None,
     zero_mean: ZeroMeanResult = "undefined",
+    source_id: str | None = None,
+    data_hash: str | None = None,
 ) -> EquityResult:
     """Wagstaff Concentration Index with audit fields.
 
@@ -513,6 +542,9 @@ def concentration_index_result(
         status=status,
         reason=reason,
         interpretation=interpretation,
+        source_id=source_id,
+        software_version=_software_version(),
+        data_hash=data_hash,
     )
 
 
