@@ -27,14 +27,11 @@ Exactly one badge per case. Promotion is recorded in `moveq.claim_history`; a ca
 
 | id | Badge | Why this badge |
 | --- | --- | --- |
+| `odonnell-2008-india-u5` | reproduced | World Bank Table 8.1; published CI −0.1694; CC BY 3.0 IGO |
 | `t1.6-missing-term` | demonstrated | Constructed 73.33 vs 55.00 missing-term swing; not a named region |
 | `t1.7-nursing-workforce` | blocked | No country table; incomplete stated formula; data on request |
 | `t1.1-greenspace` | proposed | City extract is CC BY-NC 4.0 and cannot be committed here |
 
-`registry.json` lists all 30 gallery entries from `planning/07-gallery.md`. Unpublished rows have `"published": false` and no folder yet.
+`registry.json` lists all 30 gallery entries from `planning/07-gallery.md`. Unpublished rows have `"published": false` and no folder yet. The O'Donnell case is an evidence-layer reproduction **outside** that 30-card list; T1.1 stays `proposed`.
 
-## What is not here
-
-There is currently **no reproduced case**. T1.1 is the only candidate; the deposit licence blocks committing the per-city extract. Do not describe this directory as a complete evidence system.
-
-Expected values for demonstrated cases come from the independent oracles in `reference/python/moveq-core/tests/oracles.py`, not from calling the production function once and pasting the output.
+Expected values for demonstrated and reproduced cases come from a published figure or from the independent oracles in `reference/python/moveq-core/tests/oracles.py`, not from calling the production function once and pasting the output.

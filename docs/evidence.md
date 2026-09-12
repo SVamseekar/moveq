@@ -7,9 +7,9 @@ the data came from, which contract decisions were taken, and whether the
 number still matches.
 
 This is **not** a complete evidence system until every published case has a
-manifest, the validator, and a CI check. Today three cases are published;
-twenty-seven gallery entries are registered but not yet built. There is no
-reproduced case (see T1.1 below).
+manifest, the validator, and a CI check. Today four cases are published;
+twenty-seven gallery entries are registered but not yet built. One reproduced
+case exists (O'Donnell et al. 2008, Table 8.1). T1.1 remains proposed.
 
 ## Claim ladder
 
@@ -103,12 +103,14 @@ See [examples/evidence/](../examples/evidence/).
 
 | Case | Badge | Notes |
 | --- | --- | --- |
+| O'Donnell 2008 Table 8.1 | reproduced | India U5MR by wealth quintile; published CI **−0.1694**. Extract is CC BY 3.0 IGO. Independent grouped-rank oracle agrees to 4 d.p. |
 | T1.6 missing-term score | demonstrated | Oracle `composite_score` → 73.333… under `reweight`; `as_zero` is 55.0 |
 | T1.7 nursing workforce | blocked | No country table; incomplete stated formula; data on request |
 | T1.1 greenspace | proposed | Deposit is CC BY-NC 4.0; cannot be committed to a BSD-3-Clause repo |
 
-T1.1 is the only reproduced *candidate*. It is not reproduced. Do not say
-otherwise.
+T1.1 is still a reproduced *candidate* and is not reproduced. The O'Donnell
+table is a different source: five published rows, a stated formula, and a
+redistribution-compatible licence. Do not re-badge T1.1.
 
 `CITATION.cff` is already at the repository root. Zenodo DOIs are a later,
 separate decision.
