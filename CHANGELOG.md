@@ -11,30 +11,29 @@ PyPI.
 
 ## [Unreleased]
 
-### Changed
-
-- Website no longer offers `conda install -c conda-forge moveq` (the package
-  is not on conda-forge) and no longer claims a browser WebAssembly runtime.
-  `moveq-core` is described as a pure-NumPy engine with no I/O or GIS
-  dependencies.
-- CI pins GitHub Actions to commit SHAs, and adds a Ruff job (error-class
-  rules only) plus `pip-audit`. Dependabot now watches the four Python
-  packages as well as Actions.
-
-### Removed
-
-- Agent-generated gallery design note under `docs/superpowers/` (not
-  product documentation).
-
 ### Added
 
+- Optional `outcome_kind` on `concentration_index_result` populates
+  `EquityResult.interpretation` (location of a benefit or burden; never
+  fairness or causation). Omission preserves descriptive-only output.
+- `weight_kind` on `gini_result`, `palma_result`, and
+  `concentration_index_result`. Omission records `"population"` and
+  warns; arithmetic is unchanged.
+- `missing_policy` on `compute_score`: `reweight` (default), `as_zero`,
+  `exclude`, `bounds`. `ScoreResult` gains `parameters` and `bounds`.
+  `exclude` and incomplete `bounds` return `score=None` (no midpoint).
+- Concentration Index `variant` (`standard`, `generalized`, `erreygers`,
+  `wagstaff_normalized`) recorded in `parameters`. `method` stays
+  `wagstaff-covariance`. Bounded outcomes warn; the library does not
+  switch variant.
+- CI coverage measurement for `moveq_core` and `moveq_catalogue` with a
+  98% floor (observed ~99% on 322 statements).
 - `CITATION.cff` at the repository root so GitHub can render a citation
   widget. Version is kept in lockstep with the packages; no DOI (Zenodo
   is a separate, deferred decision).
 - Commit-message types already in use (`feat`, `fix`, `docs`, `test`,
   `ci`, `chore`) recorded in `CONTRIBUTING.md`, with a pointer to
   `CLAUDE.md`.
-
 - CI job **Git release rules** fails if package version drifts from the
   latest `v*` tag unless `CHANGELOG.md` has a `## [X.Y.Z]` release heading.
 - Independent second-implementation tests for Gini, Palma, the Concentration
@@ -44,6 +43,23 @@ PyPI.
   `concentration_index_result` for auditable Gini, Palma, and Concentration
   Index outputs. The existing `compute_*` functions still return `float`.
   `moveq gini|palma|ci --json` emits `EquityResult.to_dict()`.
+
+### Changed
+
+- Website no longer offers `conda install -c conda-forge moveq` (the package
+  is not on conda-forge) and no longer claims a browser WebAssembly runtime.
+  `moveq-core` is described as a pure-NumPy engine with no I/O or GIS
+  dependencies.
+- CI pins GitHub Actions to commit SHAs, and adds a Ruff job (error-class
+  rules only) plus `pip-audit`. Dependabot now watches the four Python
+  packages as well as Actions.
+- Documentation no longer describes population weighting or missing-term
+  reweighting as inherently correct.
+
+### Removed
+
+- Agent-generated gallery design note under `docs/superpowers/` (not
+  product documentation).
 
 ## [0.2.0] — 2026-09-06
 

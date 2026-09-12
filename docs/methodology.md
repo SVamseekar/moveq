@@ -100,39 +100,48 @@ Unpopulated units (\(w_i = 0\)) are dropped before ranking. Service may be negat
    \[
    \text{Cov}_w(y, R) = \frac{\sum_{i=1}^N w_i (y_i - \mu)(R_i - 0.5)}{\sum_{i=1}^N w_i}
    \]
-4. **Concentration Index**:
+4. **Concentration Index** (relative Wagstaff covariance; `variant="standard"`):
    \[
    CI = \frac{2 \cdot \text{Cov}_w(y, R)}{\mu}
    \]
-   If \(\mu = 0\), \(CI = 0\) by convention.
+   If \(\mu = 0\) (or the mean cancels), the relative index is **undefined**.
+
+Named families of the same estimator (`method` stays `wagstaff-covariance`):
+
+| `variant` | Value |
+| --- | --- |
+| `standard` | \(CI\) |
+| `generalized` | \(\mu \cdot CI\) |
+| `erreygers` | \(4\mu \cdot CI\) when \(y \in [0, 1]\); otherwise undefined |
+| `wagstaff_normalized` | \(CI / (1 - \mu)\) when \(y \in [0, 1]\) and \(\mu \notin \{0, 1\}\) |
+
+None is universally right; they encode different judgements about maximal inequality. The library warns when \(y\) looks bounded in \([0, 1]\) but does not switch variant.
 
 ### Interpretation
-- For non-negative service, \(CI \in [-1, 1]\).
-- \(CI > 0\) (**Pro-Rich / Less Deprived**): Public transport service is disproportionately concentrated in less deprived areas.
-- \(CI < 0\) (**Pro-Poor / More Deprived**): Public transport service is disproportionately concentrated in more deprived areas.
-- \(CI = 0\): Service is uniformly distributed across socioeconomic tiers (or mean service is zero).
+- For non-negative service, the relative \(CI \in [-1, 1]\).
+- \(CI > 0\): outcome concentrated among more-advantaged units (advantage-concentrated).
+- \(CI < 0\): outcome concentrated among less-advantaged units (disadvantage-concentrated).
+- \(CI = 0\): no systematic gradient with rank.
+- Optional `outcome_kind` (`benefit` / `burden`) fills `interpretation` with that location statement. It does not assert fairness or cause.
+
+`weight_kind` on the `*_result` APIs records what the weights mean (population, area, need, user, unweighted). Population-weighted Gini and area-weighted Gini on the same data answer different questions; neither is the correct default beyond matching today's arithmetic.
 
 ---
 
-## 4. Weighted Composite Scoring with Weight Renormalization
+## 4. Weighted Composite Scoring
 
 Composite indicators aggregate multiple accessibility and service dimensions \(k \in K\) (each normalized to \([0, 1]\)) into a single \(0\)–\(100\) score using design weights \(w_k\).
 
-### Graceful Handling of Missing Terms
-
 Design weights \(w_k\) must be finite and strictly positive. Term values must be finite (`NaN` / `inf` are rejected, not clipped). Values outside \([0, 1]\) are clipped after that check.
 
-When a subset of indicators \(M \subset K\) is unavailable (i.e. \(y_k = \text{None}\)), `moveq` drops \(M\) and renormalizes the weights of the available indicators \(P = K \setminus M\):
+When a subset of indicators is missing, `missing_policy` names what happens. **Reweighting is one declared policy, not the correct one.** On one three-term example, `reweight` yields \(73.33\) and `as_zero` yields \(55.00\).
 
-1. **Effective Weights**:
-   \[
-   w_k' = \frac{w_k}{\sum_{j \in P} w_j} \quad \forall k \in P
-   \]
-2. **Composite Score**:
-   \[
-   S = 100 \times \sum_{k \in P} w_k' \cdot \text{clip}_{0,1}(y_k)
-   \]
-3. If all indicators are missing (\(P = \emptyset\)), \(S = \text{None}\) and an explanatory note is recorded.
+| Policy | Point score | Bounds |
+| --- | --- | --- |
+| `reweight` (default) | drop missing terms; renormalise remaining weights | none |
+| `as_zero` | missing terms contribute 0 under the original design weights | none |
+| `exclude` | none | none |
+| `bounds` | none if anything is missing; otherwise the complete-data point | \((\text{low}, \text{high})\) filling missing terms with \(\{0, 1\}\); \((s, s)\) if complete |
 
 ---
 
