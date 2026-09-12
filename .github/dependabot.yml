@@ -9,3 +9,43 @@ updates:
     commit-message:
       prefix: chore
       include: scope
+
+  - package-ecosystem: pip
+    directory: /reference/python/moveq-core
+    schedule:
+      interval: weekly
+    labels:
+      - dependencies
+    commit-message:
+      prefix: chore
+      include: scope
+
+  - package-ecosystem: pip
+    directory: /reference/python/moveq-catalogue
+    schedule:
+      interval: weekly
+    labels:
+      - dependencies
+    commit-message:
+      prefix: chore
+      include: scope
+
+  - package-ecosystem: pip
+    directory: /reference/python/moveq
+    schedule:
+      interval: weekly
+    labels:
+      - dependencies
+    commit-message:
+      prefix: chore
+      include: scope
+
+  - package-ecosystem: pip
+    directory: /reference/python/moveq-cli
+    schedule:
+      interval: weekly
+    labels:
+      - dependencies
+    commit-message:
+      prefix: chore
+      include: scope

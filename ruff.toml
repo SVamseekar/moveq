@@ -1,0 +1,12 @@
+# Error-class checks only. Default Ruff also flags style nits (import
+# sorting, quoted annotations) that would rewrite working library code.
+target-version = "py310"
+src = [
+    "reference/python/moveq-core/src",
+    "reference/python/moveq-catalogue/src",
+    "reference/python/moveq/src",
+    "reference/python/moveq-cli/src",
+]
+
+[lint]
+select = ["E9", "F63", "F7", "F82"]
