@@ -13,6 +13,9 @@ PyPI.
 
 ### Added
 
+- Recurring-duty rota at `/rota`. A Python handler calls `compute_gini`
+  and returns an action in ordinary words. Hours left blank are left
+  out. Nothing is stored. Palma is not offered.
 - Gallery index at `/examples`, between the guides and the reference.
   Research cards and everyday cards use different fields. Two synthetic
   examples draw charts and run in CI. No external extract is committed.
