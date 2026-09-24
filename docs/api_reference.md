@@ -71,6 +71,9 @@ Same Concentration Index calculation as `compute_concentration_index`, returned 
 ### `UndefinedMetricError`
 Raised by `compute_concentration_index` when the index is undefined. Attributes: `metric`, `reason`, `result` (the structured `EquityResult`). Subclass of `MoveqError`.
 
+### `compare_results(baseline, proposal, *, uncertainty="none", n_boot=2000, seed=None, level=0.95, paired=True, baseline_inputs=None, proposal_inputs=None) -> DifferenceResult`
+Proposal minus baseline for two results of the same metric. The default does not resample: `ci_low` and `ci_high` stay `None`. `uncertainty="bootstrap"` needs the areal-unit inputs. When `paired` is true and the lengths match, both statistics use one shared draw. The result `note` says that subtracting two separate intervals is not this comparison.
+
 ### `EquityResult`
 Frozen dataclass analogous to `ScoreResult`. `value` is the same number the corresponding `compute_*` function returns (`inf` is allowed for Palma; `None` when a Concentration Index is undefined).
 
