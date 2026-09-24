@@ -35,6 +35,10 @@ Uncertainty = Literal["none", "bootstrap"]
 
 _PALMA_BOTTOM_CUT = 0.40
 _PALMA_TOP_CUT = 0.90
+_SMALL_N_AREAS = 30
+_PALMA_MIN_TAIL_UNITS = 5
+_RANK_GROUP_MIN_SHARE = 0.05
+_BOOTSTRAP_HALF_GAP = 0.05
 _ZERO_MEAN_RTOL = 1e-9
 _RANK_DIRECTIONS = ("higher_is_advantaged", "higher_is_disadvantaged")
 _WEIGHT_KINDS = ("population", "area", "need", "user", "unweighted")
@@ -200,6 +204,41 @@ def _resolve_weight_kind(weight_kind: WeightKind | None) -> tuple[WeightKind, li
             "'user', or 'unweighted'"
         )
     return weight_kind, []
+
+
+def _threshold_parameters() -> dict[str, float | int]:
+    return {
+        "small_n_areas": _SMALL_N_AREAS,
+        "palma_min_units_in_tail": _PALMA_MIN_TAIL_UNITS,
+        "rank_group_min_share": _RANK_GROUP_MIN_SHARE,
+        "bootstrap_half_gap": _BOOTSTRAP_HALF_GAP,
+    }
+
+
+def _sample_size_warnings(n_areas: int) -> list[str]:
+    if n_areas < _SMALL_N_AREAS:
+        return [
+            f"effective sample size is small: {n_areas} live units "
+            f"(threshold {_SMALL_N_AREAS})"
+        ]
+    return []
+
+
+def _bootstrap_instability_warning(replicates: np.ndarray, level: float) -> list[str]:
+    half = int(replicates.size) // 2
+    if half < 2:
+        return []
+    low_a, high_a = _percentile_interval(replicates[:half], level)
+    low_b, high_b = _percentile_interval(replicates[half : half * 2], level)
+    if None in (low_a, high_a, low_b, high_b):
+        return []
+    gap = max(abs(low_a - low_b), abs(high_a - high_b))
+    if not np.isfinite(gap) or gap > _BOOTSTRAP_HALF_GAP:
+        return [
+            "bootstrap interval is unstable across halves of the replicates "
+            f"(gap {gap:.3f}; threshold {_BOOTSTRAP_HALF_GAP})"
+        ]
+    return []
 
 
 def _parse_uncertainty(uncertainty: str) -> Uncertainty:
@@ -430,8 +469,9 @@ def _interval_for(
         replicates = np.array(
             [float(np.asarray(replicate_fn(row[None, :])).reshape(-1)[0]) for row in rows]
         )
-    low, high = _percentile_interval(np.asarray(replicates, dtype=float), level)
-    warnings: list[str] = []
+    replicates = np.asarray(replicates, dtype=float)
+    low, high = _percentile_interval(replicates, level)
+    warnings: list[str] = _bootstrap_instability_warning(replicates, level)
     if low is None:
         warnings.append("bootstrap replicates were undefined; no interval is reported")
     return low, high, "bootstrap-percentile", int(n_boot), recorded, warnings
@@ -469,6 +509,7 @@ def gini_result(
     live_weights = weights
 
     warnings: list[str] = list(kind_warnings)
+    warnings.extend(_sample_size_warnings(n_areas))
     note = None
     total_service = float((values * weights).sum())
     if total_service == 0:
@@ -504,7 +545,7 @@ def gini_result(
         n_areas=n_areas,
         n_dropped=n_dropped,
         total_population=total_population,
-        parameters={"weight_kind": resolved_kind, **extra},
+        parameters={"weight_kind": resolved_kind, **_threshold_parameters(), **extra},
         warnings=warnings,
         note=note,
         context=dict(context or {}),
@@ -567,6 +608,15 @@ def palma_result(
     top_mean = float(np.sum(values * top_overlap) / top_weight) if top_weight > 0 else 0.0
 
     warnings: list[str] = list(kind_warnings)
+    warnings.extend(_sample_size_warnings(n_areas))
+    n_bottom_units = int(np.count_nonzero(bottom_overlap > 0))
+    n_top_units = int(np.count_nonzero(top_overlap > 0))
+    if n_bottom_units < _PALMA_MIN_TAIL_UNITS or n_top_units < _PALMA_MIN_TAIL_UNITS:
+        warnings.append(
+            "Palma 40/90 split rests on few units "
+            f"(bottom {n_bottom_units}, top {n_top_units}; "
+            f"threshold {_PALMA_MIN_TAIL_UNITS})"
+        )
     note = None
     if bottom_mean == 0.0 and top_mean == 0.0:
         value = 1.0
@@ -601,6 +651,7 @@ def palma_result(
             "bottom_cut": _PALMA_BOTTOM_CUT,
             "top_cut": _PALMA_TOP_CUT,
             "weight_kind": resolved_kind,
+            **_threshold_parameters(),
             **extra,
         },
         warnings=warnings,
@@ -779,7 +830,15 @@ def concentration_index_result(
         "zero_mean_rtol": _ZERO_MEAN_RTOL,
         "weight_kind": resolved_kind,
         "variant": resolved_variant,
+        **_threshold_parameters(),
     }
+    warn_list.extend(_sample_size_warnings(n_areas))
+    shares = group_pop / total_population
+    if np.any((group_pop > 0) & (shares < _RANK_GROUP_MIN_SHARE)):
+        warn_list.append(
+            "a rank group holds very little population "
+            f"(threshold share {_RANK_GROUP_MIN_SHARE})"
+        )
     if resolved_outcome is not None:
         parameters["outcome_kind"] = resolved_outcome
 
