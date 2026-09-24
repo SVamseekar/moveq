@@ -161,7 +161,7 @@
         <div class="callout callout-warning">
           <div class="callout-title">The Danger of Silent Zero Padding</div>
           <div>
-            Traditional scoring software replaces missing values with <code>0</code>. If a neighborhood lacks night bus data, filling with <code>0</code> artificially collapses its overall accessibility score, penalizing the agency unfairly for missing telemetry.
+            Traditional scoring software replaces missing values with <code>0</code>. If a neighbourhood lacks night-bus data, filling with <code>0</code> pulls the score down because the term is missing, not because night-bus service was measured at zero.
             <br><br>
             <strong><code>moveq</code> drops missing terms and renormalizes the weights of present terms</strong>, generating a clear audit note explaining which terms were omitted.
           </div>

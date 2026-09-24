@@ -150,7 +150,20 @@ When a subset of indicators is missing, `missing_policy` names what happens. **R
 
 ---
 
-## 5. Multidimensional Vulnerability & Deprivation Indices
+## 5. What a result does not show
+
+moveq measures a distribution. It does not establish why that distribution exists.
+
+| Layer | What moveq provides |
+| --- | --- |
+| Observed distribution | Yes. This is the product: Gini, Palma, concentration index, score. |
+| Statistical uncertainty | Yes, once a bootstrap is requested. The default is still the point estimate. |
+| Possible mechanisms | No. Need, preference, geography, and targeting rules are the analyst's to argue. |
+| Causal attribution | No. A change in Gini is not evidence that an intervention caused it. |
+
+A positive concentration index means the outcome sits with more-advantaged units. That pattern is consistent with many mechanisms, including need-based targeting working as intended. It is not a finding of discrimination. A gallery question such as whether a rota is fair is the reader's question. The number underneath is still only a distribution.
+
+## 6. Multidimensional Vulnerability & Deprivation Indices
 
 In [`moveq_core.frames`](file:///Users/souravamseekarmarti/Projects/moveq/reference/python/moveq-core/src/moveq_core/frames.py):
 
