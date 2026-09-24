@@ -349,6 +349,42 @@ def _ci_replicates(
     return out
 
 
+def _live_cluster(
+    cluster: np.ndarray | None,
+    uncertainty: str,
+    n_input: int,
+    live: np.ndarray,
+) -> np.ndarray | None:
+    if cluster is None:
+        return None
+    if uncertainty != "bootstrap":
+        raise ValueError("cluster requires uncertainty='bootstrap'")
+    labels = np.asarray(cluster)
+    if labels.ndim != 1 or labels.shape[0] != n_input:
+        raise ValueError("cluster must be a 1-dimensional array aligned with the input")
+    return labels[live]
+
+
+def _json_label(value: object) -> str | int | float:
+    if isinstance(value, (np.integer, int)) and not isinstance(value, bool):
+        return int(value)
+    if isinstance(value, (np.floating, float)):
+        return float(value)
+    return str(value)
+
+
+def _cluster_index_rows(
+    cluster: np.ndarray, n_boot: int, seed: int
+) -> tuple[list[np.ndarray], int, list[str | int | float]]:
+    codes, inverse = np.unique(cluster, return_inverse=True)
+    n_clusters = int(codes.size)
+    groups = [np.flatnonzero(inverse == i) for i in range(n_clusters)]
+    rng = np.random.default_rng(seed)
+    chosen = rng.choice(n_clusters, size=(n_boot, n_clusters), replace=True)
+    rows = [np.concatenate([groups[i] for i in chosen[b]]) for b in range(n_boot)]
+    return rows, n_clusters, [_json_label(code) for code in codes]
+
+
 def _interval_for(
     uncertainty: str,
     n_boot: int,
@@ -357,6 +393,7 @@ def _interval_for(
     n_units: int,
     point_defined: bool,
     replicate_fn,
+    cluster: np.ndarray | None = None,
 ) -> tuple[float | None, float | None, str | None, int | None, dict[str, Any], list[str]]:
     parsed = _parse_uncertainty(uncertainty)
     if parsed == "none":
@@ -374,12 +411,25 @@ def _interval_for(
         "level": float(level),
         "resample": "areal-unit",
     }
+    if cluster is not None:
+        if cluster.shape != (n_units,):
+            raise ValueError("cluster must align with the live areal units")
+        codes = np.unique(cluster)
+        recorded["resample"] = "cluster"
+        recorded["n_clusters"] = int(codes.size)
+        recorded["cluster_labels"] = [_json_label(code) for code in codes]
     if not point_defined or n_units < 1:
         return None, None, None, None, recorded, [
             "bootstrap skipped because the point estimate is undefined"
         ]
-    draws = _bootstrap_draws(n_units, int(n_boot), resolved_seed)
-    replicates = replicate_fn(draws)
+    if cluster is None:
+        draws = _bootstrap_draws(n_units, int(n_boot), resolved_seed)
+        replicates = replicate_fn(draws)
+    else:
+        rows, _n_clusters, _labels = _cluster_index_rows(cluster, int(n_boot), resolved_seed)
+        replicates = np.array(
+            [float(np.asarray(replicate_fn(row[None, :])).reshape(-1)[0]) for row in rows]
+        )
     low, high = _percentile_interval(np.asarray(replicates, dtype=float), level)
     warnings: list[str] = []
     if low is None:
@@ -399,6 +449,7 @@ def gini_result(
     n_boot: int = 2000,
     seed: int | None = None,
     level: float = 0.95,
+    cluster: np.ndarray | None = None,
 ) -> EquityResult:
     """Population-weighted Gini coefficient with audit fields.
 
@@ -409,6 +460,8 @@ def gini_result(
     """
     resolved_kind, kind_warnings = _resolve_weight_kind(weight_kind)
     values, weights = _prepare_weighted(values, weights)
+    live_mask = weights > 0
+    cluster_live = _live_cluster(cluster, uncertainty, int(weights.size), live_mask)
     (values, weights), n_areas, n_dropped, total_population = _drop_unpopulated(
         values, weights, population=weights
     )
@@ -441,6 +494,7 @@ def gini_result(
         n_areas,
         True,
         lambda draws: _gini_replicates(live_values, live_weights, draws),
+        cluster=cluster_live,
     )
     warnings.extend(boot_warnings)
     return EquityResult(
@@ -476,6 +530,7 @@ def palma_result(
     n_boot: int = 2000,
     seed: int | None = None,
     level: float = 0.95,
+    cluster: np.ndarray | None = None,
 ) -> EquityResult:
     """Palma ratio with audit fields.
 
@@ -483,6 +538,8 @@ def palma_result(
     """
     resolved_kind, kind_warnings = _resolve_weight_kind(weight_kind)
     values, weights = _prepare_weighted(values, weights)
+    live_mask = weights > 0
+    cluster_live = _live_cluster(cluster, uncertainty, int(weights.size), live_mask)
     (values, weights), n_areas, n_dropped, total_population = _drop_unpopulated(
         values, weights, population=weights
     )
@@ -530,6 +587,7 @@ def palma_result(
         n_areas,
         True,
         lambda draws: _palma_replicates(live_values, live_weights, draws),
+        cluster=cluster_live,
     )
     warnings.extend(boot_warnings)
     return EquityResult(
@@ -651,6 +709,7 @@ def concentration_index_result(
     n_boot: int = 2000,
     seed: int | None = None,
     level: float = 0.95,
+    cluster: np.ndarray | None = None,
 ) -> EquityResult:
     """Wagstaff Concentration Index with audit fields.
 
@@ -672,6 +731,8 @@ def concentration_index_result(
     if not np.all(np.isfinite(rank)):
         raise ValueError("rank must be finite")
 
+    live_mask = population > 0
+    cluster_live = _live_cluster(cluster, uncertainty, int(population.size), live_mask)
     (service, rank, population), n_areas, n_dropped, total_population = _drop_unpopulated(
         service, rank, population, population=population
     )
@@ -780,6 +841,7 @@ def concentration_index_result(
         lambda draws: _ci_replicates(
             service, rank_key, population, draws, resolved_variant
         ),
+        cluster=cluster_live,
     )
     warn_list.extend(boot_warnings)
     parameters.update(extra)
