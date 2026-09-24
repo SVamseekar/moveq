@@ -1,0 +1,10 @@
+{
+  "source": "moveq_core.equity.compute_concentration_index",
+  "service": [10.0, 20.0, 30.0, 40.0],
+  "rank": [1.0, 2.0, 3.0, 4.0],
+  "population": [100.0, 100.0, 100.0, 100.0],
+  "directions": {
+    "higher_is_advantaged": 0.25,
+    "higher_is_disadvantaged": -0.25
+  }
+}

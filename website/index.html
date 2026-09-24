@@ -15,6 +15,7 @@
   <script src="/assets/js/search.js" defer></script>
   <script src="/assets/js/average-alibi.js" defer></script>
   <script src="/assets/js/missing-data.js" defer></script>
+  <script src="/assets/js/rank-direction.js" defer></script>
 </head>
 
 <body>
@@ -292,6 +293,24 @@
       </div>
       <ol class="missing-rank" id="missingRank"></ol>
       <p id="missingNote" class="alibi-diagnosis"></p>
+    </div>
+  </section>
+
+  <section class="tools-section" id="rank-direction">
+    <div class="container">
+      <span class="section-tag">Same arrays</span>
+      <h2 class="section-title">The sign follows the declared rank direction.</h2>
+      <p class="why-lead">
+        Service 10, 20, 30, 40. Rank 1, 2, 3, 4. Population 100 in each.
+        Only <code>rank_direction</code> changes. Both figures are
+        <code>compute_concentration_index</code>.
+      </p>
+      <div class="missing-policies" role="group" aria-label="Rank direction">
+        <button type="button" class="bench-tab active" data-direction="higher_is_advantaged">Higher rank is advantaged</button>
+        <button type="button" class="bench-tab" data-direction="higher_is_disadvantaged">Higher rank is disadvantaged</button>
+      </div>
+      <p class="rank-value" id="rankDirectionValue">+0.250</p>
+      <p id="rankDirectionNote" class="alibi-diagnosis"></p>
     </div>
   </section>
 

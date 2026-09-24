@@ -13,6 +13,9 @@ PyPI.
 
 ### Added
 
+- Homepage rank-direction toggle. Identical inputs give +0.250 when
+  `rank_direction` is `higher_is_advantaged` and -0.250 when it is
+  `higher_is_disadvantaged`. The argument stays required.
 - Homepage missing-data controls. On the documented three-term case,
   `reweight` scores 73.33 and `as_zero` scores 55.00, which swaps East
   and South. `exclude` returns no score. `bounds` is the interval
