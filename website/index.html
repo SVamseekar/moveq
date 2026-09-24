@@ -14,6 +14,7 @@
   <script src="/assets/js/playground.js" defer></script>
   <script src="/assets/js/search.js" defer></script>
   <script src="/assets/js/average-alibi.js" defer></script>
+  <script src="/assets/js/missing-data.js" defer></script>
 </head>
 
 <body>
@@ -271,6 +272,26 @@
           <p id="alibiDiagnosis" class="alibi-diagnosis"></p>
         </div>
       </div>
+    </div>
+  </section>
+
+  <section class="tools-section" id="missing-data">
+    <div class="container">
+      <span class="section-tag">One missing term</span>
+      <h2 class="section-title">The ranking moves when the missing-data policy changes.</h2>
+      <p class="why-lead">
+        Four areas, three terms, design weights 0.50, 0.25, and 0.25.
+        East has no climate figure. The other three are complete. Scores are
+        <code>compute_score</code>. Reweighting is one declared policy, not the proper one.
+      </p>
+      <div class="missing-policies" role="group" aria-label="Missing-data policy">
+        <button type="button" class="bench-tab active" data-policy="reweight">Reweight</button>
+        <button type="button" class="bench-tab" data-policy="as_zero">Treat as zero</button>
+        <button type="button" class="bench-tab" data-policy="exclude">Exclude</button>
+        <button type="button" class="bench-tab" data-policy="bounds">Bounds</button>
+      </div>
+      <ol class="missing-rank" id="missingRank"></ol>
+      <p id="missingNote" class="alibi-diagnosis"></p>
     </div>
   </section>
 
