@@ -194,6 +194,67 @@
     </div>
   </section>
 
+  <section class="tools-section" id="why-not-r-or-excel">
+    <div class="container">
+      <span class="section-tag">The honest comparison</span>
+      <h2 class="section-title">Why not just use R or Excel?</h2>
+      <div class="prose why-lead">
+        <p>
+          Gini and concentration indices are standard, and R's <code>rineq</code> and WHO's HEAT
+          implement them well. <code>rineq</code> is ahead of moveq on statistical depth. moveq
+          exists for a different reason: the decisions around the formula are where results go
+          wrong — which direction the rank runs, whether the outcome is a benefit or a burden,
+          what the weights represent, and how missing data was handled. moveq makes those
+          explicit, enforces them, and records them with the result.
+        </p>
+      </div>
+
+      <div class="why-grid">
+        <article class="why-card">
+          <h3><code>rineq</code> (CRAN)</h3>
+          <p>
+            Four concentration-index variants via <code>ci()</code>: <code>CI</code> (relative),
+            <code>CIg</code> (generalized), <code>CIc</code> (Erreygers-corrected), and
+            <code>CIw</code> (Wagstaff, for bounded or binary outcomes). Confidence intervals
+            through <code>confint.hci()</code>, standard errors by several methods, robust
+            standard errors via the sandwich package, and decomposition
+            (<code>contribution()</code>, <code>decomposition()</code>) across <code>lm</code>,
+            <code>glm</code>, <code>svyglm</code>, <code>coxph</code>, and <code>mfx</code>.
+          </p>
+        </article>
+        <article class="why-card">
+          <h3>WHO HEAT</h3>
+          <p>
+            Nineteen summary inequality measures, including the concentration index, over the
+            WHO Health Equity Monitor database. HEAT Plus allows uploading your own datasets
+            for global, national, or subnational analysis.
+          </p>
+        </article>
+      </div>
+
+      <div class="callout callout-note">
+        <div class="callout-title">Where the alternatives are stronger</div>
+        <p>
+          <code>rineq</code> currently does more than moveq statistically: four variants,
+          decomposition, robust standard errors, and survey design. moveq has none of that.
+          The differentiator here is the enforced contract and a result someone else can
+          check — not statistical depth.
+        </p>
+      </div>
+
+      <div class="callout callout-warning">
+        <div class="callout-title">One verified tie, not a universal error rate</div>
+        <p>
+          With tied deprivation groups, positional ranking gives 0.250 where
+          population-weighted midpoint ranking gives 0.200. That is one verified case: arbitrary
+          positional ranking within tied socioeconomic groups changes the answer. It is not a
+          rate that applies everywhere, and it is not a claim that <code>rineq</code> or HEAT
+          get the index wrong.
+        </p>
+      </div>
+    </div>
+  </section>
+
   <section class="tools-section" id="benchmark">
     <div class="container">
       <span class="section-tag">Speed, after the question</span>
