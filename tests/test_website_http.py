@@ -20,7 +20,7 @@ WEBSITE = ROOT / "website"
 INDEPENDENT_PAGE_SNIPPETS: dict[str, dict[str, str]] = {
     "/": {
         "title": "moveq — Fast, Auditable Transport-Equity Toolkit",
-        "h1": "fast transport-equity toolkit",
+        "h1": "The average improved. Who didn't?",
     },
     "/docs": {
         "title": "Documentation Overview | moveq",
