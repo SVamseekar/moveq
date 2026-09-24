@@ -64,14 +64,42 @@ def _print_equity(result: EquityResult, label: str, as_json: bool) -> int:
     return 0
 
 
+def _uncertainty_kwargs(args: argparse.Namespace) -> dict:
+    if getattr(args, "uncertainty", "none") != "bootstrap":
+        return {}
+    kwargs: dict = {"uncertainty": "bootstrap", "n_boot": args.n_boot}
+    if args.seed is not None:
+        kwargs["seed"] = args.seed
+    return kwargs
+
+
+def _add_uncertainty_args(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        "--uncertainty",
+        choices=("none", "bootstrap"),
+        default="none",
+        help="Interval method. Default none leaves the point estimate unchanged.",
+    )
+    parser.add_argument("--n-boot", type=int, default=2000, help="Bootstrap replicates")
+    parser.add_argument("--seed", type=int, default=None, help="NumPy Generator seed")
+
+
 def _cmd_gini(args: argparse.Namespace) -> int:
     cols = _read_columns(args.csv, [args.value, args.weight])
-    return _print_equity(gini_result(cols[args.value], cols[args.weight]), "gini", args.json)
+    return _print_equity(
+        gini_result(cols[args.value], cols[args.weight], **_uncertainty_kwargs(args)),
+        "gini",
+        args.json,
+    )
 
 
 def _cmd_palma(args: argparse.Namespace) -> int:
     cols = _read_columns(args.csv, [args.value, args.weight])
-    return _print_equity(palma_result(cols[args.value], cols[args.weight]), "palma", args.json)
+    return _print_equity(
+        palma_result(cols[args.value], cols[args.weight], **_uncertainty_kwargs(args)),
+        "palma",
+        args.json,
+    )
 
 
 def _cmd_ci(args: argparse.Namespace) -> int:
@@ -83,6 +111,7 @@ def _cmd_ci(args: argparse.Namespace) -> int:
             cols[args.rank],
             cols[args.weight],
             rank_direction=rank_direction,
+            **_uncertainty_kwargs(args),
         ),
         "concentration_index",
         args.json,
@@ -284,6 +313,7 @@ def build_parser() -> argparse.ArgumentParser:
     gini.add_argument("--value", required=True, help="Service-level column")
     gini.add_argument("--weight", required=True, help="Population-weight column")
     gini.add_argument("--json", action="store_true", help="Output machine-readable JSON")
+    _add_uncertainty_args(gini)
     gini.set_defaults(func=_cmd_gini)
 
     # Palma
@@ -292,6 +322,7 @@ def build_parser() -> argparse.ArgumentParser:
     palma.add_argument("--value", required=True, help="Service-level column")
     palma.add_argument("--weight", required=True, help="Population-weight column")
     palma.add_argument("--json", action="store_true", help="Output machine-readable JSON")
+    _add_uncertainty_args(palma)
     palma.set_defaults(func=_cmd_palma)
 
     # Concentration Index
@@ -307,6 +338,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Which end of --rank is advantaged (required)",
     )
     ci.add_argument("--json", action="store_true", help="Output machine-readable JSON")
+    _add_uncertainty_args(ci)
     ci.set_defaults(func=_cmd_ci)
 
     # Score

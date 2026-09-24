@@ -13,6 +13,12 @@ PyPI.
 
 ### Added
 
+- Optional percentile bootstrap intervals on `gini_result`, `palma_result`,
+  and `concentration_index_result` (`uncertainty="bootstrap"`, `n_boot`,
+  `seed`, `level`). Off by default: omitting the argument leaves the point
+  estimate unchanged and sets `ci_low`, `ci_high`, `uncertainty_method`,
+  and `n_boot` to null. Replicates resample areal units and keep population
+  weights. Seed, method, and `n_boot` are stored in `parameters`.
 - Evidence layer: six-badge claim ladder, Frictionless case manifests
   with a required `limitations` list and the six contract decisions,
   `moveq evidence validate`, and CI that fails a case which stops
