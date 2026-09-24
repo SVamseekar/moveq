@@ -126,6 +126,9 @@ None is universally right; they encode different judgements about maximal inequa
 
 `weight_kind` on the `*_result` APIs records what the weights mean (population, area, need, user, unweighted). Population-weighted Gini and area-weighted Gini on the same data answer different questions; neither is the correct default beyond matching today's arithmetic.
 
+### Small cells
+`suppress_below` withholds areal units whose population is positive but below that count. The index is computed without them. Each withheld index is listed in `warnings` and in `parameters["suppressed_indices"]`, next to the threshold. Omission does not suppress anything. This sits with the small-sample warnings: both say the table is too thin to publish as if it were complete.
+
 ### Small samples
 Warnings, not hidden drops. Fewer than 30 live units, a rank group under 5% of population, or a Palma tail (bottom 40% or top 10%) with fewer than 5 units, is recorded on `warnings` and the threshold is stored in `parameters`. Palma at about 3,000 units does not trip the tail warning; a household-sized table does. A bootstrap also warns when the two halves of the replicates disagree by more than 0.05. That is a stability check, not evidence that a policy caused the gap.
 

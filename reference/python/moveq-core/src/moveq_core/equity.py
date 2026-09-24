@@ -206,6 +206,30 @@ def _resolve_weight_kind(weight_kind: WeightKind | None) -> tuple[WeightKind, li
     return weight_kind, []
 
 
+def _apply_suppression(
+    weights: np.ndarray, suppress_below: int | None
+) -> tuple[np.ndarray, list[int], list[str], dict[str, Any]]:
+    if suppress_below is None:
+        return weights, [], [], {}
+    if isinstance(suppress_below, bool) or not isinstance(suppress_below, (int, np.integer)):
+        raise ValueError("suppress_below must be an int or None")
+    threshold = int(suppress_below)
+    if threshold < 1:
+        raise ValueError("suppress_below must be >= 1")
+    small = (weights > 0) & (weights < threshold)
+    indices = [int(i) for i in np.flatnonzero(small)]
+    recorded = {"suppress_below": threshold, "suppressed_indices": indices}
+    if not indices:
+        return weights, [], [], recorded
+    withheld = weights.copy()
+    withheld[small] = 0.0
+    warning = (
+        f"suppressed {len(indices)} cells with population below {threshold}: "
+        f"indices {indices}"
+    )
+    return withheld, indices, [warning], recorded
+
+
 def _threshold_parameters() -> dict[str, float | int]:
     return {
         "small_n_areas": _SMALL_N_AREAS,
@@ -490,6 +514,7 @@ def gini_result(
     seed: int | None = None,
     level: float = 0.95,
     cluster: np.ndarray | None = None,
+    suppress_below: int | None = None,
 ) -> EquityResult:
     """Population-weighted Gini coefficient with audit fields.
 
@@ -500,6 +525,9 @@ def gini_result(
     """
     resolved_kind, kind_warnings = _resolve_weight_kind(weight_kind)
     values, weights = _prepare_weighted(values, weights)
+    weights, _suppressed, suppression_warnings, suppression_parameters = _apply_suppression(
+        weights, suppress_below
+    )
     live_mask = weights > 0
     cluster_live = _live_cluster(cluster, uncertainty, int(weights.size), live_mask)
     (values, weights), n_areas, n_dropped, total_population = _drop_unpopulated(
@@ -509,6 +537,7 @@ def gini_result(
     live_weights = weights
 
     warnings: list[str] = list(kind_warnings)
+    warnings.extend(suppression_warnings)
     warnings.extend(_sample_size_warnings(n_areas))
     note = None
     total_service = float((values * weights).sum())
@@ -545,7 +574,12 @@ def gini_result(
         n_areas=n_areas,
         n_dropped=n_dropped,
         total_population=total_population,
-        parameters={"weight_kind": resolved_kind, **_threshold_parameters(), **extra},
+        parameters={
+            "weight_kind": resolved_kind,
+            **_threshold_parameters(),
+            **suppression_parameters,
+            **extra,
+        },
         warnings=warnings,
         note=note,
         context=dict(context or {}),
@@ -572,6 +606,7 @@ def palma_result(
     seed: int | None = None,
     level: float = 0.95,
     cluster: np.ndarray | None = None,
+    suppress_below: int | None = None,
 ) -> EquityResult:
     """Palma ratio with audit fields.
 
@@ -579,6 +614,9 @@ def palma_result(
     """
     resolved_kind, kind_warnings = _resolve_weight_kind(weight_kind)
     values, weights = _prepare_weighted(values, weights)
+    weights, _suppressed, suppression_warnings, suppression_parameters = _apply_suppression(
+        weights, suppress_below
+    )
     live_mask = weights > 0
     cluster_live = _live_cluster(cluster, uncertainty, int(weights.size), live_mask)
     (values, weights), n_areas, n_dropped, total_population = _drop_unpopulated(
@@ -608,6 +646,7 @@ def palma_result(
     top_mean = float(np.sum(values * top_overlap) / top_weight) if top_weight > 0 else 0.0
 
     warnings: list[str] = list(kind_warnings)
+    warnings.extend(suppression_warnings)
     warnings.extend(_sample_size_warnings(n_areas))
     n_bottom_units = int(np.count_nonzero(bottom_overlap > 0))
     n_top_units = int(np.count_nonzero(top_overlap > 0))
@@ -652,6 +691,7 @@ def palma_result(
             "top_cut": _PALMA_TOP_CUT,
             "weight_kind": resolved_kind,
             **_threshold_parameters(),
+            **suppression_parameters,
             **extra,
         },
         warnings=warnings,
@@ -761,6 +801,7 @@ def concentration_index_result(
     seed: int | None = None,
     level: float = 0.95,
     cluster: np.ndarray | None = None,
+    suppress_below: int | None = None,
 ) -> EquityResult:
     """Wagstaff Concentration Index with audit fields.
 
@@ -782,6 +823,9 @@ def concentration_index_result(
     if not np.all(np.isfinite(rank)):
         raise ValueError("rank must be finite")
 
+    population, _suppressed, suppression_warnings, suppression_parameters = _apply_suppression(
+        population, suppress_below
+    )
     live_mask = population > 0
     cluster_live = _live_cluster(cluster, uncertainty, int(population.size), live_mask)
     (service, rank, population), n_areas, n_dropped, total_population = _drop_unpopulated(
@@ -831,7 +875,9 @@ def concentration_index_result(
         "weight_kind": resolved_kind,
         "variant": resolved_variant,
         **_threshold_parameters(),
+        **suppression_parameters,
     }
+    warn_list.extend(suppression_warnings)
     warn_list.extend(_sample_size_warnings(n_areas))
     shares = group_pop / total_population
     if np.any((group_pop > 0) & (shares < _RANK_GROUP_MIN_SHARE)):
