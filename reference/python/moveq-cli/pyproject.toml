@@ -37,7 +37,7 @@ classifiers = [
     "Topic :: Scientific/Engineering",
 ]
 dependencies = [
-    "moveq>=0.1.0",
+    "moveq>=0.2.0",
 ]
 
 [project.optional-dependencies]
