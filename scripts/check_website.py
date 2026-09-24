@@ -32,6 +32,7 @@ REQUIRED_ROUTES: tuple[str, ...] = (
     "/docs/frames",
     "/docs/cli",
     "/guides",
+    "/examples",
     "/playground",
     "/reference",
     "/blog",

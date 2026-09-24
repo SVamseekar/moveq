@@ -25,8 +25,8 @@ def parsed_pages():
 
 
 def test_html_file_count():
-    # Exactly 11 index.html files under website/
-    assert len(HTML_FILES) == 11, f"Expected 11 HTML files, found {len(HTML_FILES)}"
+    # Exactly 12 index.html files under website/
+    assert len(HTML_FILES) == 12, f"Expected 12 HTML files, found {len(HTML_FILES)}"
 
 
 @pytest.mark.parametrize("html_file", HTML_FILES, ids=lambda p: str(p.relative_to(WEBSITE)))

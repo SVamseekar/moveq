@@ -13,6 +13,9 @@ PyPI.
 
 ### Added
 
+- Gallery index at `/examples`, between the guides and the reference.
+  Research cards and everyday cards use different fields. Two synthetic
+  examples draw charts and run in CI. No external extract is committed.
 - Homepage rank-direction toggle. Identical inputs give +0.250 when
   `rank_direction` is `higher_is_advantaged` and -0.250 when it is
   `higher_is_disadvantaged`. The argument stays required.

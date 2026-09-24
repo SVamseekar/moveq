@@ -50,6 +50,10 @@ INDEPENDENT_PAGE_SNIPPETS: dict[str, dict[str, str]] = {
         "title": "Guides & Recipes | moveq",
         "h1": "Practical Guides",
     },
+    "/examples": {
+        "title": "Examples | moveq",
+        "h1": "Examples",
+    },
     "/playground": {
         "title": "Interactive Equity Playground | moveq",
         "h1": "Lorenz Curve & Inequality Playground",
