@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Examples | moveq</title>
+  <title>Duty rota | moveq</title>
   <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
   <link rel="stylesheet" href="/assets/css/theme.css">
   <script src="/assets/js/theme.js" defer></script>
   <script src="/assets/js/version.js" defer></script>
   <script src="/assets/js/search.js" defer></script>
-  <script src="/assets/js/gallery.js" defer></script>
 </head>
 <body>
+
 
 
   <header class="site-header">
@@ -38,7 +38,7 @@
           <svg class="icon" width="16" height="16" viewBox="0 0 24 24"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon><line x1="9" y1="3" x2="9" y2="18"></line><line x1="15" y1="6" x2="15" y2="21"></line></svg>
           <span>Guides</span>
         </a>
-                <a href="/examples" class="nav-item active">
+                <a href="/examples" class="nav-item">
           <svg class="icon" width="16" height="16" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
           <span>Examples</span>
         </a>
@@ -106,33 +106,63 @@
     </a>
   </nav>
 
-  <main class="container" id="gallery" style="padding: 40px 0 64px;">
-    <span class="section-tag">Between the guides and the reference</span>
-    <h1 class="section-title">Examples</h1>
-    <p class="why-lead">Research cards name a field and a claim-ladder badge. Everyday cards name a situation. No external extract is committed. Where a licence was not confirmed, the card has no data file. The duty rota is a separate page: <a href="/rota">who should take the next duty</a>.</p>
-    <div class="missing-policies">
-      <label>Field
-        <select id="galleryField">
-          <option value="all">All fields</option>
-        </select>
-      </label>
-      <label>Badge
-        <select id="galleryBadge">
-          <option value="all">All badges</option>
-        </select>
-      </label>
-    </div>
-    <h2>Research</h2>
-    <p class="gallery-schema">Card: spec, field, question, badge, thumbnail.</p>
-    <div class="gallery-grid" id="galleryResearch"></div>
-    <h2>Everyday</h2>
-    <p class="gallery-schema">Card: question, situation, badge, thumbnail. No coefficient.</p>
-    <div class="gallery-grid" id="galleryEveryday"></div>
+  <main class="container" id="rota" style="padding: 40px 0 64px; max-width: 40rem;">
+    <span class="section-tag">One situation</span>
+    <h1 class="section-title">Who should take the next duty?</h1>
+    <p>Same number of turns. The hours can still be uneven. Type the people and the hours. This page does not keep what you type.</p>
+    <form id="rotaForm">
+      <div id="rotaRows"></div>
+      <p><button type="button" id="rotaAdd">Add a person</button></p>
+      <p><button type="submit">Suggest the next duty</button></p>
+    </form>
+    <p id="rotaAction" class="alibi-diagnosis"></p>
+    <h2>What this assumes</h2>
+    <ul>
+      <li>Each person counts once. Turns are treated as equal. If someone took more turns, this suggestion can change.</li>
+      <li>Hours left blank are left out. They are not treated as zero. Filling them in can change who should take the next duty.</li>
+      <li>Nothing you type is stored.</li>
+    </ul>
   </main>
-
+  <script>
+    const rows = document.getElementById("rotaRows");
+    function addRow(name, hours) {
+      const line = document.createElement("p");
+      const nameInput = document.createElement("input");
+      nameInput.placeholder = "Name";
+      nameInput.value = name || "";
+      nameInput.setAttribute("aria-label", "Name");
+      const hoursInput = document.createElement("input");
+      hoursInput.placeholder = "Hours";
+      hoursInput.inputMode = "decimal";
+      hoursInput.value = hours || "";
+      hoursInput.setAttribute("aria-label", "Hours");
+      line.append(nameInput, document.createTextNode(" "), hoursInput);
+      rows.append(line);
+    }
+    ["Alex", "Sam", "Jo", "Riley"].forEach((name) => addRow(name, ""));
+    document.getElementById("rotaAdd").addEventListener("click", () => addRow("", ""));
+    document.getElementById("rotaForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const people = [...rows.querySelectorAll("p")].map((line) => {
+        const [nameInput, hoursInput] = line.querySelectorAll("input");
+        const name = nameInput.value.trim();
+        const text = hoursInput.value.trim();
+        return { name: name || "Someone", hours: text === "" ? null : Number(text) };
+      }).filter((person) => person.name);
+      fetch("/rota/advise", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ people })
+      }).then((res) => res.json()).then((data) => {
+        document.getElementById("rotaAction").textContent = data.action;
+      }).catch(() => {
+        document.getElementById("rotaAction").textContent = "The suggestion server did not answer. Nothing was stored.";
+      });
+    });
+  </script>
   <div id="searchModal" class="search-modal">
     <div class="search-card">
-      <input type="text" id="searchInput" class="search-input" placeholder="Search examples…" autocomplete="off">
+      <input type="text" id="searchInput" class="search-input" placeholder="Search…" autocomplete="off">
       <div id="searchResults" class="search-results"></div>
     </div>
   </div>
