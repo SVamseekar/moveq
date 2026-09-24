@@ -13,6 +13,11 @@ PyPI.
 
 ### Added
 
+- Homepage slider "The mean stays at 24 minutes": three wait
+  distributions, equal population, `higher_is_advantaged`. Mean stays
+  24. Gini moves from 0 to 0.3375. The concentration index moves from
+  0 to -0.0375 to -0.3375. Figures are `compute_gini` and
+  `compute_concentration_index`.
 - Site navigation states the split: transport is the entry point and the
   worked domain; the engine is any allocation, service, burden, or
   outcome. No domain-specific module is claimed.
