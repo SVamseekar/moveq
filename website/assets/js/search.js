@@ -17,7 +17,8 @@ const DOCS_INDEX = [
   { title: "Announcing moveq v0.1.0", path: "/blog#v0-1-0", cat: "Blog", desc: "First lockstep release of core, catalogue, umbrella, and CLI" },
   { title: "Static site CI and Vercel deploys", path: "/blog#site", cat: "Blog", desc: "Clean-URL checks and pytest for website/ with no Node build" },
   { title: "Why not R or Excel?", path: "/#why-not-r-or-excel", cat: "Homepage", desc: "rineq and WHO HEAT are ahead on statistical depth; moveq records the decisions around the formula" },
-  { title: "Transport entry, general engine", path: "/#dual-identity", cat: "Homepage", desc: "Transport is the worked domain. The same array functions apply to any allocation, service, burden, or outcome" }
+  { title: "Transport entry, general engine", path: "/#dual-identity", cat: "Homepage", desc: "Transport is the worked domain. The same array functions apply to any allocation, service, burden, or outcome" },
+  { title: "The average alibi", path: "/#average-alibi", cat: "Homepage", desc: "Same mean of 24 minutes; Gini and the concentration index move with the distribution" }
 ];
 
 window.openSearch = function() {

@@ -13,6 +13,7 @@
   <script src="/assets/js/terminal.js" defer></script>
   <script src="/assets/js/playground.js" defer></script>
   <script src="/assets/js/search.js" defer></script>
+  <script src="/assets/js/average-alibi.js" defer></script>
 </head>
 
 <body>
@@ -227,6 +228,48 @@
             arithmetic. There is no separate health, energy, or household module.
           </p>
         </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="tools-section" id="average-alibi">
+    <div class="container">
+      <span class="section-tag">The same headline</span>
+      <h2 class="section-title">The mean stays at 24 minutes.</h2>
+      <p class="why-lead">
+        Ten residents, equal weight. Rank 1 is the least advantaged and rank 10
+        the most (<code>higher_is_advantaged</code>). Move the slider. The mean
+        does not move. Gini and the concentration index are moveq's figures for
+        these waits.
+      </p>
+      <div class="alibi-layout">
+        <div>
+          <label class="alibi-slider-label" for="alibiSlider">
+            <span id="alibiTitle">Everyone waits 24 minutes</span>
+            <span>A → C</span>
+          </label>
+          <input type="range" id="alibiSlider" min="0" max="2" step="1" value="0"
+            aria-valuemin="0" aria-valuemax="2" aria-label="Distribution, same mean">
+          <div class="alibi-bars" id="alibiBars" aria-hidden="true"></div>
+          <p class="alibi-axis">Rank, least advantaged on the left</p>
+        </div>
+        <div>
+          <div class="metric-readouts">
+            <div class="metric-badge">
+              <div class="metric-title">Mean wait</div>
+              <div class="metric-num" id="alibiMean">24</div>
+            </div>
+            <div class="metric-badge">
+              <div class="metric-title">Gini</div>
+              <div class="metric-num" id="alibiGini">0</div>
+            </div>
+            <div class="metric-badge">
+              <div class="metric-title">Concentration</div>
+              <div class="metric-num" id="alibiCi">0</div>
+            </div>
+          </div>
+          <p id="alibiDiagnosis" class="alibi-diagnosis"></p>
+        </div>
       </div>
     </div>
   </section>
