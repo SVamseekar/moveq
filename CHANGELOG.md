@@ -13,6 +13,9 @@ PyPI.
 
 ### Added
 
+- Site navigation states the split: transport is the entry point and the
+  worked domain; the engine is any allocation, service, burden, or
+  outcome. No domain-specific module is claimed.
 - Homepage section "Why not just use R or Excel?": `rineq` is ahead on
   statistical depth (four concentration-index variants, decomposition,
   robust standard errors, survey design). WHO HEAT's nineteen measures
