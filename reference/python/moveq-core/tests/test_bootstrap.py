@@ -155,3 +155,125 @@ def test_bootstrap_is_deterministic_for_a_seed():
     assert first.ci_high == second.ci_high
     other = gini_result(VALUES, WEIGHTS, uncertainty="bootstrap", n_boot=N_BOOT, seed=SEED + 1)
     assert (other.ci_low, other.ci_high) != (first.ci_low, first.ci_high)
+
+
+def test_bootstrap_rejects_bad_uncertainty_count_and_level():
+    with pytest.raises(ValueError, match="uncertainty must be"):
+        gini_result(VALUES, WEIGHTS, uncertainty="analytic")
+    with pytest.raises(ValueError, match="n_boot"):
+        gini_result(VALUES, WEIGHTS, uncertainty="bootstrap", n_boot=0, seed=SEED)
+    with pytest.raises(ValueError, match="n_boot"):
+        gini_result(VALUES, WEIGHTS, uncertainty="bootstrap", n_boot=True, seed=SEED)
+    with pytest.raises(ValueError, match="level"):
+        gini_result(
+            VALUES, WEIGHTS, uncertainty="bootstrap", n_boot=N_BOOT, seed=SEED, level=0.0
+        )
+    with pytest.raises(ValueError, match="level"):
+        gini_result(
+            VALUES, WEIGHTS, uncertainty="bootstrap", n_boot=N_BOOT, seed=SEED, level=1.0
+        )
+
+
+def test_omitted_seed_is_drawn_and_recorded():
+    result = gini_result(VALUES, WEIGHTS, uncertainty="bootstrap", n_boot=5, seed=None)
+    assert isinstance(result.parameters["seed"], int)
+    assert result.n_boot == 5
+    assert result.ci_low is not None
+
+
+def test_single_replicate_interval_equals_that_draw():
+    expected = _replicates(compute_gini, (VALUES, WEIGHTS), 1, SEED)[0]
+    result = gini_result(VALUES, WEIGHTS, uncertainty="bootstrap", n_boot=1, seed=SEED)
+    assert result.ci_low == pytest.approx(expected)
+    assert result.ci_high == pytest.approx(expected)
+
+
+def test_linear_quantile_returns_nonfinite_left_neighbour():
+    from moveq_core.equity import _linear_quantile
+
+    # Sorted left is -inf and right is finite, so the interval must not interpolate.
+    assert _linear_quantile(np.array([-np.inf, 1.0]), 0.5) == -np.inf
+
+
+def test_undefined_replicates_omit_the_interval():
+    service = np.array([0.0, 0.0, 4.0])
+    rank = np.array([1.0, 2.0, 3.0])
+    population = np.array([1.0, 1.0, 1.0])
+    found = None
+    for seed in range(40):
+        result = concentration_index_result(
+            service,
+            rank,
+            population,
+            rank_direction="higher_is_advantaged",
+            uncertainty="bootstrap",
+            n_boot=1,
+            seed=seed,
+        )
+        if result.ci_low is None and result.value is not None:
+            found = result
+            break
+    assert found is not None
+    assert any("no interval is reported" in warning for warning in found.warnings)
+
+
+def test_generalized_bootstrap_skips_undefined_draws():
+    service = np.array([0.0, 0.0, 1.0])
+    rank = np.array([1.0, 2.0, 3.0])
+    population = np.array([1.0, 1.0, 1.0])
+    seed = None
+    for candidate in range(40):
+        draws = np.random.default_rng(candidate).choice(3, size=(12, 3), replace=True)
+        rows = service[draws]
+        all_zero = np.all(rows == 0.0, axis=1)
+        if all_zero.any() and (~all_zero).any():
+            seed = candidate
+            break
+    assert seed is not None
+    result = concentration_index_result(
+        service,
+        rank,
+        population,
+        rank_direction="higher_is_advantaged",
+        variant="generalized",
+        uncertainty="bootstrap",
+        n_boot=12,
+        seed=seed,
+    )
+    assert result.value is not None
+    assert result.uncertainty_method == "bootstrap-percentile"
+    assert result.ci_low is not None and result.ci_high is not None
+
+
+def test_software_version_falls_back_when_metadata_is_missing(monkeypatch):
+    from moveq_core import __version__
+    from moveq_core.equity import _software_version
+
+    def missing(_name):
+        raise ModuleNotFoundError("moveq-core")
+
+    monkeypatch.setattr("importlib.metadata.version", missing)
+    assert _software_version() == __version__
+
+
+def test_numpy_without_an_integrator_is_rejected():
+    import importlib
+
+    import numpy as np
+
+    import moveq_core.equity as equity
+
+    snapshot = dict(equity.__dict__)
+    removed = {}
+    for name in ("trapezoid", "trapz"):
+        if hasattr(np, name):
+            removed[name] = getattr(np, name)
+            delattr(np, name)
+    try:
+        with pytest.raises(ImportError, match="trapezoid"):
+            importlib.reload(equity)
+    finally:
+        for name, fn in removed.items():
+            setattr(np, name, fn)
+        equity.__dict__.clear()
+        equity.__dict__.update(snapshot)
