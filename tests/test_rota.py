@@ -1,8 +1,14 @@
 """The rota page must not speak in statistical vocabulary, and the reply must not either."""
 
+import importlib.util
 import json
+from pathlib import Path
 
-from everyday.rota import advise
+_ROTA = Path(__file__).resolve().parents[1] / "everyday" / "rota.py"
+_SPEC = importlib.util.spec_from_file_location("everyday_rota", _ROTA)
+_MODULE = importlib.util.module_from_spec(_SPEC)
+_SPEC.loader.exec_module(_MODULE)
+advise = _MODULE.advise
 
 
 def test_unequal_hours_become_an_action():
@@ -48,9 +54,9 @@ def test_missing_hours_are_not_zero_and_can_change_the_answer():
 
 
 def test_rota_page_has_no_statistical_vocabulary():
-    page = (
-        __import__("pathlib").Path(__file__).resolve().parents[1] / "website" / "rota" / "index.html"
-    ).read_text(encoding="utf-8")
+    page = (Path(__file__).resolve().parents[1] / "website" / "rota" / "index.html").read_text(
+        encoding="utf-8"
+    )
     main = page.split("<main", 1)[1].split("</main>", 1)[0].lower()
     for banned in ("gini", "palma", "concentration", "coefficient"):
         assert banned not in main
