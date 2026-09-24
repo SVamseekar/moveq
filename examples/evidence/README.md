@@ -21,6 +21,8 @@ CI runs the same command. A case that stops matching `expected` fails the build.
 
 Exactly one badge per case. Promotion is recorded in `moveq.claim_history`; a case does not quietly become reproduced because a later run agreed.
 
+Case titles may ask a plain question ("is this rota fair?"). The computed result does not answer it. A concentration index locates an outcome on a rank. It does not show discrimination, and a Gini change does not show that an intervention caused the change.
+
 `limitations` is required. The six contract decisions — rank direction, outcome kind, weight kind, missing-data policy, CI variant, and tolerance — are present on every descriptor even when the value is `null`.
 
 ## Published in this directory

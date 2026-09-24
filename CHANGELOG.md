@@ -19,6 +19,9 @@ PyPI.
   estimate unchanged and sets `ci_low`, `ci_high`, `uncertainty_method`,
   and `n_boot` to null. Replicates resample areal units and keep population
   weights. Seed, method, and `n_boot` are stored in `parameters`.
+- Methodology section separating observed distribution, statistical
+  uncertainty, possible mechanisms, and causal attribution. moveq reports
+  the first, and uncertainty only when asked. It does not attribute cause.
 - Evidence layer: six-badge claim ladder, Frictionless case manifests
   with a required `limitations` list and the six contract decisions,
   `moveq evidence validate`, and CI that fails a case which stops
