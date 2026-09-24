@@ -11,6 +11,12 @@ PyPI.
 
 ## [Unreleased]
 
+### Changed
+
+- The website homepage leads with "The average improved. Who didn't?"
+  and three routes: the interactive demonstration, a real case, and your
+  own CSV. The million-zone timing is below the headline.
+
 ### Added
 
 - Optional percentile bootstrap intervals on `gini_result`, `palma_result`,
