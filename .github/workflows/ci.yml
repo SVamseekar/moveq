@@ -60,7 +60,10 @@ jobs:
           --cov-fail-under=98
 
       - name: Run example integration test
-        run: python examples/basic_equity/run.py
+        run: |
+          for script in examples/*/run.py; do
+            python "$script"
+          done
 
       - name: Validate evidence manifests
         run: moveq evidence validate examples/evidence

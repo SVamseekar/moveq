@@ -52,13 +52,17 @@ Computes the Wagstaff Concentration Index using the fractional rank covariance m
 
 ---
 
-### `gini_result(values, weights, *, weight_kind=None, context=None) -> EquityResult`
+### `gini_result(values, weights, *, weight_kind=None, context=None, uncertainty="none", n_boot=2000, seed=None, level=0.95) -> EquityResult`
 Same Gini calculation as `compute_gini`, returned as an `EquityResult` (`method="lorenz-trapezoid"`). Zero-weight units are counted in `n_dropped` and excluded from `n_areas` and `total_population`. Zero total service records a warning and sets `value` to `0.0`. `weight_kind` (`"population"` \| `"area"` \| `"need"` \| `"user"` \| `"unweighted"`) is recorded in `parameters`; omission resolves to `"population"` and adds a warning. It does not change the arithmetic: `"unweighted"` means the caller passed equal weights, not that the library replaces them.
 
-### `palma_result(values, weights, *, weight_kind=None, context=None) -> EquityResult`
+`uncertainty="bootstrap"` adds a percentile interval (`ci_low`, `ci_high`). Omission leaves those fields `None` and does not resample. Each replicate draws areal units with replacement and keeps each unit's population weight (pairs bootstrap; observations are treated as independent). `parameters` then records `seed`, `n_boot`, `bootstrap_method="percentile"`, `level`, and `resample="areal-unit"`. Cost is one index matrix of shape `(n_boot, n_areas)` plus an argsort per replicate: fine for hundreds of areas, expensive for a million zones at `n_boot=2000`.
+
+`cluster` (same length as the input) resamples those groups instead. `parameters["resample"]` becomes `"cluster"`, with `n_clusters` and `cluster_labels`. That is the right choice for spatially dependent areas. It is not applied unless you pass it. `cluster` without `uncertainty="bootstrap"` raises `ValueError`. The same argument exists on `palma_result` and `concentration_index_result`.
+
+### `palma_result(values, weights, *, weight_kind=None, context=None, uncertainty="none", n_boot=2000, seed=None, level=0.95) -> EquityResult`
 Same Palma calculation as `compute_palma_ratio`, returned as an `EquityResult` (`method="palma-split-40-90"`). `parameters` records the population cuts `bottom_cut=0.40` and `top_cut=0.90`, and the resolved `weight_kind` (same rules as `gini_result`). All-zero service and infinite Palma each record a warning.
 
-### `concentration_index_result(service, rank, population, *, rank_direction, outcome_kind=None, weight_kind=None, variant=None, context=None, zero_mean="undefined") -> EquityResult`
+### `concentration_index_result(service, rank, population, *, rank_direction, outcome_kind=None, weight_kind=None, variant=None, context=None, zero_mean="undefined", uncertainty="none", n_boot=2000, seed=None, level=0.95) -> EquityResult`
 Same Concentration Index calculation as `compute_concentration_index`, returned as an `EquityResult` (`method="wagstaff-covariance"` — the estimator identity, for every variant). Unpopulated units are dropped (`n_dropped` / `n_areas`). Zero or cancelled mean service sets `value` to `None`, `status` to `"undefined"`, and `reason` to `"zero_mean"` or `"near_zero_mean"`. `parameters` records `rank_direction_input`, `rank_direction_canonical`, `rank_transformed`, `zero_mean_rtol`, resolved `weight_kind`, and resolved `variant`.
 
 - `outcome_kind` (`"benefit"` \| `"burden"`): optional. When supplied and `value` is a non-zero finite CI, `interpretation` states where the outcome sits (never fairness or causation). Recorded in `parameters` only when supplied.
@@ -66,6 +70,9 @@ Same Concentration Index calculation as `compute_concentration_index`, returned 
 
 ### `UndefinedMetricError`
 Raised by `compute_concentration_index` when the index is undefined. Attributes: `metric`, `reason`, `result` (the structured `EquityResult`). Subclass of `MoveqError`.
+
+### `compare_results(baseline, proposal, *, uncertainty="none", n_boot=2000, seed=None, level=0.95, paired=True, baseline_inputs=None, proposal_inputs=None) -> DifferenceResult`
+Proposal minus baseline for two results of the same metric. The default does not resample: `ci_low` and `ci_high` stay `None`. `uncertainty="bootstrap"` needs the areal-unit inputs. When `paired` is true and the lengths match, both statistics use one shared draw. The result `note` says that subtracting two separate intervals is not this comparison.
 
 ### `EquityResult`
 Frozen dataclass analogous to `ScoreResult`. `value` is the same number the corresponding `compute_*` function returns (`inf` is allowed for Palma; `None` when a Concentration Index is undefined).
@@ -86,6 +93,9 @@ Frozen dataclass analogous to `ScoreResult`. `value` is the same number the corr
 - `source_id: str | None` — optional link to a case manifest `name`
 - `software_version: str | None` — `moveq-core` version that produced the result (filled automatically)
 - `data_hash: str | None` — optional SHA-256 of the input file (`sha256:<hex>`)
+- `ci_low`, `ci_high: float | None` — percentile interval when `uncertainty="bootstrap"`; otherwise `None`
+- `uncertainty_method: str | None` — `"bootstrap-percentile"` when an interval was computed
+- `n_boot: int | None` — replicates used; `None` when uncertainty was not requested
 - `to_dict() -> dict` — JSON-serializable copy of the fields (`value` is JSON `null` when undefined)
 
 The existing `compute_gini`, `compute_palma_ratio`, and `compute_concentration_index` functions still return `float` (they return `.value` from the corresponding `*_result` function).

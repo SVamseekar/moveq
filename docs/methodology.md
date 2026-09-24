@@ -126,6 +126,19 @@ None is universally right; they encode different judgements about maximal inequa
 
 `weight_kind` on the `*_result` APIs records what the weights mean (population, area, need, user, unweighted). Population-weighted Gini and area-weighted Gini on the same data answer different questions; neither is the correct default beyond matching today's arithmetic.
 
+### Small cells
+`suppress_below` withholds areal units whose population is positive but below that count. The index is computed without them. Each withheld index is listed in `warnings` and in `parameters["suppressed_indices"]`, next to the threshold. Omission does not suppress anything. This sits with the small-sample warnings: both say the table is too thin to publish as if it were complete.
+
+### Small samples
+Warnings, not hidden drops. Fewer than 30 live units, a rank group under 5% of population, or a Palma tail (bottom 40% or top 10%) with fewer than 5 units, is recorded on `warnings` and the threshold is stored in `parameters`. Palma at about 3,000 units does not trip the tail warning; a household-sized table does. A bootstrap also warns when the two halves of the replicates disagree by more than 0.05. That is a stability check, not evidence that a policy caused the gap.
+
+### Sampling variability
+Point estimates are the default. `uncertainty="bootstrap"` adds a percentile interval (2.5% and 97.5% by default) from a pairs bootstrap of areal units: each draw keeps the unit's population weight, then the same estimator is recomputed. This is the independent-observation bootstrap used by statsmodels' `GenericLikelihoodModelResults.bootstrap`, not a regression standard error and not a cluster bootstrap. Neighbouring areas are usually dependent, so a unit bootstrap is often too narrow for spatial data. `cluster=` resamples whole groups instead (the appropriate choice for most areal data) and records `n_clusters` and `cluster_labels` in `parameters`. It is not the default: omitting it leaves the unit bootstrap, and omitting `uncertainty` leaves the point estimate. The interval does not say an intervention caused the number.
+
+`compare_results` puts the interval on the difference itself. When the two inputs describe the same units, both statistics share one set of draws. Subtracting the endpoints of two separately estimated intervals is a different, usually wrong, comparison.
+
+Cost: an index matrix of shape `(n_boot, n_areas)` and a sort per replicate. A few hundred areas is cheap. A million zones at 2,000 replicates is not.
+
 ---
 
 ## 4. Weighted Composite Scoring
@@ -145,7 +158,20 @@ When a subset of indicators is missing, `missing_policy` names what happens. **R
 
 ---
 
-## 5. Multidimensional Vulnerability & Deprivation Indices
+## 5. What a result does not show
+
+moveq measures a distribution. It does not establish why that distribution exists.
+
+| Layer | What moveq provides |
+| --- | --- |
+| Observed distribution | Yes. This is the product: Gini, Palma, concentration index, score. |
+| Statistical uncertainty | Yes, once a bootstrap is requested. The default is still the point estimate. |
+| Possible mechanisms | No. Need, preference, geography, and targeting rules are the analyst's to argue. |
+| Causal attribution | No. A change in Gini is not evidence that an intervention caused it. |
+
+A positive concentration index means the outcome sits with more-advantaged units. That pattern is consistent with many mechanisms, including need-based targeting working as intended. It is not a finding of discrimination. A gallery question such as whether a rota is fair is the reader's question. The number underneath is still only a distribution.
+
+## 6. Multidimensional Vulnerability & Deprivation Indices
 
 In [`moveq_core.frames`](file:///Users/souravamseekarmarti/Projects/moveq/reference/python/moveq-core/src/moveq_core/frames.py):
 

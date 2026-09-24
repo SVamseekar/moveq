@@ -51,3 +51,56 @@ def test_root_and_asset_resolution():
 
 def test_full_website_check_passes():
     assert cw.collect_errors(WEBSITE) == []
+
+
+def test_navigation_states_transport_and_engine():
+    pages = list((WEBSITE).rglob("*.html"))
+    assert pages
+    for path in pages:
+        text = path.read_text(encoding="utf-8")
+        assert 'class="identity-nav"' in text, path
+        assert "Entry point and worked domain" in text, path
+        assert "Any allocation, service, burden, or outcome" in text, path
+        assert 'href="/guides"' in text, path
+        assert 'href="/docs/core"' in text, path
+    home = (WEBSITE / "index.html").read_text(encoding="utf-8")
+    assert 'id="dual-identity"' in home
+    assert "no separate health, energy, or household module" in home
+
+
+def test_homepage_why_not_section_uses_verified_facts():
+    text = (WEBSITE / "index.html").read_text(encoding="utf-8")
+    assert 'id="why-not-r-or-excel"' in text
+    required = (
+        "Why not just use R or Excel?",
+        "rineq",
+        "ahead of moveq on statistical depth",
+        "CI",
+        "CIg",
+        "CIc",
+        "CIw",
+        "confint.hci()",
+        "sandwich",
+        "decomposition()",
+        "svyglm",
+        "coxph",
+        "mfx",
+        "Nineteen summary inequality measures",
+        "Health Equity Monitor",
+        "HEAT Plus",
+        "four variants",
+        "robust standard errors",
+        "survey design",
+        "moveq has none of that",
+        "0.250",
+        "0.200",
+        "not a universal error rate",
+        "not a claim that",
+    )
+    for phrase in required:
+        assert phrase in text, phrase
+    lowered = text.lower()
+    assert "only implementation" not in lowered
+    assert "the only tool" not in lowered
+    assert "rineq is wrong" not in lowered
+    assert "rineq gets it wrong" not in lowered

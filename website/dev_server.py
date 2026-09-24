@@ -66,6 +66,35 @@ class CleanURLHandler(SimpleHTTPRequestHandler):
 
         return super().do_GET()
 
+    def do_POST(self):
+        url_path = self.path.split("?")[0].split("#")[0]
+        if url_path != "/rota/advise":
+            self.send_error(404)
+            return
+        length = int(self.headers.get("Content-Length", "0") or "0")
+        raw = self.rfile.read(length) if length else b""
+        import json
+        import sys
+        from pathlib import Path
+
+        root = Path(__file__).resolve().parents[1]
+        if str(root) not in sys.path:
+            sys.path.insert(0, str(root))
+        from everyday.rota import advise
+
+        try:
+            payload = json.loads(raw.decode("utf-8"))
+            people = payload["people"]
+        except (json.JSONDecodeError, KeyError, TypeError):
+            self.send_error(400)
+            return
+        body = json.dumps(advise(people)).encode("utf-8")
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
 if __name__ == "__main__":
     PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8080
     server = HTTPServer(("0.0.0.0", PORT), CleanURLHandler)

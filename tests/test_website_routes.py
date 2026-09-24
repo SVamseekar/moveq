@@ -24,6 +24,8 @@ INDEPENDENT_ROUTE_MAP: dict[str, str] = {
     "/docs/frames": "docs/frames/index.html",
     "/docs/cli": "docs/cli/index.html",
     "/guides": "guides/index.html",
+    "/examples": "examples/index.html",
+    "/rota": "rota/index.html",
     "/playground": "playground/index.html",
     "/reference": "reference/index.html",
     "/blog": "blog/index.html",

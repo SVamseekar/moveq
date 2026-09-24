@@ -15,7 +15,13 @@ const DOCS_INDEX = [
   { title: "Why discrete Palma binning fails", path: "/blog#palma-boundaries", cat: "Blog", desc: "MAUP at 40/90 population cuts and continuous proportional boundary splitting" },
   { title: "v0.1.1 PyPI documentation", path: "/blog#v0-1-1", cat: "Blog", desc: "Package READMEs explain metrics, not only API call signatures" },
   { title: "Announcing moveq v0.1.0", path: "/blog#v0-1-0", cat: "Blog", desc: "First lockstep release of core, catalogue, umbrella, and CLI" },
-  { title: "Static site CI and Vercel deploys", path: "/blog#site", cat: "Blog", desc: "Clean-URL checks and pytest for website/ with no Node build" }
+  { title: "Static site CI and Vercel deploys", path: "/blog#site", cat: "Blog", desc: "Clean-URL checks and pytest for website/ with no Node build" },
+  { title: "Why not R or Excel?", path: "/#why-not-r-or-excel", cat: "Homepage", desc: "rineq and WHO HEAT are ahead on statistical depth; moveq records the decisions around the formula" },
+  { title: "Transport entry, general engine", path: "/#dual-identity", cat: "Homepage", desc: "Transport is the worked domain. The same array functions apply to any allocation, service, burden, or outcome" },
+  { title: "The average alibi", path: "/#average-alibi", cat: "Homepage", desc: "Same mean of 24 minutes; Gini and the concentration index move with the distribution" },
+  { title: "Missing-data ranking", path: "/#missing-data", cat: "Homepage", desc: "Reweight scores East at 73.33; treating the missing term as zero scores 55.00" },
+  { title: "Rank direction", path: "/#rank-direction", cat: "Homepage", desc: "The same arrays give +0.250 or -0.250 depending on rank_direction" },
+  { title: "Examples", path: "/examples", cat: "Examples", desc: "Gallery index between the guides and the reference, filtered by field and claim-ladder badge" }
 ];
 
 window.openSearch = function() {

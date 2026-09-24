@@ -40,6 +40,10 @@ TO_DICT_KEYS = {
     "source_id",
     "software_version",
     "data_hash",
+    "ci_low",
+    "ci_high",
+    "uncertainty_method",
+    "n_boot",
 }
 
 
@@ -135,7 +139,9 @@ def test_live_units_have_no_drops():
     assert result.n_areas == 4
     assert result.n_dropped == 0
     assert result.total_population == pytest.approx(400.0)
-    assert result.warnings == []
+    assert result.warnings == [
+        "effective sample size is small: 4 live units (threshold 30)"
+    ]
 
 
 def test_method_ids_and_palma_parameters():
