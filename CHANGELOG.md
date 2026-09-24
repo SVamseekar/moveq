@@ -23,6 +23,11 @@ PyPI.
   units when `uncertainty="bootstrap"`. Omission stays a unit bootstrap.
   The cluster labels and count are stored in `parameters`. Passing
   `cluster` without a bootstrap raises `ValueError`.
+- `compare_results(baseline, proposal)` returns the difference of two
+  results of the same metric. `uncertainty="bootstrap"` intervals that
+  difference, using one shared resample when the inputs are paired.
+  Subtracting two separate intervals is not that comparison. Off by
+  default.
 - Optional percentile bootstrap intervals on `gini_result`, `palma_result`,
   and `concentration_index_result` (`uncertainty="bootstrap"`, `n_boot`,
   `seed`, `level`). Off by default: omitting the argument leaves the point

@@ -959,3 +959,144 @@ def compute_concentration_index(
         )
     assert result.value is not None
     return result.value
+
+
+_DIFFERENCE_NOTE = (
+    "This interval is for the difference of the two estimates. "
+    "Subtracting the endpoints of two separate intervals is not that comparison."
+)
+
+
+@dataclass(frozen=True)
+class DifferenceResult:
+    """Difference of two equity results, with an optional interval.
+
+    ``difference`` is proposal minus baseline. The interval, when requested,
+    is for that difference. It is not the gap between two separate intervals.
+    """
+
+    metric: MetricId
+    difference: float | None
+    ci_low: float | None
+    ci_high: float | None
+    uncertainty_method: str | None
+    n_boot: int | None
+    parameters: dict[str, Any]
+    warnings: list[str]
+    note: str | None
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "metric": self.metric,
+            "difference": self.difference,
+            "ci_low": self.ci_low,
+            "ci_high": self.ci_high,
+            "uncertainty_method": self.uncertainty_method,
+            "n_boot": self.n_boot,
+            "parameters": dict(self.parameters),
+            "warnings": list(self.warnings),
+            "note": self.note,
+        }
+
+
+def compare_results(
+    baseline: EquityResult,
+    proposal: EquityResult,
+    *,
+    uncertainty: Uncertainty = "none",
+    n_boot: int = 2000,
+    seed: int | None = None,
+    level: float = 0.95,
+    paired: bool = True,
+    baseline_inputs: tuple[np.ndarray, ...] | None = None,
+    proposal_inputs: tuple[np.ndarray, ...] | None = None,
+) -> DifferenceResult:
+    """Compare two results of the same metric.
+
+    With ``uncertainty="none"`` (the default) this subtracts the point
+    estimates and does not resample. ``uncertainty="bootstrap"`` resamples
+    the supplied areal-unit inputs. When ``paired`` is true and the two
+    inputs have the same length, both statistics use the same draws.
+    """
+    if baseline.metric != proposal.metric:
+        raise ValueError("baseline and proposal must be the same metric")
+    if baseline.value is None or proposal.value is None:
+        difference = None
+    else:
+        difference = float(proposal.value - baseline.value)
+    parsed = _parse_uncertainty(uncertainty)
+    if parsed == "none":
+        return DifferenceResult(
+            metric=baseline.metric,
+            difference=difference,
+            ci_low=None,
+            ci_high=None,
+            uncertainty_method=None,
+            n_boot=None,
+            parameters={"paired": paired},
+            warnings=[],
+            note=None,
+        )
+    if baseline_inputs is None or proposal_inputs is None:
+        raise ValueError("bootstrap comparison requires baseline_inputs and proposal_inputs")
+    if difference is None:
+        return DifferenceResult(
+            metric=baseline.metric,
+            difference=None,
+            ci_low=None,
+            ci_high=None,
+            uncertainty_method=None,
+            n_boot=None,
+            parameters={"paired": paired, "uncertainty": "bootstrap"},
+            warnings=["bootstrap skipped because a point estimate is undefined"],
+            note=_DIFFERENCE_NOTE,
+        )
+    base = tuple(np.asarray(col, dtype=float) for col in baseline_inputs)
+    prop = tuple(np.asarray(col, dtype=float) for col in proposal_inputs)
+    if base[0].shape != prop[0].shape:
+        if paired:
+            raise ValueError("paired comparison requires inputs of the same length")
+        paired = False
+    resolved_seed = _resolve_seed(seed)
+    n_units = int(base[0].shape[0])
+    if paired:
+        draws = _bootstrap_draws(n_units, int(n_boot), resolved_seed)
+        base_reps = _replicates_for(baseline.metric, base, draws)
+        prop_reps = _replicates_for(proposal.metric, prop, draws)
+    else:
+        rng = np.random.default_rng(resolved_seed)
+        base_draws = rng.choice(n_units, size=(int(n_boot), n_units), replace=True)
+        prop_draws = rng.choice(int(prop[0].shape[0]), size=(int(n_boot), int(prop[0].shape[0])), replace=True)
+        base_reps = _replicates_for(baseline.metric, base, base_draws)
+        prop_reps = _replicates_for(proposal.metric, prop, prop_draws)
+    low, high = _percentile_interval(prop_reps - base_reps, level)
+    return DifferenceResult(
+        metric=baseline.metric,
+        difference=difference,
+        ci_low=low,
+        ci_high=high,
+        uncertainty_method="bootstrap-percentile",
+        n_boot=int(n_boot),
+        parameters={
+            "paired": paired,
+            "uncertainty": "bootstrap",
+            "bootstrap_method": "percentile",
+            "n_boot": int(n_boot),
+            "seed": resolved_seed,
+            "level": float(level),
+            "resample": "areal-unit",
+        },
+        warnings=[],
+        note=_DIFFERENCE_NOTE,
+    )
+
+
+def _replicates_for(metric: str, columns: tuple[np.ndarray, ...], draws: np.ndarray) -> np.ndarray:
+    if metric == "gini":
+        return _gini_replicates(columns[0], columns[1], draws)
+    if metric == "palma":
+        return _palma_replicates(columns[0], columns[1], draws)
+    if metric == "ci":
+        rank_key = columns[1]
+        return _ci_replicates(columns[0], rank_key, columns[2], draws, "standard")
+    raise ValueError("metric must be 'gini', 'palma', or 'ci'")

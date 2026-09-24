@@ -4,7 +4,9 @@ from moveq_catalogue import Catalogue, SectionAction, SectionMapping
 from moveq_core import (
     CLAIM_BADGES,
     PROMOTION_RULES,
+    DifferenceResult,
     EquityResult,
+    compare_results,
     MoveqError,
     ScoreComponent,
     ScoreResult,
@@ -31,6 +33,8 @@ __all__ = [
     "gini_result",
     "palma_result",
     "concentration_index_result",
+    "compare_results",
+    "DifferenceResult",
     "EquityResult",
     "MoveqError",
     "UndefinedMetricError",
