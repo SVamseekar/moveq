@@ -13,6 +13,10 @@ PyPI.
 
 ### Added
 
+- Homepage missing-data controls. On the documented three-term case,
+  `reweight` scores 73.33 and `as_zero` scores 55.00, which swaps East
+  and South. `exclude` returns no score. `bounds` is the interval
+  55.00–80.00 with no point score. Reweighting is one declared policy.
 - Homepage slider "The mean stays at 24 minutes": three wait
   distributions, equal population, `higher_is_advantaged`. Mean stays
   24. Gini moves from 0 to 0.3375. The concentration index moves from

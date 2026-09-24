@@ -785,6 +785,37 @@ kbd {
   }
 }
 
+.missing-policies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.missing-rank {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-width: 28rem;
+}
+
+.missing-rank li {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-line);
+  font-weight: 650;
+}
+
+.missing-rank li span:last-child {
+  font-family: var(--font-mono);
+}
+
+.missing-unranked {
+  color: var(--text-faint);
+}
+
 .tool-card {
   position: relative;
   isolation: isolate;

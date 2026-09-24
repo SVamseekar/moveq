@@ -18,7 +18,8 @@ const DOCS_INDEX = [
   { title: "Static site CI and Vercel deploys", path: "/blog#site", cat: "Blog", desc: "Clean-URL checks and pytest for website/ with no Node build" },
   { title: "Why not R or Excel?", path: "/#why-not-r-or-excel", cat: "Homepage", desc: "rineq and WHO HEAT are ahead on statistical depth; moveq records the decisions around the formula" },
   { title: "Transport entry, general engine", path: "/#dual-identity", cat: "Homepage", desc: "Transport is the worked domain. The same array functions apply to any allocation, service, burden, or outcome" },
-  { title: "The average alibi", path: "/#average-alibi", cat: "Homepage", desc: "Same mean of 24 minutes; Gini and the concentration index move with the distribution" }
+  { title: "The average alibi", path: "/#average-alibi", cat: "Homepage", desc: "Same mean of 24 minutes; Gini and the concentration index move with the distribution" },
+  { title: "Missing-data ranking", path: "/#missing-data", cat: "Homepage", desc: "Reweight scores East at 73.33; treating the missing term as zero scores 55.00" }
 ];
 
 window.openSearch = function() {
