@@ -26,6 +26,10 @@ PyPI.
   is not feasible. Comparability is attested, not detected. No CLI command,
   GitHub Action, or equity regression check is added. The name is
   distributional difference, not CI.
+- `docs/everyday_app.md` chooses a server-side Python app that calls
+  `moveq-core`. A browser reimplementation is rejected. The default is to
+  retain nothing. The first template, if built, is a recurring-duty rota
+  in plain language.
 - Evidence layer: six-badge claim ladder, Frictionless case manifests
   with a required `limitations` list and the six contract decisions,
   `moveq evidence validate`, and CI that fails a case which stops
