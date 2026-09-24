@@ -61,3 +61,112 @@ def test_paired_bootstrap_matches_shared_draws():
     assert result.parameters["seed"] == SEED
     text = " ".join(result.warnings) + " " + (result.note or "")
     assert "subtract" in text.lower()
+    payload = result.to_dict()
+    assert payload["difference"] == result.difference
+    assert payload["ci_low"] == result.ci_low
+
+
+def test_rejects_mixed_metrics_and_a_bootstrap_without_inputs():
+    from moveq_core import compare_results, palma_result
+
+    baseline = gini_result(BASE_VALUES, BASE_WEIGHTS)
+    proposal = palma_result(PROP_VALUES, PROP_WEIGHTS)
+    with pytest.raises(ValueError, match="same metric"):
+        compare_results(baseline, proposal)
+    with pytest.raises(ValueError, match="baseline_inputs"):
+        compare_results(baseline, baseline, uncertainty="bootstrap")
+
+
+def test_undefined_point_skips_the_difference_interval():
+    from moveq_core import compare_results, concentration_index_result
+
+    service = np.array([0.0, 0.0, 0.0])
+    rank = np.array([1.0, 2.0, 3.0])
+    population = np.array([1.0, 1.0, 1.0])
+    baseline = concentration_index_result(
+        service, rank, population, rank_direction="higher_is_advantaged"
+    )
+    proposal = concentration_index_result(
+        service, rank, population, rank_direction="higher_is_advantaged"
+    )
+    result = compare_results(
+        baseline,
+        proposal,
+        uncertainty="bootstrap",
+        n_boot=5,
+        seed=SEED,
+        baseline_inputs=(service, rank, population),
+        proposal_inputs=(service, rank, population),
+    )
+    assert result.difference is None
+    assert result.ci_low is None
+    assert any("undefined" in warning for warning in result.warnings)
+
+
+def test_unpaired_bootstrap_uses_separate_draws():
+    from moveq_core import compare_results
+
+    baseline = gini_result(BASE_VALUES, BASE_WEIGHTS)
+    proposal = gini_result(PROP_VALUES[:3], PROP_WEIGHTS[:3])
+    with pytest.raises(ValueError, match="same length"):
+        compare_results(
+            baseline,
+            proposal,
+            uncertainty="bootstrap",
+            n_boot=N_BOOT,
+            seed=SEED,
+            baseline_inputs=(BASE_VALUES, BASE_WEIGHTS),
+            proposal_inputs=(PROP_VALUES[:3], PROP_WEIGHTS[:3]),
+        )
+    result = compare_results(
+        baseline,
+        proposal,
+        uncertainty="bootstrap",
+        n_boot=N_BOOT,
+        seed=SEED,
+        paired=False,
+        baseline_inputs=(BASE_VALUES, BASE_WEIGHTS),
+        proposal_inputs=(PROP_VALUES[:3], PROP_WEIGHTS[:3]),
+    )
+    assert result.parameters["paired"] is False
+    assert result.ci_low is not None and result.ci_high is not None
+    assert result.note is not None and "subtract" in result.note.lower()
+
+
+def test_palma_and_ci_differences_resample_their_estimators():
+    from moveq_core import compare_results, concentration_index_result, palma_result
+
+    base_palma = palma_result(BASE_VALUES, BASE_WEIGHTS)
+    prop_palma = palma_result(PROP_VALUES, PROP_WEIGHTS)
+    palma = compare_results(
+        base_palma,
+        prop_palma,
+        uncertainty="bootstrap",
+        n_boot=N_BOOT,
+        seed=SEED,
+        baseline_inputs=(BASE_VALUES, BASE_WEIGHTS),
+        proposal_inputs=(PROP_VALUES, PROP_WEIGHTS),
+    )
+    assert palma.metric == "palma"
+    assert palma.difference == pytest.approx(prop_palma.value - base_palma.value)
+    assert palma.ci_low is not None
+
+    rank = np.array([1.0, 2.0, 3.0, 4.0])
+    base_ci = concentration_index_result(
+        BASE_VALUES, rank, BASE_WEIGHTS, rank_direction="higher_is_advantaged"
+    )
+    prop_ci = concentration_index_result(
+        PROP_VALUES, rank, PROP_WEIGHTS, rank_direction="higher_is_advantaged"
+    )
+    ci = compare_results(
+        base_ci,
+        prop_ci,
+        uncertainty="bootstrap",
+        n_boot=N_BOOT,
+        seed=SEED,
+        baseline_inputs=(BASE_VALUES, rank, BASE_WEIGHTS),
+        proposal_inputs=(PROP_VALUES, rank, PROP_WEIGHTS),
+    )
+    assert ci.metric == "ci"
+    assert ci.difference == pytest.approx(prop_ci.value - base_ci.value)
+    assert ci.uncertainty_method == "bootstrap-percentile"
