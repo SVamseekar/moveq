@@ -28,6 +28,9 @@ PyPI.
   difference, using one shared resample when the inputs are paired.
   Subtracting two separate intervals is not that comparison. Off by
   default.
+- `suppress_below` withholds small positive populations from Gini, Palma,
+  and the concentration index, and lists every withheld index in
+  `warnings` and `parameters`. Omission leaves the result unchanged.
 - Small-sample warnings on Gini, Palma, and the concentration index:
   few live units, a thin rank group, a Palma tail with few units, and a
   bootstrap whose two halves disagree. Thresholds are stored in
