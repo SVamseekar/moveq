@@ -40,6 +40,10 @@ TO_DICT_KEYS = {
     "source_id",
     "software_version",
     "data_hash",
+    "ci_low",
+    "ci_high",
+    "uncertainty_method",
+    "n_boot",
 }
 
 
