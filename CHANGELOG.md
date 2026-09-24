@@ -19,6 +19,10 @@ PyPI.
 
 ### Added
 
+- `cluster` on the same three functions resamples groups instead of areal
+  units when `uncertainty="bootstrap"`. Omission stays a unit bootstrap.
+  The cluster labels and count are stored in `parameters`. Passing
+  `cluster` without a bootstrap raises `ValueError`.
 - Optional percentile bootstrap intervals on `gini_result`, `palma_result`,
   and `concentration_index_result` (`uncertainty="bootstrap"`, `n_boot`,
   `seed`, `level`). Off by default: omitting the argument leaves the point
