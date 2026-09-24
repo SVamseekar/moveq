@@ -159,6 +159,41 @@ kbd {
   gap: 4px;
 }
 
+.identity-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--border-line);
+  background-color: var(--bg-surface);
+}
+
+.identity-link {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  border: 1px solid var(--border-rule);
+  color: var(--text-muted);
+  font-size: 0.84rem;
+}
+
+.identity-link:hover {
+  color: var(--text-fg);
+  border-color: var(--accent-metro);
+}
+
+.identity-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-metro);
+}
+
 .nav-item {
   display: inline-flex;
   align-items: center;
