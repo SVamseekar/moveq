@@ -13,6 +13,79 @@ PyPI.
 
 ### Added
 
+- Recurring-duty rota at `/rota`. A Python handler calls `compute_gini`
+  and returns an action in ordinary words. Hours left blank are left
+  out. Nothing is stored. Palma is not offered.
+- Gallery index at `/examples`, between the guides and the reference.
+  Research cards and everyday cards use different fields. Two synthetic
+  examples draw charts and run in CI. No external extract is committed.
+- Homepage rank-direction toggle. Identical inputs give +0.250 when
+  `rank_direction` is `higher_is_advantaged` and -0.250 when it is
+  `higher_is_disadvantaged`. The argument stays required.
+- Homepage missing-data controls. On the documented three-term case,
+  `reweight` scores 73.33 and `as_zero` scores 55.00, which swaps East
+  and South. `exclude` returns no score. `bounds` is the interval
+  55.00–80.00 with no point score. Reweighting is one declared policy.
+- Homepage slider "The mean stays at 24 minutes": three wait
+  distributions, equal population, `higher_is_advantaged`. Mean stays
+  24. Gini moves from 0 to 0.3375. The concentration index moves from
+  0 to -0.0375 to -0.3375. Figures are `compute_gini` and
+  `compute_concentration_index`.
+- Site navigation states the split: transport is the entry point and the
+  worked domain; the engine is any allocation, service, burden, or
+  outcome. No domain-specific module is claimed.
+- Homepage section "Why not just use R or Excel?": `rineq` is ahead on
+  statistical depth (four concentration-index variants, decomposition,
+  robust standard errors, survey design). WHO HEAT's nineteen measures
+  and HEAT Plus are named. One verified tie (positional ranking 0.250
+  versus population-weighted midpoint ranking 0.200) is a specific case,
+  not a claim that other implementations are wrong.
+
+### Changed
+
+- The website homepage leads with "The average improved. Who didn't?"
+  and three routes: the interactive demonstration, a real case, and your
+  own CSV. The million-zone timing is below the headline.
+
+### Added
+
+- `cluster` on the same three functions resamples groups instead of areal
+  units when `uncertainty="bootstrap"`. Omission stays a unit bootstrap.
+  The cluster labels and count are stored in `parameters`. Passing
+  `cluster` without a bootstrap raises `ValueError`.
+- `examples/distributional_difference/run.py` is a constructed
+  demonstration: the same zones, and the mean rises while the bottom 40%
+  share of service falls. It prints a difference interval and is labelled
+  a demonstration, not a shipped comparison tool.
+- `compare_results(baseline, proposal)` returns the difference of two
+  results of the same metric. `uncertainty="bootstrap"` intervals that
+  difference, using one shared resample when the inputs are paired.
+  Subtracting two separate intervals is not that comparison. Off by
+  default.
+- `suppress_below` withholds small positive populations from Gini, Palma,
+  and the concentration index, and lists every withheld index in
+  `warnings` and `parameters`. Omission leaves the result unchanged.
+- Small-sample warnings on Gini, Palma, and the concentration index:
+  few live units, a thin rank group, a Palma tail with few units, and a
+  bootstrap whose two halves disagree. Thresholds are stored in
+  `parameters`. The point estimate is unchanged.
+- Optional percentile bootstrap intervals on `gini_result`, `palma_result`,
+  and `concentration_index_result` (`uncertainty="bootstrap"`, `n_boot`,
+  `seed`, `level`). Off by default: omitting the argument leaves the point
+  estimate unchanged and sets `ci_low`, `ci_high`, `uncertainty_method`,
+  and `n_boot` to null. Replicates resample areal units and keep population
+  weights. Seed, method, and `n_boot` are stored in `parameters`.
+- Methodology section separating observed distribution, statistical
+  uncertainty, possible mechanisms, and causal attribution. moveq reports
+  the first, and uncertainty only when asked. It does not attribute cause.
+- `docs/comparability.md` records that a general distributional-diff tool
+  is not feasible. Comparability is attested, not detected. No CLI command,
+  GitHub Action, or equity regression check is added. The name is
+  distributional difference, not CI.
+- `docs/everyday_app.md` chooses a server-side Python app that calls
+  `moveq-core`. A browser reimplementation is rejected. The default is to
+  retain nothing. The first template, if built, is a recurring-duty rota
+  in plain language.
 - Evidence layer: six-badge claim ladder, Frictionless case manifests
   with a required `limitations` list and the six contract decisions,
   `moveq evidence validate`, and CI that fails a case which stops

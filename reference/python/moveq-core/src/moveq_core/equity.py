@@ -31,9 +31,14 @@ ZeroMeanScalar = Literal["raise", "legacy_zero"]
 WeightKind = Literal["population", "area", "need", "user", "unweighted"]
 OutcomeKind = Literal["benefit", "burden"]
 CIVariant = Literal["standard", "generalized", "erreygers", "wagstaff_normalized"]
+Uncertainty = Literal["none", "bootstrap"]
 
 _PALMA_BOTTOM_CUT = 0.40
 _PALMA_TOP_CUT = 0.90
+_SMALL_N_AREAS = 30
+_PALMA_MIN_TAIL_UNITS = 5
+_RANK_GROUP_MIN_SHARE = 0.05
+_BOOTSTRAP_HALF_GAP = 0.05
 _ZERO_MEAN_RTOL = 1e-9
 _RANK_DIRECTIONS = ("higher_is_advantaged", "higher_is_disadvantaged")
 _WEIGHT_KINDS = ("population", "area", "need", "user", "unweighted")
@@ -160,6 +165,10 @@ class EquityResult:
     source_id: str | None = None
     software_version: str | None = None
     data_hash: str | None = None
+    ci_low: float | None = None
+    ci_high: float | None = None
+    uncertainty_method: str | None = None
+    n_boot: int | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -179,6 +188,10 @@ class EquityResult:
             "source_id": self.source_id,
             "software_version": self.software_version,
             "data_hash": self.data_hash,
+            "ci_low": self.ci_low,
+            "ci_high": self.ci_high,
+            "uncertainty_method": self.uncertainty_method,
+            "n_boot": self.n_boot,
         }
 
 
@@ -193,6 +206,301 @@ def _resolve_weight_kind(weight_kind: WeightKind | None) -> tuple[WeightKind, li
     return weight_kind, []
 
 
+def _apply_suppression(
+    weights: np.ndarray, suppress_below: int | None
+) -> tuple[np.ndarray, list[int], list[str], dict[str, Any]]:
+    if suppress_below is None:
+        return weights, [], [], {}
+    if isinstance(suppress_below, bool) or not isinstance(suppress_below, (int, np.integer)):
+        raise ValueError("suppress_below must be an int or None")
+    threshold = int(suppress_below)
+    if threshold < 1:
+        raise ValueError("suppress_below must be >= 1")
+    small = (weights > 0) & (weights < threshold)
+    indices = [int(i) for i in np.flatnonzero(small)]
+    recorded = {"suppress_below": threshold, "suppressed_indices": indices}
+    if not indices:
+        return weights, [], [], recorded
+    withheld = weights.copy()
+    withheld[small] = 0.0
+    warning = (
+        f"suppressed {len(indices)} cells with population below {threshold}: "
+        f"indices {indices}"
+    )
+    return withheld, indices, [warning], recorded
+
+
+def _threshold_parameters() -> dict[str, float | int]:
+    return {
+        "small_n_areas": _SMALL_N_AREAS,
+        "palma_min_units_in_tail": _PALMA_MIN_TAIL_UNITS,
+        "rank_group_min_share": _RANK_GROUP_MIN_SHARE,
+        "bootstrap_half_gap": _BOOTSTRAP_HALF_GAP,
+    }
+
+
+def _sample_size_warnings(n_areas: int) -> list[str]:
+    if n_areas < _SMALL_N_AREAS:
+        return [
+            f"effective sample size is small: {n_areas} live units "
+            f"(threshold {_SMALL_N_AREAS})"
+        ]
+    return []
+
+
+def _bootstrap_instability_warning(replicates: np.ndarray, level: float) -> list[str]:
+    half = int(replicates.size) // 2
+    if half < 2:
+        return []
+    low_a, high_a = _percentile_interval(replicates[:half], level)
+    low_b, high_b = _percentile_interval(replicates[half : half * 2], level)
+    if None in (low_a, high_a, low_b, high_b):
+        return []
+    gap = max(abs(low_a - low_b), abs(high_a - high_b))
+    if not np.isfinite(gap) or gap > _BOOTSTRAP_HALF_GAP:
+        return [
+            "bootstrap interval is unstable across halves of the replicates "
+            f"(gap {gap:.3f}; threshold {_BOOTSTRAP_HALF_GAP})"
+        ]
+    return []
+
+
+def _parse_uncertainty(uncertainty: str) -> Uncertainty:
+    if uncertainty not in ("none", "bootstrap"):
+        raise ValueError("uncertainty must be 'none' or 'bootstrap'")
+    return uncertainty  # type: ignore[return-value]
+
+
+def _resolve_seed(seed: int | None) -> int:
+    if seed is None:
+        return int(np.random.SeedSequence().entropy)
+    return int(seed)
+
+
+def _linear_quantile(samples: np.ndarray, q: float) -> float:
+    """Hyndman–Fan type 7, without interpolating across ±inf (that yields NaN)."""
+    ordered = np.sort(samples)
+    if ordered.size == 1:
+        return float(ordered[0])
+    pos = (ordered.size - 1) * q
+    lo = int(np.floor(pos))
+    hi = int(np.ceil(pos))
+    weight = pos - lo
+    left = ordered[lo]
+    right = ordered[hi]
+    if not np.isfinite(right):
+        return float(right if weight > 0.0 or not np.isfinite(left) else left)
+    if not np.isfinite(left):
+        return float(left)
+    return float((1.0 - weight) * left + weight * right)
+
+
+def _percentile_interval(replicates: np.ndarray, level: float) -> tuple[float | None, float | None]:
+    # Keep ±inf. Drop only NaN (undefined replicates). Dropping inf would
+    # report a finite upper bound when the Palma tail is infinite.
+    usable = replicates[~np.isnan(replicates)]
+    if usable.size == 0:
+        return None, None
+    alpha = (1.0 - level) / 2.0
+    return _linear_quantile(usable, alpha), _linear_quantile(usable, 1.0 - alpha)
+
+
+def _bootstrap_draws(n_units: int, n_boot: int, seed: int) -> np.ndarray:
+    """One pairs-bootstrap index matrix. Matches a single Generator.choice call."""
+    rng = np.random.default_rng(seed)
+    return rng.choice(n_units, size=(n_boot, n_units), replace=True)
+
+
+def _gini_replicates(values: np.ndarray, weights: np.ndarray, draws: np.ndarray) -> np.ndarray:
+    sampled_values = values[draws]
+    sampled_weights = weights[draws]
+    total_service = (sampled_values * sampled_weights).sum(axis=1)
+    order = np.argsort(sampled_values, axis=1, kind="stable")
+    sampled_values = np.take_along_axis(sampled_values, order, axis=1)
+    sampled_weights = np.take_along_axis(sampled_weights, order, axis=1)
+    population = sampled_weights.sum(axis=1, keepdims=True)
+    cum_pop = np.cumsum(sampled_weights, axis=1) / population
+    with np.errstate(divide="ignore", invalid="ignore"):
+        cum_service = np.cumsum(sampled_values * sampled_weights, axis=1) / total_service[:, None]
+    zeros = np.zeros((draws.shape[0], 1))
+    cum_pop = np.concatenate([zeros, cum_pop], axis=1)
+    cum_service = np.concatenate([zeros, np.nan_to_num(cum_service)], axis=1)
+    lorenz_area = _trapezoid(cum_service, cum_pop, axis=1)
+    gini = 1.0 - 2.0 * lorenz_area
+    return np.where(total_service == 0.0, 0.0, gini)
+
+
+def _palma_replicates(values: np.ndarray, weights: np.ndarray, draws: np.ndarray) -> np.ndarray:
+    sampled_values = values[draws]
+    sampled_weights = weights[draws]
+    order = np.argsort(sampled_values, axis=1, kind="stable")
+    sampled_values = np.take_along_axis(sampled_values, order, axis=1)
+    sampled_weights = np.take_along_axis(sampled_weights, order, axis=1)
+    total = sampled_weights.sum(axis=1)
+    cum_weight = np.cumsum(sampled_weights, axis=1)
+    cum_before = cum_weight - sampled_weights
+    bottom_cut = (_PALMA_BOTTOM_CUT * total)[:, None]
+    top_cut = (_PALMA_TOP_CUT * total)[:, None]
+    bottom_overlap = np.clip(np.minimum(cum_weight, bottom_cut) - cum_before, 0, None)
+    top_overlap = np.clip(cum_weight - np.maximum(cum_before, top_cut), 0, None)
+    bottom_weight = bottom_overlap.sum(axis=1)
+    top_weight = top_overlap.sum(axis=1)
+    bottom_mean = np.divide(
+        (sampled_values * bottom_overlap).sum(axis=1),
+        bottom_weight,
+        out=np.zeros(draws.shape[0]),
+        where=bottom_weight > 0,
+    )
+    top_mean = np.divide(
+        (sampled_values * top_overlap).sum(axis=1),
+        top_weight,
+        out=np.zeros(draws.shape[0]),
+        where=top_weight > 0,
+    )
+    both_zero = (bottom_mean == 0.0) & (top_mean == 0.0)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        ratio = top_mean / bottom_mean
+    return np.where(both_zero, 1.0, np.where(bottom_mean > 0.0, ratio, np.inf))
+
+
+def _ci_replicates(
+    service: np.ndarray,
+    rank_key: np.ndarray,
+    population: np.ndarray,
+    draws: np.ndarray,
+    variant: CIVariant,
+) -> np.ndarray:
+    sampled_service = service[draws]
+    sampled_rank = rank_key[draws]
+    sampled_population = population[draws]
+    order = np.argsort(sampled_rank, axis=1, kind="stable")
+    sampled_service = np.take_along_axis(sampled_service, order, axis=1)
+    sampled_rank = np.take_along_axis(sampled_rank, order, axis=1)
+    sampled_population = np.take_along_axis(sampled_population, order, axis=1)
+    starts = np.empty(sampled_rank.shape, dtype=bool)
+    starts[:, 0] = True
+    starts[:, 1:] = sampled_rank[:, 1:] != sampled_rank[:, :-1]
+    group_id = np.cumsum(starts, axis=1) - 1
+    n_boot, n_units = sampled_rank.shape
+    group_pop = np.zeros((n_boot, n_units), dtype=float)
+    row_index = np.broadcast_to(np.arange(n_boot)[:, None], group_id.shape)
+    np.add.at(group_pop, (row_index, group_id), sampled_population)
+    group_before = np.cumsum(group_pop, axis=1) - group_pop
+    total = sampled_population.sum(axis=1)
+    frac_rank = (
+        np.take_along_axis(group_before, group_id, axis=1)
+        + 0.5 * np.take_along_axis(group_pop, group_id, axis=1)
+    ) / total[:, None]
+    mean_service = (sampled_service * sampled_population).sum(axis=1) / total
+    mean_abs = (np.abs(sampled_service) * sampled_population).sum(axis=1) / total
+    centred = (sampled_service - mean_service[:, None]) * (frac_rank - 0.5)
+    cov = (centred * sampled_population).sum(axis=1) / total
+    undefined = (mean_abs == 0.0) | (np.abs(mean_service) <= _ZERO_MEAN_RTOL * mean_abs)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        standard = np.where(undefined, np.nan, 2.0 * cov / mean_service)
+    if variant == "standard":
+        return standard
+    out = np.empty(n_boot, dtype=float)
+    for i in range(n_boot):
+        if not np.isfinite(standard[i]):
+            out[i] = np.nan
+            continue
+        value, status, _reason = _apply_ci_variant(
+            float(standard[i]), float(mean_service[i]), sampled_service[i], variant
+        )
+        out[i] = np.nan if status == "undefined" or value is None else value
+    return out
+
+
+def _live_cluster(
+    cluster: np.ndarray | None,
+    uncertainty: str,
+    n_input: int,
+    live: np.ndarray,
+) -> np.ndarray | None:
+    if cluster is None:
+        return None
+    if uncertainty != "bootstrap":
+        raise ValueError("cluster requires uncertainty='bootstrap'")
+    labels = np.asarray(cluster)
+    if labels.ndim != 1 or labels.shape[0] != n_input:
+        raise ValueError("cluster must be a 1-dimensional array aligned with the input")
+    return labels[live]
+
+
+def _json_label(value: object) -> str | int | float:
+    if isinstance(value, (np.integer, int)) and not isinstance(value, bool):
+        return int(value)
+    if isinstance(value, (np.floating, float)):
+        return float(value)
+    return str(value)
+
+
+def _cluster_index_rows(
+    cluster: np.ndarray, n_boot: int, seed: int
+) -> tuple[list[np.ndarray], int, list[str | int | float]]:
+    codes, inverse = np.unique(cluster, return_inverse=True)
+    n_clusters = int(codes.size)
+    groups = [np.flatnonzero(inverse == i) for i in range(n_clusters)]
+    rng = np.random.default_rng(seed)
+    chosen = rng.choice(n_clusters, size=(n_boot, n_clusters), replace=True)
+    rows = [np.concatenate([groups[i] for i in chosen[b]]) for b in range(n_boot)]
+    return rows, n_clusters, [_json_label(code) for code in codes]
+
+
+def _interval_for(
+    uncertainty: str,
+    n_boot: int,
+    seed: int | None,
+    level: float,
+    n_units: int,
+    point_defined: bool,
+    replicate_fn,
+    cluster: np.ndarray | None = None,
+) -> tuple[float | None, float | None, str | None, int | None, dict[str, Any], list[str]]:
+    parsed = _parse_uncertainty(uncertainty)
+    if parsed == "none":
+        return None, None, None, None, {}, []
+    if not isinstance(n_boot, (int, np.integer)) or isinstance(n_boot, bool) or int(n_boot) < 1:
+        raise ValueError("n_boot must be an integer >= 1")
+    if not (0.0 < level < 1.0):
+        raise ValueError("level must be between 0 and 1")
+    resolved_seed = _resolve_seed(seed)
+    recorded = {
+        "uncertainty": "bootstrap",
+        "bootstrap_method": "percentile",
+        "n_boot": int(n_boot),
+        "seed": resolved_seed,
+        "level": float(level),
+        "resample": "areal-unit",
+    }
+    if cluster is not None:
+        if cluster.shape != (n_units,):
+            raise ValueError("cluster must align with the live areal units")
+        codes = np.unique(cluster)
+        recorded["resample"] = "cluster"
+        recorded["n_clusters"] = int(codes.size)
+        recorded["cluster_labels"] = [_json_label(code) for code in codes]
+    if not point_defined or n_units < 1:
+        return None, None, None, None, recorded, [
+            "bootstrap skipped because the point estimate is undefined"
+        ]
+    if cluster is None:
+        draws = _bootstrap_draws(n_units, int(n_boot), resolved_seed)
+        replicates = replicate_fn(draws)
+    else:
+        rows, _n_clusters, _labels = _cluster_index_rows(cluster, int(n_boot), resolved_seed)
+        replicates = np.array(
+            [float(np.asarray(replicate_fn(row[None, :])).reshape(-1)[0]) for row in rows]
+        )
+    replicates = np.asarray(replicates, dtype=float)
+    low, high = _percentile_interval(replicates, level)
+    warnings: list[str] = _bootstrap_instability_warning(replicates, level)
+    if low is None:
+        warnings.append("bootstrap replicates were undefined; no interval is reported")
+    return low, high, "bootstrap-percentile", int(n_boot), recorded, warnings
+
+
 def gini_result(
     values: np.ndarray,
     weights: np.ndarray,
@@ -201,18 +509,36 @@ def gini_result(
     context: dict[str, str] | None = None,
     source_id: str | None = None,
     data_hash: str | None = None,
+    uncertainty: Uncertainty = "none",
+    n_boot: int = 2000,
+    seed: int | None = None,
+    level: float = 0.95,
+    cluster: np.ndarray | None = None,
+    suppress_below: int | None = None,
 ) -> EquityResult:
     """Population-weighted Gini coefficient with audit fields.
 
     See :func:`compute_gini` for the numeric definition.
+    ``uncertainty="bootstrap"`` adds a percentile interval. The default
+    ``"none"`` does not resample and leaves ``ci_low`` / ``ci_high`` unset.
+    Cost is ``O(n_boot * n log n)`` time and an ``(n_boot, n)`` index matrix.
     """
     resolved_kind, kind_warnings = _resolve_weight_kind(weight_kind)
     values, weights = _prepare_weighted(values, weights)
+    weights, _suppressed, suppression_warnings, suppression_parameters = _apply_suppression(
+        weights, suppress_below
+    )
+    live_mask = weights > 0
+    cluster_live = _live_cluster(cluster, uncertainty, int(weights.size), live_mask)
     (values, weights), n_areas, n_dropped, total_population = _drop_unpopulated(
         values, weights, population=weights
     )
+    live_values = values
+    live_weights = weights
 
     warnings: list[str] = list(kind_warnings)
+    warnings.extend(suppression_warnings)
+    warnings.extend(_sample_size_warnings(n_areas))
     note = None
     total_service = float((values * weights).sum())
     if total_service == 0:
@@ -230,6 +556,17 @@ def gini_result(
         lorenz_area = _trapezoid(cum_service, cum_pop)
         value = float(1 - 2 * lorenz_area)
 
+    ci_low, ci_high, uncertainty_method, recorded_n_boot, extra, boot_warnings = _interval_for(
+        uncertainty,
+        n_boot,
+        seed,
+        level,
+        n_areas,
+        True,
+        lambda draws: _gini_replicates(live_values, live_weights, draws),
+        cluster=cluster_live,
+    )
+    warnings.extend(boot_warnings)
     return EquityResult(
         metric="gini",
         value=value,
@@ -237,13 +574,22 @@ def gini_result(
         n_areas=n_areas,
         n_dropped=n_dropped,
         total_population=total_population,
-        parameters={"weight_kind": resolved_kind},
+        parameters={
+            "weight_kind": resolved_kind,
+            **_threshold_parameters(),
+            **suppression_parameters,
+            **extra,
+        },
         warnings=warnings,
         note=note,
         context=dict(context or {}),
         source_id=source_id,
         software_version=_software_version(),
         data_hash=data_hash,
+        ci_low=ci_low,
+        ci_high=ci_high,
+        uncertainty_method=uncertainty_method,
+        n_boot=recorded_n_boot,
     )
 
 
@@ -255,6 +601,12 @@ def palma_result(
     context: dict[str, str] | None = None,
     source_id: str | None = None,
     data_hash: str | None = None,
+    uncertainty: Uncertainty = "none",
+    n_boot: int = 2000,
+    seed: int | None = None,
+    level: float = 0.95,
+    cluster: np.ndarray | None = None,
+    suppress_below: int | None = None,
 ) -> EquityResult:
     """Palma ratio with audit fields.
 
@@ -262,9 +614,16 @@ def palma_result(
     """
     resolved_kind, kind_warnings = _resolve_weight_kind(weight_kind)
     values, weights = _prepare_weighted(values, weights)
+    weights, _suppressed, suppression_warnings, suppression_parameters = _apply_suppression(
+        weights, suppress_below
+    )
+    live_mask = weights > 0
+    cluster_live = _live_cluster(cluster, uncertainty, int(weights.size), live_mask)
     (values, weights), n_areas, n_dropped, total_population = _drop_unpopulated(
         values, weights, population=weights
     )
+    live_values = values
+    live_weights = weights
 
     order = np.argsort(values, kind="stable")
     values = values[order]
@@ -287,6 +646,16 @@ def palma_result(
     top_mean = float(np.sum(values * top_overlap) / top_weight) if top_weight > 0 else 0.0
 
     warnings: list[str] = list(kind_warnings)
+    warnings.extend(suppression_warnings)
+    warnings.extend(_sample_size_warnings(n_areas))
+    n_bottom_units = int(np.count_nonzero(bottom_overlap > 0))
+    n_top_units = int(np.count_nonzero(top_overlap > 0))
+    if n_bottom_units < _PALMA_MIN_TAIL_UNITS or n_top_units < _PALMA_MIN_TAIL_UNITS:
+        warnings.append(
+            "Palma 40/90 split rests on few units "
+            f"(bottom {n_bottom_units}, top {n_top_units}; "
+            f"threshold {_PALMA_MIN_TAIL_UNITS})"
+        )
     note = None
     if bottom_mean == 0.0 and top_mean == 0.0:
         value = 1.0
@@ -299,6 +668,17 @@ def palma_result(
         warnings.append("bottom 40% mean service is zero; Palma is infinite")
         note = "The bottom 40% has zero mean service while the top 10% does not."
 
+    ci_low, ci_high, uncertainty_method, recorded_n_boot, extra, boot_warnings = _interval_for(
+        uncertainty,
+        n_boot,
+        seed,
+        level,
+        n_areas,
+        True,
+        lambda draws: _palma_replicates(live_values, live_weights, draws),
+        cluster=cluster_live,
+    )
+    warnings.extend(boot_warnings)
     return EquityResult(
         metric="palma",
         value=value,
@@ -310,6 +690,9 @@ def palma_result(
             "bottom_cut": _PALMA_BOTTOM_CUT,
             "top_cut": _PALMA_TOP_CUT,
             "weight_kind": resolved_kind,
+            **_threshold_parameters(),
+            **suppression_parameters,
+            **extra,
         },
         warnings=warnings,
         note=note,
@@ -317,6 +700,10 @@ def palma_result(
         source_id=source_id,
         software_version=_software_version(),
         data_hash=data_hash,
+        ci_low=ci_low,
+        ci_high=ci_high,
+        uncertainty_method=uncertainty_method,
+        n_boot=recorded_n_boot,
     )
 
 
@@ -409,6 +796,12 @@ def concentration_index_result(
     zero_mean: ZeroMeanResult = "undefined",
     source_id: str | None = None,
     data_hash: str | None = None,
+    uncertainty: Uncertainty = "none",
+    n_boot: int = 2000,
+    seed: int | None = None,
+    level: float = 0.95,
+    cluster: np.ndarray | None = None,
+    suppress_below: int | None = None,
 ) -> EquityResult:
     """Wagstaff Concentration Index with audit fields.
 
@@ -430,6 +823,11 @@ def concentration_index_result(
     if not np.all(np.isfinite(rank)):
         raise ValueError("rank must be finite")
 
+    population, _suppressed, suppression_warnings, suppression_parameters = _apply_suppression(
+        population, suppress_below
+    )
+    live_mask = population > 0
+    cluster_live = _live_cluster(cluster, uncertainty, int(population.size), live_mask)
     (service, rank, population), n_areas, n_dropped, total_population = _drop_unpopulated(
         service, rank, population, population=population
     )
@@ -476,7 +874,17 @@ def concentration_index_result(
         "zero_mean_rtol": _ZERO_MEAN_RTOL,
         "weight_kind": resolved_kind,
         "variant": resolved_variant,
+        **_threshold_parameters(),
+        **suppression_parameters,
     }
+    warn_list.extend(suppression_warnings)
+    warn_list.extend(_sample_size_warnings(n_areas))
+    shares = group_pop / total_population
+    if np.any((group_pop > 0) & (shares < _RANK_GROUP_MIN_SHARE)):
+        warn_list.append(
+            "a rank group holds very little population "
+            f"(threshold share {_RANK_GROUP_MIN_SHARE})"
+        )
     if resolved_outcome is not None:
         parameters["outcome_kind"] = resolved_outcome
 
@@ -528,6 +936,20 @@ def concentration_index_result(
 
     interpretation = _interpretation_for(value, resolved_outcome, dict(context or {}))
 
+    ci_low, ci_high, uncertainty_method, recorded_n_boot, extra, boot_warnings = _interval_for(
+        uncertainty,
+        n_boot,
+        seed,
+        level,
+        n_areas,
+        (not undefined) and status == "ok" and value is not None and np.isfinite(value),
+        lambda draws: _ci_replicates(
+            service, rank_key, population, draws, resolved_variant
+        ),
+        cluster=cluster_live,
+    )
+    warn_list.extend(boot_warnings)
+    parameters.update(extra)
     return EquityResult(
         metric="ci",
         value=value,
@@ -545,6 +967,10 @@ def concentration_index_result(
         source_id=source_id,
         software_version=_software_version(),
         data_hash=data_hash,
+        ci_low=ci_low,
+        ci_high=ci_high,
+        uncertainty_method=uncertainty_method,
+        n_boot=recorded_n_boot,
     )
 
 
@@ -638,3 +1064,144 @@ def compute_concentration_index(
         )
     assert result.value is not None
     return result.value
+
+
+_DIFFERENCE_NOTE = (
+    "This interval is for the difference of the two estimates. "
+    "Subtracting the endpoints of two separate intervals is not that comparison."
+)
+
+
+@dataclass(frozen=True)
+class DifferenceResult:
+    """Difference of two equity results, with an optional interval.
+
+    ``difference`` is proposal minus baseline. The interval, when requested,
+    is for that difference. It is not the gap between two separate intervals.
+    """
+
+    metric: MetricId
+    difference: float | None
+    ci_low: float | None
+    ci_high: float | None
+    uncertainty_method: str | None
+    n_boot: int | None
+    parameters: dict[str, Any]
+    warnings: list[str]
+    note: str | None
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "metric": self.metric,
+            "difference": self.difference,
+            "ci_low": self.ci_low,
+            "ci_high": self.ci_high,
+            "uncertainty_method": self.uncertainty_method,
+            "n_boot": self.n_boot,
+            "parameters": dict(self.parameters),
+            "warnings": list(self.warnings),
+            "note": self.note,
+        }
+
+
+def compare_results(
+    baseline: EquityResult,
+    proposal: EquityResult,
+    *,
+    uncertainty: Uncertainty = "none",
+    n_boot: int = 2000,
+    seed: int | None = None,
+    level: float = 0.95,
+    paired: bool = True,
+    baseline_inputs: tuple[np.ndarray, ...] | None = None,
+    proposal_inputs: tuple[np.ndarray, ...] | None = None,
+) -> DifferenceResult:
+    """Compare two results of the same metric.
+
+    With ``uncertainty="none"`` (the default) this subtracts the point
+    estimates and does not resample. ``uncertainty="bootstrap"`` resamples
+    the supplied areal-unit inputs. When ``paired`` is true and the two
+    inputs have the same length, both statistics use the same draws.
+    """
+    if baseline.metric != proposal.metric:
+        raise ValueError("baseline and proposal must be the same metric")
+    if baseline.value is None or proposal.value is None:
+        difference = None
+    else:
+        difference = float(proposal.value - baseline.value)
+    parsed = _parse_uncertainty(uncertainty)
+    if parsed == "none":
+        return DifferenceResult(
+            metric=baseline.metric,
+            difference=difference,
+            ci_low=None,
+            ci_high=None,
+            uncertainty_method=None,
+            n_boot=None,
+            parameters={"paired": paired},
+            warnings=[],
+            note=None,
+        )
+    if baseline_inputs is None or proposal_inputs is None:
+        raise ValueError("bootstrap comparison requires baseline_inputs and proposal_inputs")
+    if difference is None:
+        return DifferenceResult(
+            metric=baseline.metric,
+            difference=None,
+            ci_low=None,
+            ci_high=None,
+            uncertainty_method=None,
+            n_boot=None,
+            parameters={"paired": paired, "uncertainty": "bootstrap"},
+            warnings=["bootstrap skipped because a point estimate is undefined"],
+            note=_DIFFERENCE_NOTE,
+        )
+    base = tuple(np.asarray(col, dtype=float) for col in baseline_inputs)
+    prop = tuple(np.asarray(col, dtype=float) for col in proposal_inputs)
+    if base[0].shape != prop[0].shape:
+        if paired:
+            raise ValueError("paired comparison requires inputs of the same length")
+        paired = False
+    resolved_seed = _resolve_seed(seed)
+    n_units = int(base[0].shape[0])
+    if paired:
+        draws = _bootstrap_draws(n_units, int(n_boot), resolved_seed)
+        base_reps = _replicates_for(baseline.metric, base, draws)
+        prop_reps = _replicates_for(proposal.metric, prop, draws)
+    else:
+        rng = np.random.default_rng(resolved_seed)
+        base_draws = rng.choice(n_units, size=(int(n_boot), n_units), replace=True)
+        prop_draws = rng.choice(int(prop[0].shape[0]), size=(int(n_boot), int(prop[0].shape[0])), replace=True)
+        base_reps = _replicates_for(baseline.metric, base, base_draws)
+        prop_reps = _replicates_for(proposal.metric, prop, prop_draws)
+    low, high = _percentile_interval(prop_reps - base_reps, level)
+    return DifferenceResult(
+        metric=baseline.metric,
+        difference=difference,
+        ci_low=low,
+        ci_high=high,
+        uncertainty_method="bootstrap-percentile",
+        n_boot=int(n_boot),
+        parameters={
+            "paired": paired,
+            "uncertainty": "bootstrap",
+            "bootstrap_method": "percentile",
+            "n_boot": int(n_boot),
+            "seed": resolved_seed,
+            "level": float(level),
+            "resample": "areal-unit",
+        },
+        warnings=[],
+        note=_DIFFERENCE_NOTE,
+    )
+
+
+def _replicates_for(metric: str, columns: tuple[np.ndarray, ...], draws: np.ndarray) -> np.ndarray:
+    if metric == "gini":
+        return _gini_replicates(columns[0], columns[1], draws)
+    if metric == "palma":
+        return _palma_replicates(columns[0], columns[1], draws)
+    if metric == "ci":
+        rank_key = columns[1]
+        return _ci_replicates(columns[0], rank_key, columns[2], draws, "standard")
+    raise ValueError("metric must be 'gini', 'palma', or 'ci'")

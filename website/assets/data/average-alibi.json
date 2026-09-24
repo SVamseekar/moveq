@@ -1,0 +1,93 @@
+{
+  "source": "moveq_core.equity.compute_gini and compute_concentration_index",
+  "rank_direction": "higher_is_advantaged",
+  "population": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+  ],
+  "rank": [
+    1.0,
+    2.0,
+    3.0,
+    4.0,
+    5.0,
+    6.0,
+    7.0,
+    8.0,
+    9.0,
+    10.0
+  ],
+  "states": [
+    {
+      "id": "A",
+      "title": "Everyone waits 24 minutes",
+      "blurb": "The same wait for every resident.",
+      "waits": [
+        24.0,
+        24.0,
+        24.0,
+        24.0,
+        24.0,
+        24.0,
+        24.0,
+        24.0,
+        24.0,
+        24.0
+      ],
+      "mean": 24.0,
+      "gini": 0.0,
+      "concentration_index": 0.0,
+      "diagnosis": "Everyone waits 24 minutes. The mean is the whole distribution. Gini is 0 and the concentration index is 0."
+    },
+    {
+      "id": "B",
+      "title": "Most wait 15, one waits 105",
+      "blurb": "Nine residents wait 15 minutes. The resident at rank 5 waits 105.",
+      "waits": [
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        105.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0
+      ],
+      "mean": 24.0,
+      "gini": 0.3375,
+      "concentration_index": -0.0375,
+      "diagnosis": "Nine residents wait 15 minutes and one waits 105. The mean is still 24. Gini rises to 0.3375. The long wait sits near the middle of the rank, so the concentration index is only -0.0375."
+    },
+    {
+      "id": "C",
+      "title": "The long wait is the least advantaged",
+      "blurb": "The same waits. The 105-minute wait is rank 1, the least-advantaged resident.",
+      "waits": [
+        105.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0,
+        15.0
+      ],
+      "mean": 24.0,
+      "gini": 0.3375,
+      "concentration_index": -0.33749999999999997,
+      "diagnosis": "The same waits, so the mean is still 24 and Gini is still 0.3375. The 105-minute wait is the least-advantaged resident. The concentration index is -0.3375, disadvantage-concentrated."
+    }
+  ]
+}

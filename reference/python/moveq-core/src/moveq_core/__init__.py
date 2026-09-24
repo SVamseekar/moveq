@@ -1,9 +1,11 @@
 """moveq-core — pure algorithms for transport-equity analysis."""
 
 from moveq_core.equity import (
+    DifferenceResult,
     EquityResult,
     MoveqError,
     UndefinedMetricError,
+    compare_results,
     compute_concentration_index,
     compute_gini,
     compute_palma_ratio,
@@ -29,6 +31,8 @@ __all__ = [
     "gini_result",
     "palma_result",
     "concentration_index_result",
+    "compare_results",
+    "DifferenceResult",
     "EquityResult",
     "MoveqError",
     "UndefinedMetricError",

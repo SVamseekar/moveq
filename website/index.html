@@ -13,6 +13,9 @@
   <script src="/assets/js/terminal.js" defer></script>
   <script src="/assets/js/playground.js" defer></script>
   <script src="/assets/js/search.js" defer></script>
+  <script src="/assets/js/average-alibi.js" defer></script>
+  <script src="/assets/js/missing-data.js" defer></script>
+  <script src="/assets/js/rank-direction.js" defer></script>
 </head>
 
 <body>
@@ -50,6 +53,10 @@
             <line x1="15" y1="6" x2="15" y2="21"></line>
           </svg>
           <span>Guides</span>
+        </a>
+                <a href="/examples" class="nav-item">
+          <svg class="icon" width="16" height="16" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
+          <span>Examples</span>
         </a>
         <a href="/reference" class="nav-item">
           <svg class="icon" width="16" height="16" viewBox="0 0 24 24">
@@ -141,6 +148,17 @@
       </div>
     </div>
   </header>
+  <nav class="identity-nav" aria-label="What moveq is">
+    <a href="/guides" class="identity-link">
+      <span class="identity-kicker">Transport</span>
+      <span class="identity-text">Entry point and worked domain</span>
+    </a>
+    <a href="/docs/core" class="identity-link">
+      <span class="identity-kicker">Engine</span>
+      <span class="identity-text">Any allocation, service, burden, or outcome</span>
+    </a>
+  </nav>
+
 
   <!-- Hero Section -->
   <section class="hero-section">
@@ -154,23 +172,18 @@
           </a>
 
           <h1 class="hero-title">
-            moveq is a <span style="color: var(--accent-metro);">fast</span> transport-equity toolkit. All in one.
+            The average improved. Who didn't?
           </h1>
 
           <p class="hero-subtitle">
-            Calculate population-weighted Gini coefficients, continuous Palma ratios, Wagstaff Concentration Indices,
-            and composite accessibility scores with pure NumPy speed.
+            moveq measures how benefits and burdens are actually distributed — and records the assumptions behind
+            every number, so someone else can check it.
           </p>
 
-          <!-- Transit Route Bullets -->
           <div class="route-bullets">
-            <div class="bullet-item"><span class="bullet-shield shield-gini">G</span><span>Gini Coefficient</span></div>
-            <div class="bullet-item"><span class="bullet-shield shield-palma">P</span><span>Continuous Palma</span>
-            </div>
-            <div class="bullet-item"><span class="bullet-shield shield-ci">C</span><span>Concentration Index</span>
-            </div>
-            <div class="bullet-item"><span class="bullet-shield shield-score">S</span><span>Composite Score</span></div>
-            <div class="bullet-item"><span class="bullet-shield shield-cat">H</span><span>Harmonization</span></div>
+            <a class="bullet-item" href="/playground"><span class="bullet-shield shield-gini">1</span><span>Try the interactive demonstration</span></a>
+            <a class="bullet-item" href="/guides#baseline-proposal"><span class="bullet-shield shield-palma">2</span><span>Inspect a real case</span></a>
+            <a class="bullet-item" href="/docs/cli"><span class="bullet-shield shield-ci">3</span><span>Run it on your own CSV</span></a>
           </div>
 
           <!-- Installer Box -->
@@ -195,8 +208,182 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </section>
 
-        <!-- Benchmark Arena Card -->
+  <section class="tools-section" id="dual-identity">
+    <div class="container">
+      <span class="section-tag">Two layers, one library</span>
+      <h2 class="section-title">Transport is the entry. The engine is the arrays.</h2>
+      <div class="why-grid">
+        <article class="why-card">
+          <h3>Transport, the worked domain</h3>
+          <p>
+            The guides, the playground, and the CSV commands are written as transit
+            service: trips, population, a deprivation rank. Start there. That is the
+            vocabulary this site already has.
+          </p>
+        </article>
+        <article class="why-card">
+          <h3>The engine, any allocation</h3>
+          <p>
+            <code>compute_gini</code>, <code>compute_palma_ratio</code>,
+            <code>compute_concentration_index</code>, and <code>compute_score</code>
+            take arrays. An allocation, a service, a burden, or an outcome is the same
+            arithmetic. There is no separate health, energy, or household module.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="tools-section" id="average-alibi">
+    <div class="container">
+      <span class="section-tag">The same headline</span>
+      <h2 class="section-title">The mean stays at 24 minutes.</h2>
+      <p class="why-lead">
+        Ten residents, equal weight. Rank 1 is the least advantaged and rank 10
+        the most (<code>higher_is_advantaged</code>). Move the slider. The mean
+        does not move. Gini and the concentration index are moveq's figures for
+        these waits.
+      </p>
+      <div class="alibi-layout">
+        <div>
+          <label class="alibi-slider-label" for="alibiSlider">
+            <span id="alibiTitle">Everyone waits 24 minutes</span>
+            <span>A → C</span>
+          </label>
+          <input type="range" id="alibiSlider" min="0" max="2" step="1" value="0"
+            aria-valuemin="0" aria-valuemax="2" aria-label="Distribution, same mean">
+          <div class="alibi-bars" id="alibiBars" aria-hidden="true"></div>
+          <p class="alibi-axis">Rank, least advantaged on the left</p>
+        </div>
+        <div>
+          <div class="metric-readouts">
+            <div class="metric-badge">
+              <div class="metric-title">Mean wait</div>
+              <div class="metric-num" id="alibiMean">24</div>
+            </div>
+            <div class="metric-badge">
+              <div class="metric-title">Gini</div>
+              <div class="metric-num" id="alibiGini">0</div>
+            </div>
+            <div class="metric-badge">
+              <div class="metric-title">Concentration</div>
+              <div class="metric-num" id="alibiCi">0</div>
+            </div>
+          </div>
+          <p id="alibiDiagnosis" class="alibi-diagnosis"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tools-section" id="missing-data">
+    <div class="container">
+      <span class="section-tag">One missing term</span>
+      <h2 class="section-title">The ranking moves when the missing-data policy changes.</h2>
+      <p class="why-lead">
+        Four areas, three terms, design weights 0.50, 0.25, and 0.25.
+        East has no climate figure. The other three are complete. Scores are
+        <code>compute_score</code>. Reweighting is one declared policy, not the proper one.
+      </p>
+      <div class="missing-policies" role="group" aria-label="Missing-data policy">
+        <button type="button" class="bench-tab active" data-policy="reweight">Reweight</button>
+        <button type="button" class="bench-tab" data-policy="as_zero">Treat as zero</button>
+        <button type="button" class="bench-tab" data-policy="exclude">Exclude</button>
+        <button type="button" class="bench-tab" data-policy="bounds">Bounds</button>
+      </div>
+      <ol class="missing-rank" id="missingRank"></ol>
+      <p id="missingNote" class="alibi-diagnosis"></p>
+    </div>
+  </section>
+
+  <section class="tools-section" id="rank-direction">
+    <div class="container">
+      <span class="section-tag">Same arrays</span>
+      <h2 class="section-title">The sign follows the declared rank direction.</h2>
+      <p class="why-lead">
+        Service 10, 20, 30, 40. Rank 1, 2, 3, 4. Population 100 in each.
+        Only <code>rank_direction</code> changes. Both figures are
+        <code>compute_concentration_index</code>.
+      </p>
+      <div class="missing-policies" role="group" aria-label="Rank direction">
+        <button type="button" class="bench-tab active" data-direction="higher_is_advantaged">Higher rank is advantaged</button>
+        <button type="button" class="bench-tab" data-direction="higher_is_disadvantaged">Higher rank is disadvantaged</button>
+      </div>
+      <p class="rank-value" id="rankDirectionValue">+0.250</p>
+      <p id="rankDirectionNote" class="alibi-diagnosis"></p>
+    </div>
+  </section>
+
+  <section class="tools-section" id="why-not-r-or-excel">
+    <div class="container">
+      <span class="section-tag">The honest comparison</span>
+      <h2 class="section-title">Why not just use R or Excel?</h2>
+      <div class="prose why-lead">
+        <p>
+          Gini and concentration indices are standard, and R's <code>rineq</code> and WHO's HEAT
+          implement them well. <code>rineq</code> is ahead of moveq on statistical depth. moveq
+          exists for a different reason: the decisions around the formula are where results go
+          wrong — which direction the rank runs, whether the outcome is a benefit or a burden,
+          what the weights represent, and how missing data was handled. moveq makes those
+          explicit, enforces them, and records them with the result.
+        </p>
+      </div>
+
+      <div class="why-grid">
+        <article class="why-card">
+          <h3><code>rineq</code> (CRAN)</h3>
+          <p>
+            Four concentration-index variants via <code>ci()</code>: <code>CI</code> (relative),
+            <code>CIg</code> (generalized), <code>CIc</code> (Erreygers-corrected), and
+            <code>CIw</code> (Wagstaff, for bounded or binary outcomes). Confidence intervals
+            through <code>confint.hci()</code>, standard errors by several methods, robust
+            standard errors via the sandwich package, and decomposition
+            (<code>contribution()</code>, <code>decomposition()</code>) across <code>lm</code>,
+            <code>glm</code>, <code>svyglm</code>, <code>coxph</code>, and <code>mfx</code>.
+          </p>
+        </article>
+        <article class="why-card">
+          <h3>WHO HEAT</h3>
+          <p>
+            Nineteen summary inequality measures, including the concentration index, over the
+            WHO Health Equity Monitor database. HEAT Plus allows uploading your own datasets
+            for global, national, or subnational analysis.
+          </p>
+        </article>
+      </div>
+
+      <div class="callout callout-note">
+        <div class="callout-title">Where the alternatives are stronger</div>
+        <p>
+          <code>rineq</code> currently does more than moveq statistically: four variants,
+          decomposition, robust standard errors, and survey design. moveq has none of that.
+          The differentiator here is the enforced contract and a result someone else can
+          check — not statistical depth.
+        </p>
+      </div>
+
+      <div class="callout callout-warning">
+        <div class="callout-title">One verified tie, not a universal error rate</div>
+        <p>
+          With tied deprivation groups, positional ranking gives 0.250 where
+          population-weighted midpoint ranking gives 0.200. That is one verified case: arbitrary
+          positional ranking within tied socioeconomic groups changes the answer. It is not a
+          rate that applies everywhere, and it is not a claim that <code>rineq</code> or HEAT
+          get the index wrong.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="tools-section" id="benchmark">
+    <div class="container">
+      <span class="section-tag">Speed, after the question</span>
+      <h2 class="section-title">The million-zone timing sits here, not in the headline.</h2>
+      <div class="hero-grid">
         <div>
           <div class="benchmark-card">
             <div class="bench-tabs">
