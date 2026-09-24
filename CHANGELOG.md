@@ -28,6 +28,10 @@ PyPI.
   difference, using one shared resample when the inputs are paired.
   Subtracting two separate intervals is not that comparison. Off by
   default.
+- Small-sample warnings on Gini, Palma, and the concentration index:
+  few live units, a thin rank group, a Palma tail with few units, and a
+  bootstrap whose two halves disagree. Thresholds are stored in
+  `parameters`. The point estimate is unchanged.
 - Optional percentile bootstrap intervals on `gini_result`, `palma_result`,
   and `concentration_index_result` (`uncertainty="bootstrap"`, `n_boot`,
   `seed`, `level`). Off by default: omitting the argument leaves the point
