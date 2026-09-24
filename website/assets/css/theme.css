@@ -653,6 +653,38 @@ kbd {
   overflow: visible;
 }
 
+.why-lead {
+  max-width: 46rem;
+  margin-bottom: 8px;
+}
+
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+  margin-top: 8px;
+}
+
+.why-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-rule);
+  border-radius: 12px;
+  padding: 22px 22px 8px;
+}
+
+.why-card h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-fg);
+  margin-bottom: 8px;
+}
+
+.why-card p,
+.why-lead p,
+#why-not-r-or-excel .callout p {
+  margin-bottom: 14px;
+}
+
 .tool-card {
   position: relative;
   isolation: isolate;

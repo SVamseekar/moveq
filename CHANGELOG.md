@@ -11,6 +11,15 @@ PyPI.
 
 ## [Unreleased]
 
+### Added
+
+- Homepage section "Why not just use R or Excel?": `rineq` is ahead on
+  statistical depth (four concentration-index variants, decomposition,
+  robust standard errors, survey design). WHO HEAT's nineteen measures
+  and HEAT Plus are named. One verified tie (positional ranking 0.250
+  versus population-weighted midpoint ranking 0.200) is a specific case,
+  not a claim that other implementations are wrong.
+
 ### Changed
 
 - The website homepage leads with "The average improved. Who didn't?"

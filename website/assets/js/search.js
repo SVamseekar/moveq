@@ -15,7 +15,8 @@ const DOCS_INDEX = [
   { title: "Why discrete Palma binning fails", path: "/blog#palma-boundaries", cat: "Blog", desc: "MAUP at 40/90 population cuts and continuous proportional boundary splitting" },
   { title: "v0.1.1 PyPI documentation", path: "/blog#v0-1-1", cat: "Blog", desc: "Package READMEs explain metrics, not only API call signatures" },
   { title: "Announcing moveq v0.1.0", path: "/blog#v0-1-0", cat: "Blog", desc: "First lockstep release of core, catalogue, umbrella, and CLI" },
-  { title: "Static site CI and Vercel deploys", path: "/blog#site", cat: "Blog", desc: "Clean-URL checks and pytest for website/ with no Node build" }
+  { title: "Static site CI and Vercel deploys", path: "/blog#site", cat: "Blog", desc: "Clean-URL checks and pytest for website/ with no Node build" },
+  { title: "Why not R or Excel?", path: "/#why-not-r-or-excel", cat: "Homepage", desc: "rineq and WHO HEAT are ahead on statistical depth; moveq records the decisions around the formula" }
 ];
 
 window.openSearch = function() {
