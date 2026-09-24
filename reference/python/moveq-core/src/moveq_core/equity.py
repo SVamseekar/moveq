@@ -214,13 +214,32 @@ def _resolve_seed(seed: int | None) -> int:
     return int(seed)
 
 
+def _linear_quantile(samples: np.ndarray, q: float) -> float:
+    """Hyndman–Fan type 7, without interpolating across ±inf (that yields NaN)."""
+    ordered = np.sort(samples)
+    if ordered.size == 1:
+        return float(ordered[0])
+    pos = (ordered.size - 1) * q
+    lo = int(np.floor(pos))
+    hi = int(np.ceil(pos))
+    weight = pos - lo
+    left = ordered[lo]
+    right = ordered[hi]
+    if not np.isfinite(right):
+        return float(right if weight > 0.0 or not np.isfinite(left) else left)
+    if not np.isfinite(left):
+        return float(left)
+    return float((1.0 - weight) * left + weight * right)
+
+
 def _percentile_interval(replicates: np.ndarray, level: float) -> tuple[float | None, float | None]:
-    finite = replicates[np.isfinite(replicates)]
-    if finite.size == 0:
+    # Keep ±inf. Drop only NaN (undefined replicates). Dropping inf would
+    # report a finite upper bound when the Palma tail is infinite.
+    usable = replicates[~np.isnan(replicates)]
+    if usable.size == 0:
         return None, None
     alpha = (1.0 - level) / 2.0
-    low, high = np.quantile(finite, [alpha, 1.0 - alpha], method="linear")
-    return float(low), float(high)
+    return _linear_quantile(usable, alpha), _linear_quantile(usable, 1.0 - alpha)
 
 
 def _bootstrap_draws(n_units: int, n_boot: int, seed: int) -> np.ndarray:
@@ -509,7 +528,7 @@ def palma_result(
         seed,
         level,
         n_areas,
-        np.isfinite(value),
+        True,
         lambda draws: _palma_replicates(live_values, live_weights, draws),
     )
     warnings.extend(boot_warnings)
@@ -757,7 +776,7 @@ def concentration_index_result(
         seed,
         level,
         n_areas,
-        status == "ok" and value is not None and np.isfinite(value),
+        (not undefined) and status == "ok" and value is not None and np.isfinite(value),
         lambda draws: _ci_replicates(
             service, rank_key, population, draws, resolved_variant
         ),

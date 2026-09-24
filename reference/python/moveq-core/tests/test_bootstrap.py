@@ -6,6 +6,8 @@ the replicates (Hyndman–Fan type 7), matching statsmodels' pairs bootstrap
 of independent observations — not a regression standard error.
 """
 
+import math
+
 import numpy as np
 import pytest
 
@@ -115,6 +117,34 @@ def test_palma_and_ci_bootstrap_match_oracles():
     assert ci.ci_high == pytest.approx(ci_high)
     assert ci.parameters["seed"] == SEED
     assert ci.uncertainty_method == "bootstrap-percentile"
+
+
+def test_palma_percentile_keeps_infinite_replicates():
+    values = np.array([0.0, 0.0, 0.0, 0.0, 10.0])
+    weights = np.array([40.0, 20.0, 20.0, 10.0, 10.0])
+    result = palma_result(values, weights, uncertainty="bootstrap", n_boot=20, seed=1)
+    assert math.isinf(result.value)
+    assert result.ci_high is not None and math.isinf(result.ci_high)
+    assert not any("undefined" in warning for warning in result.warnings)
+
+
+def test_legacy_zero_mean_does_not_bootstrap_around_convention_zero():
+    service = np.array([0.0, 0.0, 0.0])
+    rank = np.array([1.0, 2.0, 3.0])
+    population = np.array([10.0, 10.0, 10.0])
+    result = concentration_index_result(
+        service,
+        rank,
+        population,
+        rank_direction="higher_is_advantaged",
+        zero_mean="legacy_zero",
+        uncertainty="bootstrap",
+        n_boot=20,
+        seed=1,
+    )
+    assert result.value == 0.0
+    assert result.ci_low is None
+    assert result.ci_high is None
 
 
 def test_bootstrap_is_deterministic_for_a_seed():
