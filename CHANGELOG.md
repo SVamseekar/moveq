@@ -23,6 +23,10 @@ PyPI.
   units when `uncertainty="bootstrap"`. Omission stays a unit bootstrap.
   The cluster labels and count are stored in `parameters`. Passing
   `cluster` without a bootstrap raises `ValueError`.
+- `examples/distributional_difference/run.py` is a constructed
+  demonstration: the same zones, and the mean rises while the bottom 40%
+  share of service falls. It prints a difference interval and is labelled
+  a demonstration, not a shipped comparison tool.
 - `compare_results(baseline, proposal)` returns the difference of two
   results of the same metric. `uncertainty="bootstrap"` intervals that
   difference, using one shared resample when the inputs are paired.
