@@ -1,0 +1,330 @@
+{
+  "note": "No external extract is committed. Thumbnails exist only where the example script draws a chart from synthetic inputs.",
+  "tiers": [
+    {
+      "id": "research",
+      "label": "Research",
+      "schema": [
+        "spec",
+        "field",
+        "question",
+        "badge",
+        "thumbnail"
+      ],
+      "cards": [
+        {
+          "id": "t1.1-greenspace",
+          "spec": "T1.1",
+          "title": "Greenspace exposure inequality, Global North vs Global South",
+          "badge": "proposed",
+          "field": "environment",
+          "question": "Greenspace exposure inequality, Global North vs Global South",
+          "thumbnail": null,
+          "extract": null
+        },
+        {
+          "id": "t1.2-gini-reporting",
+          "spec": "T1.2",
+          "title": "The Gini reporting problem in urban greening",
+          "badge": "demonstrated",
+          "field": "environment",
+          "question": "Does one Gini, reported on its own, say who received the trips?",
+          "thumbnail": "/examples/thumbnails/t1-2-gini-reporting.svg",
+          "extract": null
+        },
+        {
+          "id": "t1.3-nhs-wlmds",
+          "spec": "T1.3",
+          "title": "NHS elective waiting lists by deprivation decile",
+          "badge": "extended",
+          "field": "health",
+          "question": "NHS elective waiting lists by deprivation decile",
+          "thumbnail": null,
+          "extract": null
+        },
+        {
+          "id": "t1.4-bus-travel-time",
+          "spec": "T1.4",
+          "title": "Bus-based healthcare access and travel time variability",
+          "badge": "extended",
+          "field": "transport",
+          "question": "Bus-based healthcare access and travel time variability",
+          "thumbnail": null,
+          "extract": null
+        },
+        {
+          "id": "t1.5-london-ptal",
+          "spec": "T1.5",
+          "title": "London public transport accessibility, 2011\u20132021",
+          "badge": "extended",
+          "field": "transport",
+          "question": "London public transport accessibility, 2011\u20132021",
+          "thumbnail": null,
+          "extract": null
+        },
+        {
+          "id": "t1.6-missing-term",
+          "spec": "T1.6",
+          "title": "EU energy poverty and the Social Climate Fund",
+          "badge": "demonstrated",
+          "field": "energy",
+          "question": "EU energy poverty and the Social Climate Fund",
+          "thumbnail": null,
+          "extract": null
+        },
+        {
+          "id": "t1.7-nursing-workforce",
+          "spec": "T1.7",
+          "title": "Global nursing workforce distribution",
+          "badge": "blocked",
+          "field": "health",
+          "question": "Global nursing workforce distribution",
+          "thumbnail": null,
+          "extract": null
+        },
+        {
+          "id": "t1.8-pm25-pittsburgh",
+          "spec": "T1.8",
+          "title": "PM2.5 exposure and social deprivation",
+          "badge": "extended",
+          "field": "air quality",
+          "question": "PM2.5 exposure and social deprivation",
+          "thumbnail": null,
+          "extract": null
+        },
+        {
+          "id": "t1.9-access-to-cash",
+          "spec": "T1.9",
+          "title": "Access to cash after bank branch closures",
+          "badge": "extended",
+          "field": "infrastructure",
+          "question": "Access to cash after bank branch closures",
+          "thumbnail": null,
+          "extract": null
+        },
+        {
+          "id": "t1.10-e-food-deserts",
+          "spec": "T1.10",
+          "title": "E-food deserts across Great Britain",
+          "badge": "extended",
+          "field": "food",
+          "question": "E-food deserts across Great Britain",
+          "thumbnail": null,
+          "extract": null
+        },
+        {
+          "id": "t1.11-ev-charging",
+          "spec": "T1.11",
+          "title": "EV charging infrastructure and regional inequality",
+          "badge": "extended",
+          "field": "infrastructure",
+          "question": "EV charging infrastructure and regional inequality",
+          "thumbnail": null,
+          "extract": null
+        },
+        {
+          "id": "t1.12-school-spending",
+          "spec": "T1.12",
+          "title": "School spending inequality across local authorities",
+          "badge": "extended",
+          "field": "education",
+          "question": "School spending inequality across local authorities",
+          "thumbnail": null,
+          "extract": null
+        },
+        {
+          "id": "t1.13-broadband",
+          "spec": "T1.13",
+          "title": "Broadband and full-fibre adoption inequality",
+          "badge": "extended",
+          "field": "digital infrastructure",
+          "question": "Broadband and full-fibre adoption inequality",
+          "thumbnail": null,
+          "extract": null
+        },
+        {
+          "id": "t1.14-flood-risk",
+          "spec": "T1.14",
+          "title": "Flood risk and social vulnerability",
+          "badge": "extended",
+          "field": "climate",
+          "question": "Flood risk and social vulnerability",
+          "thumbnail": null,
+          "extract": null
+        },
+        {
+          "id": "t1.15-deprivation-catalogue",
+          "spec": "T1.15",
+          "title": "Cross-country deprivation index harmonization",
+          "badge": "demonstrated",
+          "field": "harmonization",
+          "question": "Cross-country deprivation index harmonization",
+          "thumbnail": null,
+          "extract": null
+        }
+      ]
+    },
+    {
+      "id": "everyday",
+      "label": "Everyday",
+      "schema": [
+        "question",
+        "situation",
+        "badge",
+        "thumbnail"
+      ],
+      "cards": [
+        {
+          "id": "t2.1-recurring-duty-rota",
+          "spec": "T2.1",
+          "title": "Is the recurring duty rota actually fair?",
+          "badge": "demonstrated",
+          "field": "household",
+          "question": "Is the recurring duty rota actually fair?",
+          "thumbnail": null,
+          "extract": null
+        },
+        {
+          "id": "t2.2-flexible-hours",
+          "spec": "T2.2",
+          "title": "Did the flexible-hours change help everyone on the team?",
+          "badge": "demonstrated",
+          "field": "household",
+          "question": "Did the flexible-hours change help everyone on the team?",
+          "thumbnail": null,
+          "extract": null
+        },
+        {
+          "id": "t2.3-holiday-split",
+          "spec": "T2.3",
+          "title": "Splitting a holiday when everyone flies from a different city",
+          "badge": "demonstrated",
+          "field": "household",
+          "question": "Splitting a holiday when everyone flies from a different city",
+          "thumbnail": null,
+          "extract": null
+        },
+        {
+          "id": "t2.4-recurring-meetup",
+          "spec": "T2.4",
+          "title": "Where should we hold the recurring meetup?",
+          "badge": "demonstrated",
+          "field": "household",
+          "question": "Where should we hold the recurring meetup?",
+          "thumbnail": null,
+          "extract": null
+        },
+        {
+          "id": "t2.5-equal-bill-split",
+          "spec": "T2.5",
+          "title": "Is this equal bill split actually equal?",
+          "badge": "demonstrated",
+          "field": "household",
+          "question": "Is this equal bill split actually equal?",
+          "thumbnail": null,
+          "extract": null
+        },
+        {
+          "id": "t2.6-neighbourhood-choice",
+          "spec": "T2.6",
+          "title": "Which neighbourhood actually suits us?",
+          "badge": "demonstrated",
+          "field": "household",
+          "question": "Which neighbourhood actually suits us?",
+          "thumbnail": null,
+          "extract": null
+        },
+        {
+          "id": "t2.7-household-load",
+          "spec": "T2.7",
+          "title": "How much of the household load do I actually carry?",
+          "badge": "demonstrated",
+          "field": "household",
+          "question": "How much of the household load does one person actually carry?",
+          "thumbnail": "/examples/thumbnails/t2-7-household-load.svg",
+          "extract": null
+        },
+        {
+          "id": "t2.8-savings-goals",
+          "spec": "T2.8",
+          "title": "Are our savings goals actually progressing together?",
+          "badge": "demonstrated",
+          "field": "household",
+          "question": "Are our savings goals actually progressing together?",
+          "thumbnail": null,
+          "extract": null
+        },
+        {
+          "id": "t2.9-accessible-route",
+          "spec": "T2.9",
+          "title": "Is our accessible route actually usable?",
+          "badge": "demonstrated",
+          "field": "household",
+          "question": "Is our accessible route actually usable?",
+          "thumbnail": null,
+          "extract": null
+        },
+        {
+          "id": "t2.10-shared-subscription",
+          "spec": "T2.10",
+          "title": "Is the shared subscription worth it for everyone?",
+          "badge": "demonstrated",
+          "field": "household",
+          "question": "Is the shared subscription worth it for everyone?",
+          "thumbnail": null,
+          "extract": null
+        },
+        {
+          "id": "t2.11-giving-up-the-car",
+          "spec": "T2.11",
+          "title": "Would giving up the car actually work?",
+          "badge": "demonstrated",
+          "field": "household",
+          "question": "Would giving up the car actually work?",
+          "thumbnail": null,
+          "extract": null
+        },
+        {
+          "id": "t2.12-earnings-volatility",
+          "spec": "T2.12",
+          "title": "Are my earnings as steady as the average suggests?",
+          "badge": "demonstrated",
+          "field": "household",
+          "question": "Are my earnings as steady as the average suggests?",
+          "thumbnail": null,
+          "extract": null
+        },
+        {
+          "id": "t2.13-service-closure",
+          "spec": "T2.13",
+          "title": "Which services did the closure actually cost us?",
+          "badge": "demonstrated",
+          "field": "household",
+          "question": "Which services did the closure actually cost us?",
+          "thumbnail": null,
+          "extract": null
+        },
+        {
+          "id": "t2.14-time-of-use-tariff",
+          "spec": "T2.14",
+          "title": "Would a time-of-use energy tariff actually save us money?",
+          "badge": "demonstrated",
+          "field": "household",
+          "question": "Would a time-of-use energy tariff actually save us money?",
+          "thumbnail": null,
+          "extract": null
+        },
+        {
+          "id": "t2.15-elder-care",
+          "spec": "T2.15",
+          "title": "Who is actually carrying the care for our parent?",
+          "badge": "demonstrated",
+          "field": "household",
+          "question": "Who is actually carrying the care for our parent?",
+          "thumbnail": null,
+          "extract": null
+        }
+      ]
+    }
+  ]
+}

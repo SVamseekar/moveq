@@ -3,15 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Interactive Equity Playground | moveq</title>
+  <title>Examples | moveq</title>
   <link rel="icon" type="image/svg+xml" href="/assets/images/favicon.svg">
   <link rel="stylesheet" href="/assets/css/theme.css">
   <script src="/assets/js/theme.js" defer></script>
   <script src="/assets/js/version.js" defer></script>
-  <script src="/assets/js/playground.js" defer></script>
   <script src="/assets/js/search.js" defer></script>
+  <script src="/assets/js/gallery.js" defer></script>
 </head>
 <body>
+
 
   <header class="site-header">
     <div class="container header-inner">
@@ -37,7 +38,7 @@
           <svg class="icon" width="16" height="16" viewBox="0 0 24 24"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon><line x1="9" y1="3" x2="9" y2="18"></line><line x1="15" y1="6" x2="15" y2="21"></line></svg>
           <span>Guides</span>
         </a>
-                <a href="/examples" class="nav-item">
+                <a href="/examples" class="nav-item active">
           <svg class="icon" width="16" height="16" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
           <span>Examples</span>
         </a>
@@ -45,7 +46,7 @@
           <svg class="icon" width="16" height="16" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
           <span>Reference</span>
         </a>
-        <a href="/playground" class="nav-item active">
+        <a href="/playground" class="nav-item">
           <svg class="icon" width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M8 12a4 4 0 0 1 8 0"></path><line x1="12" y1="2" x2="12" y2="4"></line></svg>
           <span>Playground</span>
         </a>
@@ -85,15 +86,12 @@
       <div style="display: flex; align-items: center; gap: 10px;">
         <button class="search-btn" onclick="openSearch()" aria-label="Search docs">
           <svg class="icon" width="15" height="15" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          <span>Search playground…</span>
+          <span>Search examples…</span>
           <kbd class="kbd-shortcut">/</kbd>
         </button>
         <button id="themeToggleBtn" onclick="toggleTheme()" class="theme-toggle-btn" aria-label="Toggle Theme" style="padding: 8px;">
           <svg class="icon" width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></svg>
         </button>
-        <a href="/docs" class="cut-btn">
-          <span>Install v0.1.0</span>
-        </a>
       </div>
     </div>
   </header>
@@ -108,68 +106,35 @@
     </a>
   </nav>
 
-
-  <div class="container" style="padding: 48px 24px;">
-    <span class="section-tag">In-Browser Simulation</span>
-    <h1 style="font-size: 2.75rem; font-weight: 800; color: var(--text-fg); margin-top: 8px;">Lorenz Curve & Inequality Playground</h1>
-    <p style="color: var(--text-muted); font-size: 1.1rem; margin-top: 8px; max-width: 680px;">
-      Simulate demographic deciles, adjust transit access parameters, and see exact real-time mathematical evaluations.
-    </p>
-
-    <div class="playground-card" style="margin-top: 32px;">
-      <div class="canvas-container">
-        <canvas id="lorenzCanvas" width="360" height="360"></canvas>
-      </div>
-
-      <div style="display: flex; flex-direction: column; justify-content: center;">
-        <div class="slider-group">
-          <div class="slider-item">
-            <label>
-              <span>Deprived / Low-Income Decile Service (trips/cap):</span>
-              <span id="lowIncomeVal" style="font-family: var(--font-mono); font-weight: 700; color: var(--accent-metro);">10.0</span>
-            </label>
-            <input type="range" id="sliderLowIncome" min="1" max="50" value="10" 
-                   oninput="document.getElementById('lowIncomeVal').innerText = parseFloat(this.value).toFixed(1)">
-          </div>
-
-          <div class="slider-item">
-            <label>
-              <span>Affluent / High-Income Decile Service (trips/cap):</span>
-              <span id="highIncomeVal" style="font-family: var(--font-mono); font-weight: 700; color: var(--accent-metro);">50.0</span>
-            </label>
-            <input type="range" id="sliderHighIncome" min="10" max="100" value="50" 
-                   oninput="document.getElementById('highIncomeVal').innerText = parseFloat(this.value).toFixed(1)">
-          </div>
-        </div>
-
-        <div class="metric-readouts" style="margin-top: 24px;">
-          <div class="metric-badge">
-            <div class="metric-title">Gini Coeff</div>
-            <div class="metric-num" id="calcGini">0.3902</div>
-          </div>
-          <div class="metric-badge">
-            <div class="metric-title">Palma Ratio</div>
-            <div class="metric-num" id="calcPalma">7.07</div>
-          </div>
-          <div class="metric-badge">
-            <div class="metric-title">Wagstaff CI</div>
-            <div class="metric-num" id="calcCI">+0.2457</div>
-          </div>
-        </div>
-
-        <div style="margin-top: 24px; padding: 14px; background-color: var(--bg-subtle); border-radius: 8px; font-size: 0.84rem; color: var(--text-muted);">
-          <strong>Observation</strong>: When low-income decile service rises from 10 to 45 trips/cap, Gini drops below 0.10, Palma approaches 1.0, and the Wagstaff index flips negative (disadvantage-concentrated).
-        </div>
-      </div>
+  <main class="container" id="gallery" style="padding: 40px 0 64px;">
+    <span class="section-tag">Between the guides and the reference</span>
+    <h1 class="section-title">Examples</h1>
+    <p class="why-lead">Research cards name a field and a claim-ladder badge. Everyday cards name a situation. No external extract is committed. Where a licence was not confirmed, the card has no data file.</p>
+    <div class="missing-policies">
+      <label>Field
+        <select id="galleryField">
+          <option value="all">All fields</option>
+        </select>
+      </label>
+      <label>Badge
+        <select id="galleryBadge">
+          <option value="all">All badges</option>
+        </select>
+      </label>
     </div>
-  </div>
+    <h2>Research</h2>
+    <p class="gallery-schema">Card: spec, field, question, badge, thumbnail.</p>
+    <div class="gallery-grid" id="galleryResearch"></div>
+    <h2>Everyday</h2>
+    <p class="gallery-schema">Card: question, situation, badge, thumbnail. No coefficient.</p>
+    <div class="gallery-grid" id="galleryEveryday"></div>
+  </main>
 
   <div id="searchModal" class="search-modal">
     <div class="search-card">
-      <input type="text" id="searchInput" class="search-input" placeholder="Search playground…" autocomplete="off">
+      <input type="text" id="searchInput" class="search-input" placeholder="Search examples…" autocomplete="off">
       <div id="searchResults" class="search-results"></div>
     </div>
   </div>
-
 </body>
 </html>
