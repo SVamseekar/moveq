@@ -42,7 +42,7 @@ dependencies = [
 
 [project.optional-dependencies]
 frames = ["moveq[frames]"]
-test = ["pytest>=9.1.1"]
+test = ["pytest>=9.2.0"]
 
 [project.scripts]
 moveq = "moveq_cli.main:main"
